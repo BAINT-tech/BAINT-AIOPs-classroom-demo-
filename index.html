@@ -16,8 +16,8 @@ body {
 }
 
 .classroom-device {
-  width:900px;
-  height:600px;
+  width:1000px;
+  height:650px;
   background:rgba(0,0,0,0.85);
   border-radius:20px;
   padding:20px;
@@ -112,11 +112,45 @@ body {
 .toggle-lang button.active { background:#1E90FF; color:#fff; }
 
 .assignment-step {
-  margin-top:12px;
-  padding:10px;
+  margin-top:8px;
+  padding:8px;
   border-radius:12px;
   background:rgba(255,255,255,0.1);
   font-size:14px;
+}
+
+.student-container {
+  margin-top:15px;
+  max-height:200px;
+  overflow-y:auto;
+}
+
+.student {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:6px 10px;
+  margin-top:4px;
+  border-radius:10px;
+  background:rgba(255,255,255,0.1);
+  font-size:14px;
+}
+
+.progress-bar {
+  width:60%;
+  height:10px;
+  background:rgba(255,255,255,0.2);
+  border-radius:6px;
+  margin-left:10px;
+  position:relative;
+}
+
+.progress {
+  height:100%;
+  width:0%;
+  background:#1E90FF;
+  border-radius:6px;
+  transition:width 0.5s ease-in-out;
 }
 </style>
 </head>
@@ -129,7 +163,7 @@ body {
     <!-- TEACHER DASHBOARD -->
     <div class="screen active" id="teacher">
       <h3>Teacher Dashboard</h3>
-      <p>Class: Biology 101 | Students: 30</p>
+      <p>Class: Biology 101 | Students: 5</p>
       <button onclick="launchAssignment()">Launch Student Assignment</button>
       <div class="toggle-lang">
         <button id="enBtn" class="active" onclick="setLang('en')">English</button>
@@ -141,6 +175,11 @@ body {
     <div class="screen" id="student">
       <h3 id="assignment-title">Assignment: Photosynthesis</h3>
       <div id="assignment-steps"></div>
+
+      <div class="student-container" id="students-list">
+        <!-- Students dynamically added here -->
+      </div>
+
       <button onclick="backToTeacher()">Back to Dashboard</button>
     </div>
 
@@ -163,6 +202,10 @@ const assignment = {
   ]
 };
 
+const students = [
+  "Alice","Bob","Charlie","Diana","Ethan"
+];
+
 function setLang(l){
   lang=l;
   document.getElementById("enBtn").classList.toggle("active",l==="en");
@@ -171,6 +214,8 @@ function setLang(l){
 
 function launchAssignment(){
   showScreen('student');
+  document.getElementById("assignment-title").innerText=`Assignment: ${assignment.title[lang]}`;
+
   const stepsDiv=document.getElementById("assignment-steps");
   stepsDiv.innerHTML="";
   assignment.steps.forEach((s,i)=>{
@@ -179,7 +224,32 @@ function launchAssignment(){
     stepDiv.innerText=`Step ${i+1}: ${s[lang]}`;
     stepsDiv.appendChild(stepDiv);
   });
+
+  setupStudents();
   typeCursorSteps(stepsDiv);
+}
+
+function setupStudents(){
+  const studentsList=document.getElementById("students-list");
+  studentsList.innerHTML="";
+  students.forEach(s=>{
+    const stuDiv=document.createElement("div");
+    stuDiv.className="student";
+    stuDiv.innerHTML=`<span>${s}</span>
+      <div class="progress-bar"><div class="progress" id="progress-${s}"></div></div>`;
+    studentsList.appendChild(stuDiv);
+    animateProgress(s);
+  });
+}
+
+function animateProgress(name){
+  const progressBar=document.getElementById(`progress-${name}`);
+  let progress=0;
+  const interval=setInterval(()=>{
+    progress+=Math.floor(Math.random()*10)+5;
+    if(progress>=100){ progress=100; clearInterval(interval); }
+    progressBar.style.width=`${progress}%`;
+  },600);
 }
 
 function typeCursorSteps(container){
