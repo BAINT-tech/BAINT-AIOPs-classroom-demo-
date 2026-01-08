@@ -2,9 +2,10 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>BAINT AIOPs – Classroom Demo</title>
+<title>Baint OS – AIOPs Classroom Demo</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style>
+/* ---------- GENERAL ---------- */
 body {
   margin:0;
   font-family: Arial, sans-serif;
@@ -15,276 +16,220 @@ body {
   height:100vh;
 }
 
-.classroom-device {
-  width:1000px;
-  height:650px;
-  background:rgba(0,0,0,0.85);
+/* ---------- LAPTOP / DEVICE ---------- */
+.laptop {
+  width:900px;
+  height:600px;
+  background: rgba(0,0,0,0.75);
   border-radius:20px;
   padding:20px;
-  box-shadow:0 20px 60px rgba(0,0,0,0.5);
+  box-shadow:0 20px 60px rgba(0,0,0,0.4);
   display:flex;
   flex-direction:column;
   position:relative;
-  color:#fff;
-  overflow:hidden;
 }
-
-.device-top-bar {
+.laptop-top-bar {
   height:28px;
+  background: rgba(0,0,0,0.85);
+  border-radius:12px 12px 0 0;
   display:flex;
   align-items:center;
-  padding:0 12px;
+  padding:0 10px;
+  color:#fff;
   font-size:14px;
-  background:rgba(0,0,0,0.9);
-  border-radius:12px 12px 0 0;
 }
-
-.device-screen {
+.laptop-screen {
   flex:1;
-  margin-top:6px;
-  border-radius:0 0 16px 16px;
+  background: rgba(255,255,255,0.95);
+  border-radius:0 0 20px 20px;
+  margin-top:4px;
   position:relative;
   overflow:hidden;
-  padding:20px;
-  box-sizing:border-box;
 }
 
-.screen {
-  display:none;
-  height:100%;
-  width:100%;
-}
-
+/* ---------- SCREENS ---------- */
+.screen { display:none; height:100%; width:100%; padding:20px; box-sizing:border-box; overflow:auto; }
 .screen.active { display:block; }
+.window-title { font-weight:bold; margin-bottom:10px; }
+.icon-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:20px; margin-top:30px; }
+.app { text-align:center; font-size:12px; cursor:pointer; }
+.icon { width:64px; height:64px; border-radius:16px; background:linear-gradient(135deg,#1E90FF,#00BFFF); margin:0 auto 8px; }
+.card { background:#F9FAFB; border-radius:14px; padding:16px; margin-top:20px; border:1px solid #E5E7EB; }
+button { background:#1E90FF; border:none; padding:12px 24px; border-radius:10px; color:white; margin-top:12px; font-size:14px; cursor:pointer; }
+.toggle { display:flex; gap:10px; margin-top:10px; }
+.toggle button { background:#E5E7EB; color:#111; border:none; padding:6px 12px; border-radius:8px; cursor:pointer; }
+.toggle button.active { background:#1E90FF; color:#fff; }
+.search-box { border:1px solid #E5E7EB; border-radius:8px; padding:10px; font-size:13px; min-height:22px; margin-bottom:12px; }
+.result { background:#F9FAFB; border-radius:12px; padding:12px; margin-top:12px; font-size:13px; min-height:30px; }
+.education { margin-top:16px; font-size:13px; color:#374151; }
+.education strong { display:block; margin-bottom:6px; }
 
-.button {
-  background:#1E90FF;
-  border:none;
-  padding:10px 20px;
-  border-radius:10px;
-  color:white;
-  cursor:pointer;
-  font-size:14px;
-  margin-top:12px;
-}
-
-#ai-cursor {
-  width:16px;
-  height:16px;
-  background:#1E90FF;
-  border-radius:50%;
-  position:absolute;
-  top:50%;
-  left:20%;
-  display:none;
-  z-index:10;
-  box-shadow:0 0 12px rgba(30,144,255,0.9);
-}
-
-.subtitles {
-  position:absolute;
-  bottom:12px;
-  left:12px;
-  right:12px;
-  background:rgba(0,0,0,0.75);
-  color:#fff;
-  padding:10px;
-  border-radius:8px;
-  font-size:13px;
-  display:none;
-}
-
-.toggle-lang {
-  display:flex;
-  gap:10px;
-  margin-top:10px;
-}
-
-.toggle-lang button {
-  background:#E5E7EB;
-  color:#111;
-  border:none;
-  padding:6px 12px;
-  border-radius:8px;
-  cursor:pointer;
-}
-
-.toggle-lang button.active { background:#1E90FF; color:#fff; }
-
-.assignment-step {
-  margin-top:8px;
-  padding:8px;
-  border-radius:12px;
-  background:rgba(255,255,255,0.1);
-  font-size:14px;
-}
-
-.student-container {
-  margin-top:15px;
-  max-height:200px;
-  overflow-y:auto;
-}
-
-.student {
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  padding:6px 10px;
-  margin-top:4px;
-  border-radius:10px;
-  background:rgba(255,255,255,0.1);
-  font-size:14px;
-}
-
-.progress-bar {
-  width:60%;
-  height:10px;
-  background:rgba(255,255,255,0.2);
-  border-radius:6px;
-  margin-left:10px;
-  position:relative;
-}
-
-.progress {
-  height:100%;
-  width:0%;
-  background:#1E90FF;
-  border-radius:6px;
-  transition:width 0.5s ease-in-out;
-}
+/* ---------- AI PANELS ---------- */
+#ai-cursor { width:16px; height:16px; background:#1E90FF; border-radius:50%; position:absolute; top:50%; left:20%; display:none; z-index:10; box-shadow:0 0 12px rgba(30,144,255,0.9); }
+.subtitles { position:absolute; bottom:10px; left:10px; right:10px; background:rgba(0,0,0,0.75); color:#fff; padding:10px; border-radius:8px; font-size:13px; display:none; }
+#ai-teacher-panel, #ai-student-panel { max-height:150px; overflow-y:auto; border-radius:12px; padding:10px; margin-top:12px; font-size:13px; }
+#ai-teacher-panel { background: rgba(30,144,255,0.15); }
+#ai-student-panel { background: rgba(255,215,0,0.15); }
 </style>
 </head>
 <body>
 
-<div class="classroom-device">
-  <div class="device-top-bar">BAINT AIOPs – Classroom Demo</div>
-  <div class="device-screen">
+<div class="laptop">
+  <div class="laptop-top-bar">Baint OS – AIOPs Classroom Demo</div>
+  <div class="laptop-screen">
 
-    <!-- TEACHER DASHBOARD -->
-    <div class="screen active" id="teacher">
+    <!-- ---------- BOOT ---------- -->
+    <div class="screen active" id="boot">
+      <div style="background:#111;color:#0f0;font-family:monospace;height:100%;padding:30px;box-sizing:border-box;overflow-y:auto;">
+        <img src="logo.png" alt="Baint OS Logo" style="width:60px;height:60px;margin-bottom:20px;">
+        <div id="boot-log"></div>
+      </div>
+    </div>
+
+    <!-- ---------- HOME ---------- -->
+    <div class="screen" id="home">
+      <h3>Home</h3>
+      <p style="font-size:13px">Human-centric automation for students and educators</p>
+      <div class="icon-grid">
+        <div class="app" onclick="show('teacher')"><div class="icon"></div>Teacher Dashboard</div>
+        <div class="app" onclick="show('student')"><div class="icon"></div>Student AI</div>
+        <div class="app"><div class="icon"></div>Browser</div>
+      </div>
+    </div>
+
+    <!-- ---------- TEACHER DASHBOARD ---------- -->
+    <div class="screen" id="teacher">
       <h3>Teacher Dashboard</h3>
       <p>Class: Biology 101 | Students: 5</p>
       <button onclick="launchAssignment()">Launch Student Assignment</button>
-      <div class="toggle-lang">
+      <div class="toggle">
         <button id="enBtn" class="active" onclick="setLang('en')">English</button>
         <button id="zhBtn" onclick="setLang('zh')">中文</button>
       </div>
-    </div>
-
-    <!-- STUDENT ASSIGNMENT -->
-    <div class="screen" id="student">
-      <h3 id="assignment-title">Assignment: Photosynthesis</h3>
-      <div id="assignment-steps"></div>
-
-      <div class="student-container" id="students-list">
-        <!-- Students dynamically added here -->
+      <div id="ai-teacher-panel">
+        <strong>AI Teacher Suggestions:</strong>
+        <ul id="ai-suggestions"></ul>
       </div>
-
-      <button onclick="backToTeacher()">Back to Dashboard</button>
+      <button onclick="show('home')">Back</button>
     </div>
 
-    <div id="ai-cursor"></div>
-    <div class="subtitles" id="subtitles"></div>
+    <!-- ---------- STUDENT AI ---------- -->
+    <div class="screen" id="student">
+      <h3>Student Assignment Helper</h3>
+      <p>https://study.local</p>
+      <div id="ai-student-panel">
+        <strong>AI Hints:</strong>
+        <ul id="student-hints"></ul>
+      </div>
+      <button onclick="show('home')">Back</button>
+    </div>
 
   </div>
 </div>
 
 <script>
-let lang = "en";
+let lang="en";
 
-const assignment = {
-  title: {en:"Photosynthesis", zh:"光合作用"},
-  steps: [
-    {en:"Identify key concepts (sunlight, water, CO₂)", zh:"识别关键概念（阳光，水，二氧化碳）"},
-    {en:"Create visual diagram", zh:"创建视觉图表"},
-    {en:"Write explanation in your own words", zh:"用自己的话写解释"},
-    {en:"Optional quiz", zh:"可选测验"}
-  ]
-};
-
-const students = [
-  "Alice","Bob","Charlie","Diana","Ethan"
+/* ---------- BOOT LOG ---------- */
+const bootMessages = [
+  "Initializing Baint OS...",
+  "Loading AIOPs modules...",
+  "Checking hardware interfaces...",
+  "Starting human-centric automation...",
+  "System ready. Launching desktop..."
 ];
+const bootLog = document.getElementById("boot-log");
+let index=0;
 
+function typeBootLine(line,callback){
+  let i=0;
+  const interval=setInterval(()=>{
+    bootLog.innerHTML+=line[i];
+    i++;
+    if(i>=line.length){ clearInterval(interval); bootLog.innerHTML+="<br>"; callback();}
+  },40);
+}
+
+function nextBootLine(){
+  if(index<bootMessages.length){
+    typeBootLine(bootMessages[index],()=>{
+      index++;
+      setTimeout(nextBootLine,200);
+    });
+  } else {
+    show('home');
+  }
+}
+setTimeout(nextBootLine,500);
+
+/* ---------- SHOW SCREENS ---------- */
+function show(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+/* ---------- LANGUAGE ---------- */
 function setLang(l){
   lang=l;
   document.getElementById("enBtn").classList.toggle("active",l==="en");
   document.getElementById("zhBtn").classList.toggle("active",l==="zh");
 }
 
-function launchAssignment(){
-  showScreen('student');
-  document.getElementById("assignment-title").innerText=`Assignment: ${assignment.title[lang]}`;
+/* ---------- TEACHER AI ---------- */
+const aiTips=[
+  {en:"Remind students to focus on the diagram before writing.", zh:"提醒学生在写作前先关注图表。"},
+  {en:"Check if any student is stuck on Step 2.", zh:"检查是否有学生在步骤2卡住。"},
+  {en:"Encourage students to review key concepts.", zh:"鼓励学生复习关键概念。"},
+  {en:"Provide extra resources if a student is slow.", zh:"如果学生进度慢，提供额外资源。"},
+  {en:"Give positive reinforcement to students completing steps.", zh:"对完成步骤的学生给予积极反馈。"}
+];
 
-  const stepsDiv=document.getElementById("assignment-steps");
-  stepsDiv.innerHTML="";
-  assignment.steps.forEach((s,i)=>{
-    const stepDiv=document.createElement("div");
-    stepDiv.className="assignment-step";
-    stepDiv.innerText=`Step ${i+1}: ${s[lang]}`;
-    stepsDiv.appendChild(stepDiv);
-  });
-
-  setupStudents();
-  typeCursorSteps(stepsDiv);
-}
-
-function setupStudents(){
-  const studentsList=document.getElementById("students-list");
-  studentsList.innerHTML="";
-  students.forEach(s=>{
-    const stuDiv=document.createElement("div");
-    stuDiv.className="student";
-    stuDiv.innerHTML=`<span>${s}</span>
-      <div class="progress-bar"><div class="progress" id="progress-${s}"></div></div>`;
-    studentsList.appendChild(stuDiv);
-    animateProgress(s);
+function updateAITips(){
+  const list=document.getElementById("ai-suggestions");
+  list.innerHTML="";
+  const shuffled=aiTips.sort(()=>0.5-Math.random()).slice(0,3);
+  shuffled.forEach(tip=>{
+    const li=document.createElement("li");
+    li.innerText=tip[lang];
+    list.appendChild(li);
   });
 }
-
-function animateProgress(name){
-  const progressBar=document.getElementById(`progress-${name}`);
-  let progress=0;
-  const interval=setInterval(()=>{
-    progress+=Math.floor(Math.random()*10)+5;
-    if(progress>=100){ progress=100; clearInterval(interval); }
-    progressBar.style.width=`${progress}%`;
-  },600);
-}
-
-function typeCursorSteps(container){
-  const cursor=document.getElementById("ai-cursor");
-  cursor.style.display="block";
-  cursor.animate([
-    {transform:"translate(0,0)"},
-    {transform:"translate(300px,50px)"},
-    {transform:"translate(350px,100px)"}
-  ], {duration:2500, easing:"ease-in-out", fill:"forwards"});
-  setTimeout(()=>{
-    cursor.style.display="none";
-    playVoice(container.innerText);
-  },2600);
-}
-
-function playVoice(text){
-  const subtitles=document.getElementById("subtitles");
-  subtitles.innerText=text;
-  subtitles.style.display="block";
-  if('speechSynthesis' in window){
-    speechSynthesis.cancel();
-    const utter=new SpeechSynthesisUtterance(text);
-    utter.lang=lang==="zh"?"zh-CN":"en-US";
-    speechSynthesis.speak(utter);
+setInterval(()=>{
+  if(document.getElementById("teacher").classList.contains("active")){
+    updateAITips();
   }
-  const estimatedTime=Math.max(text.length*80,4000);
-  setTimeout(()=>subtitles.style.display="none",estimatedTime);
+},6000);
+
+/* ---------- STUDENT AI ---------- */
+const studentHints=[
+  {en:"Remember the key formula for photosynthesis.", zh:"记住光合作用的关键公式。"},
+  {en:"Focus on light absorption step first.", zh:"先关注光吸收步骤。"},
+  {en:"Break your answer into steps.", zh:"将答案分成步骤。"},
+  {en:"Check the diagrams carefully.", zh:"仔细检查图表。"},
+  {en:"Write in your own words.", zh:"用自己的话写。"}
+];
+
+function updateStudentHints(){
+  const list=document.getElementById("student-hints");
+  list.innerHTML="";
+  const shuffled=studentHints.sort(()=>0.5-Math.random()).slice(0,3);
+  shuffled.forEach(hint=>{
+    const li=document.createElement("li");
+    li.innerText=hint[lang];
+    list.appendChild(li);
+  });
 }
 
-function backToTeacher(){ showScreen('teacher'); }
+setInterval(()=>{
+  if(document.getElementById("student").classList.contains("active")){
+    updateStudentHints();
+  }
+},6000);
 
-function showScreen(id){
-  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
+/* ---------- LAUNCH ASSIGNMENT ---------- */
+function launchAssignment(){
+  alert("Assignment launched to students!");
+  show('student');
 }
 </script>
 
