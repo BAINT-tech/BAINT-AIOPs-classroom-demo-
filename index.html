@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>BAINT AIOPs – Classroom Demo</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+body {
+  margin:0;
+  font-family: Arial, sans-serif;
+  background:#fff;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  height:100vh;
+}
+
+.classroom-device {
+  width:900px;
+  height:600px;
+  background:rgba(0,0,0,0.85);
+  border-radius:20px;
+  padding:20px;
+  box-shadow:0 20px 60px rgba(0,0,0,0.5);
+  display:flex;
+  flex-direction:column;
+  position:relative;
+  color:#fff;
+  overflow:hidden;
+}
+
+.device-top-bar {
+  height:28px;
+  display:flex;
+  align-items:center;
+  padding:0 12px;
+  font-size:14px;
+  background:rgba(0,0,0,0.9);
+  border-radius:12px 12px 0 0;
+}
+
+.device-screen {
+  flex:1;
+  margin-top:6px;
+  border-radius:0 0 16px 16px;
+  position:relative;
+  overflow:hidden;
+  padding:20px;
+  box-sizing:border-box;
+}
+
+.screen {
+  display:none;
+  height:100%;
+  width:100%;
+}
+
+.screen.active { display:block; }
+
+.button {
+  background:#1E90FF;
+  border:none;
+  padding:10px 20px;
+  border-radius:10px;
+  color:white;
+  cursor:pointer;
+  font-size:14px;
+  margin-top:12px;
+}
+
+#ai-cursor {
+  width:16px;
+  height:16px;
+  background:#1E90FF;
+  border-radius:50%;
+  position:absolute;
+  top:50%;
+  left:20%;
+  display:none;
+  z-index:10;
+  box-shadow:0 0 12px rgba(30,144,255,0.9);
+}
+
+.subtitles {
+  position:absolute;
+  bottom:12px;
+  left:12px;
+  right:12px;
+  background:rgba(0,0,0,0.75);
+  color:#fff;
+  padding:10px;
+  border-radius:8px;
+  font-size:13px;
+  display:none;
+}
+
+.toggle-lang {
+  display:flex;
+  gap:10px;
+  margin-top:10px;
+}
+
+.toggle-lang button {
+  background:#E5E7EB;
+  color:#111;
+  border:none;
+  padding:6px 12px;
+  border-radius:8px;
+  cursor:pointer;
+}
+
+.toggle-lang button.active { background:#1E90FF; color:#fff; }
+
+.assignment-step {
+  margin-top:12px;
+  padding:10px;
+  border-radius:12px;
+  background:rgba(255,255,255,0.1);
+  font-size:14px;
+}
+</style>
+</head>
+<body>
+
+<div class="classroom-device">
+  <div class="device-top-bar">BAINT AIOPs – Classroom Demo</div>
+  <div class="device-screen">
+
+    <!-- TEACHER DASHBOARD -->
+    <div class="screen active" id="teacher">
+      <h3>Teacher Dashboard</h3>
+      <p>Class: Biology 101 | Students: 30</p>
+      <button onclick="launchAssignment()">Launch Student Assignment</button>
+      <div class="toggle-lang">
+        <button id="enBtn" class="active" onclick="setLang('en')">English</button>
+        <button id="zhBtn" onclick="setLang('zh')">中文</button>
+      </div>
+    </div>
+
+    <!-- STUDENT ASSIGNMENT -->
+    <div class="screen" id="student">
+      <h3 id="assignment-title">Assignment: Photosynthesis</h3>
+      <div id="assignment-steps"></div>
+      <button onclick="backToTeacher()">Back to Dashboard</button>
+    </div>
+
+    <div id="ai-cursor"></div>
+    <div class="subtitles" id="subtitles"></div>
+
+  </div>
+</div>
+
+<script>
+let lang = "en";
+
+const assignment = {
+  title: {en:"Photosynthesis", zh:"光合作用"},
+  steps: [
+    {en:"Identify key concepts (sunlight, water, CO₂)", zh:"识别关键概念（阳光，水，二氧化碳）"},
+    {en:"Create visual diagram", zh:"创建视觉图表"},
+    {en:"Write explanation in your own words", zh:"用自己的话写解释"},
+    {en:"Optional quiz", zh:"可选测验"}
+  ]
+};
+
+function setLang(l){
+  lang=l;
+  document.getElementById("enBtn").classList.toggle("active",l==="en");
+  document.getElementById("zhBtn").classList.toggle("active",l==="zh");
+}
+
+function launchAssignment(){
+  showScreen('student');
+  const stepsDiv=document.getElementById("assignment-steps");
+  stepsDiv.innerHTML="";
+  assignment.steps.forEach((s,i)=>{
+    const stepDiv=document.createElement("div");
+    stepDiv.className="assignment-step";
+    stepDiv.innerText=`Step ${i+1}: ${s[lang]}`;
+    stepsDiv.appendChild(stepDiv);
+  });
+  typeCursorSteps(stepsDiv);
+}
+
+function typeCursorSteps(container){
+  const cursor=document.getElementById("ai-cursor");
+  cursor.style.display="block";
+  cursor.animate([
+    {transform:"translate(0,0)"},
+    {transform:"translate(300px,50px)"},
+    {transform:"translate(350px,100px)"}
+  ], {duration:2500, easing:"ease-in-out", fill:"forwards"});
+  setTimeout(()=>{
+    cursor.style.display="none";
+    playVoice(container.innerText);
+  },2600);
+}
+
+function playVoice(text){
+  const subtitles=document.getElementById("subtitles");
+  subtitles.innerText=text;
+  subtitles.style.display="block";
+  if('speechSynthesis' in window){
+    speechSynthesis.cancel();
+    const utter=new SpeechSynthesisUtterance(text);
+    utter.lang=lang==="zh"?"zh-CN":"en-US";
+    speechSynthesis.speak(utter);
+  }
+  const estimatedTime=Math.max(text.length*80,4000);
+  setTimeout(()=>subtitles.style.display="none",estimatedTime);
+}
+
+function backToTeacher(){ showScreen('teacher'); }
+
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+</script>
+
+</body>
+</html>
