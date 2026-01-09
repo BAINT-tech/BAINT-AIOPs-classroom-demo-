@@ -1,176 +1,44 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>Baint OS – Multi-Student AIOPs Demo</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<style>
-body {
-  margin:0;
-  font-family: Arial, sans-serif;
-  background:#fff;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  height:100vh;
-}
-.laptop {
-  width:900px;
-  height:600px;
-  background:rgba(0,0,0,0.9);
-  border-radius:12px;
-  padding:20px;
-  box-shadow:0 20px 60px rgba(0,0,0,0.5);
-  display:flex;
-  flex-direction:column;
-  position:relative;
-}
-.laptop-top-bar {
-  height:28px;
-  background:#333;
-  border-radius:8px 8px 0 0;
-  display:flex;
-  align-items:center;
-  padding:0 10px;
-  color:#fff;
-  font-size:14px;
-}
-.laptop-screen {
-  flex:1;
-  background:rgba(255,255,255,0.1);
-  border-radius:0 0 12px 12px;
-  margin-top:4px;
-  position:relative;
-  overflow:hidden;
-}
-.screen {
-  display:none;
-  height:100%;
-  width:100%;
-  padding:20px;
-  box-sizing:border-box;
-  overflow-y:auto;
-}
-.screen.active { display:block; }
-.icon-grid {
-  display:grid;
-  grid-template-columns:repeat(3,1fr);
-  gap:20px;
-  margin-top:20px;
-}
-.app { text-align:center; font-size:12px; cursor:pointer; }
-.icon { width:64px; height:64px; border-radius:16px; background:linear-gradient(135deg,#1E90FF,#00BFFF); margin:0 auto 8px; }
-button { background:#1E90FF; border:none; padding:12px 24px; border-radius:10px; color:white; font-size:14px; cursor:pointer; margin-top:12px; }
-#ai-cursor { width:16px; height:16px; background:#1E90FF; border-radius:50%; position:absolute; top:50%; left:20%; display:none; z-index:10; box-shadow:0 0 12px rgba(30,144,255,0.9); }
-.subtitles { position:absolute; bottom:10px; left:10px; right:10px; background:rgba(0,0,0,0.75); color:#fff; padding:10px; border-radius:8px; font-size:13px; display:none; }
-.student-tabs { display:flex; gap:10px; margin-bottom:12px; }
-.student-tabs button { background:#E5E7EB; color:#111; border:none; padding:6px 12px; border-radius:8px; cursor:pointer; }
-.student-tabs button.active { background:#1E90FF; color:#fff; }
-.card { background:#F9FAFB; border-radius:14px; padding:16px; margin-top:12px; border:1px solid #E5E7EB; }
-</style>
+  <meta charset="UTF-8" />
+  <title>BAINT AIOPs – Classroom Demo</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
 
-<div class="laptop">
-  <div class="laptop-top-bar">Baint OS – Multi-Student AIOPs</div>
-  <div class="laptop-screen">
+<div class="device">
+  <div class="screen">
 
-    <!-- BOOT SCREEN -->
-    <div class="screen active" id="boot">
-      <div style="background:#111;color:#0f0;font-family:monospace;height:100%;padding:30px;overflow-y:auto;">
-        <img src="logo.png" alt="Baint OS Logo" style="width:60px;height:60px;margin-bottom:20px;">
-        <div id="boot-log"></div>
+    <header>
+      <h2>Classroom Demo</h2>
+      <span class="brand">Powered by BAINT AIOPs</span>
+    </header>
+
+    <div class="content">
+      <h3 id="topic">What is Photosynthesis?</h3>
+
+      <p id="subtitle" class="subtitle">
+        Photosynthesis is the process plants use to make food using sunlight.
+      </p>
+
+      <div class="controls">
+        <select id="language">
+          <option value="en">English</option>
+          <option value="zh">中文</option>
+        </select>
+
+        <button id="voiceBtn">🔊 Explain with Voice</button>
+      </div>
+
+      <div class="ethics">
+        AI Explainer Mode • Optional • Student-controlled • Learning-first
       </div>
     </div>
 
-    <!-- HOME -->
-    <div class="screen" id="home">
-      <h3>Home</h3>
-      <div class="icon-grid">
-        <div class="app" onclick="show('aiops')"><div class="icon"></div>AIOPs Demo</div>
-        <div class="app" onclick="show('student')"><div class="icon"></div>Student Assignment Helper</div>
-        <div class="app"><div class="icon"></div>Browser</div>
-        <div class="app"><div class="icon"></div>Spotify</div>
-      </div>
-    </div>
-
-    <!-- AIOPs Demo -->
-    <div class="screen" id="aiops">
-      <h3>AIOPs Demo</h3>
-      <p>Human-centric AI automation</p>
-      <button onclick="show('home')">Back</button>
-    </div>
-
-    <!-- STUDENT ASSIST -->
-    <div class="screen" id="student">
-      <h3>Student Assignment Helper</h3>
-      <div class="student-tabs" id="student-tabs"></div>
-      <div class="card" id="student-card"></div>
-      <button onclick="show('home')">Back</button>
-    </div>
-
-    <div id="ai-cursor"></div>
-    <div class="subtitles" id="subtitles"></div>
   </div>
 </div>
 
-<script>
-// Boot sequence
-const bootMessages = ["Initializing Baint OS...", "Loading modules...", "System ready..."];
-const bootLog = document.getElementById("boot-log");
-let index = 0;
-function typeBootLine(line, cb){let i=0;const intv=setInterval(()=>{bootLog.innerHTML+=line[i];i++;if(i>=line.length){clearInterval(intv);bootLog.innerHTML+="<br>";cb();}},40);}
-function nextBootLine(){if(index<bootMessages.length){typeBootLine(bootMessages[index],()=>{index++;setTimeout(nextBootLine,200);});}else{show('home');}}
-setTimeout(nextBootLine,500);
-
-// Show screens
-function show(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');}
-
-// Multi-student data
-const students=[
-  {name:"Alice", question:"Explain photosynthesis for biology assignment", explanation:"Photosynthesis is the process by which plants convert sunlight into energy using carbon dioxide and water. Step-by-step explanation...", learning:["Student authorized learning assistance","AIOPs analyzed the question","Key concepts identified","Explanation structured","Student remains in control"]},
-  {name:"Bob", question:"Summarize the French Revolution", explanation:"The French Revolution began in 1789 and led to major political and social change in France...", learning:["Student authorized learning assistance","AIOPs analyzed the question","Key concepts identified","Explanation structured","Student remains in control"]},
-  {name:"Charlie", question:"Describe water cycle", explanation:"The water cycle is the process by which water circulates through Earth's oceans, atmosphere, and land...", learning:["Student authorized learning assistance","AIOPs analyzed the question","Key concepts identified","Explanation structured","Student remains in control"]}
-];
-
-// Render student tabs
-const studentTabs=document.getElementById("student-tabs");
-const studentCard=document.getElementById("student-card");
-let currentStudent=0;
-students.forEach((s,i)=>{
-  const btn=document.createElement("button");
-  btn.innerText=s.name;
-  btn.onclick=()=>selectStudent(i);
-  if(i===0) btn.classList.add("active");
-  studentTabs.appendChild(btn);
-});
-
-// Select student
-function selectStudent(idx){
-  currentStudent=idx;
-  Array.from(studentTabs.children).forEach((b,i)=>b.classList.toggle("active",i===idx));
-  renderStudent();
-}
-
-// Render student info
-function renderStudent(){
-  const s=students[currentStudent];
-  studentCard.innerHTML=`<strong>Question:</strong> ${s.question}<br><br><strong>Guided Explanation:</strong><br>${s.explanation}<br><br><strong>Learning Mode:</strong><ul>${s.learning.map(l=>"<li>"+l+"</li>").join("")}</ul>`;
-  const subtitles=document.getElementById("subtitles");
-  subtitles.innerText=s.explanation;
-  subtitles.style.display="block";
-  if('speechSynthesis' in window){
-    speechSynthesis.cancel();
-    const utter=new SpeechSynthesisUtterance(s.explanation);
-    utter.lang="en-US";
-    speechSynthesis.speak(utter);
-  }
-  setTimeout(()=>subtitles.style.display="none",Math.max(s.explanation.length*80,5000));
-}
-
-// Init first student
-renderStudent();
-
-</script>
+<script src="script.js"></script>
 </body>
 </html>
