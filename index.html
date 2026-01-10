@@ -1,269 +1,177 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>Baint OS – Human-Centric AIOPs</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>BAINT AIOPs – Education & Faith Demo</title>
 
 <style>
-body {
-  margin: 0;
-  background: #fff;
-  font-family: Arial, sans-serif;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
-}
+  body {
+    background:#0b0b0b;
+    font-family: Arial, sans-serif;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    height:100vh;
+    color:#000;
+  }
 
-/* Laptop Shell */
-.laptop {
-  width: 920px;
-  height: 600px;
-  background: rgba(0,0,0,0.92);
-  border-radius: 16px;
-  padding: 16px;
-  box-shadow: 0 30px 80px rgba(0,0,0,0.5);
-  display: flex;
-  flex-direction: column;
-}
+  /* Black rounded device */
+  .device {
+    background:#000;
+    border-radius:28px;
+    padding:18px;
+    width:360px;
+    box-shadow:0 0 40px rgba(0,255,255,0.15);
+  }
 
-/* Top Bar */
-.top-bar {
-  height: 32px;
-  background: #222;
-  border-radius: 12px 12px 0 0;
-  color: #fff;
-  display: flex;
-  align-items: center;
-  padding: 0 14px;
-  font-size: 14px;
-}
+  /* White inner board */
+  .screen {
+    background:#fff;
+    border-radius:20px;
+    padding:16px;
+    min-height:520px;
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+  }
 
-/* Screen */
-.screen-shell {
-  flex: 1;
-  background: rgba(255,255,255,0.12);
-  border-radius: 0 0 14px 14px;
-  margin-top: 6px;
-  position: relative;
-  overflow: hidden;
-}
+  h2 {
+    text-align:center;
+    margin:0;
+  }
 
-.screen {
-  display: none;
-  height: 100%;
-  padding: 20px;
-  box-sizing: border-box;
-  overflow-y: auto;
-}
+  .powered {
+    font-size:12px;
+    text-align:center;
+    color:#666;
+  }
 
-.screen.active { display: block; }
+  select, input, textarea, button {
+    width:100%;
+    padding:8px;
+    border-radius:8px;
+    border:1px solid #ccc;
+    font-size:14px;
+  }
 
-/* Home Icons */
-.icon-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 22px;
-  margin-top: 24px;
-}
+  textarea {
+    resize:none;
+    height:70px;
+  }
 
-.app {
-  text-align: center;
-  cursor: pointer;
-  color: #111;
-}
+  button {
+    background:#000;
+    color:#fff;
+    cursor:pointer;
+  }
 
-.icon {
-  width: 64px;
-  height: 64px;
-  border-radius: 18px;
-  background: linear-gradient(135deg,#2563EB,#38BDF8);
-  margin: 0 auto 8px;
-}
+  button:hover {
+    background:#222;
+  }
 
-/* Cards */
-.card {
-  background: #F9FAFB;
-  border-radius: 14px;
-  padding: 16px;
-  margin-top: 14px;
-  border: 1px solid #E5E7EB;
-}
+  .output {
+    background:#f5f5f5;
+    border-radius:10px;
+    padding:10px;
+    font-size:13px;
+    min-height:80px;
+  }
 
-/* Buttons */
-button {
-  background: #2563EB;
-  border: none;
-  padding: 10px 18px;
-  border-radius: 10px;
-  color: white;
-  cursor: pointer;
-  margin: 6px 4px 0 0;
-}
+  .subtitle {
+    font-size:12px;
+    color:#333;
+    font-style:italic;
+  }
 
-/* Mode Switch */
-.mode-switch {
-  display: flex;
-  gap: 10px;
-  margin-bottom: 12px;
-}
-
-.mode-switch button {
-  background: #E5E7EB;
-  color: #111;
-}
-
-.mode-switch button.active {
-  background: #2563EB;
-  color: #fff;
-}
-
-/* Subtitles */
-.subtitles {
-  position: absolute;
-  bottom: 10px;
-  left: 10px;
-  right: 10px;
-  background: rgba(0,0,0,0.75);
-  color: #fff;
-  padding: 10px;
-  border-radius: 10px;
-  font-size: 13px;
-  display: none;
-}
+  .section-title {
+    font-weight:bold;
+    font-size:13px;
+    margin-top:6px;
+  }
 </style>
 </head>
 
 <body>
 
-<div class="laptop">
-  <div class="top-bar">Baint OS — Human-Centric AIOPs</div>
+<div class="device">
+  <div class="screen">
 
-  <div class="screen-shell">
+    <h2>BAINT AIOPs</h2>
+    <div class="powered">Human-Centric On-Device Intelligence</div>
 
-    <!-- BOOT -->
-    <div class="screen active" id="boot">
-      <div style="background:#111;color:#0f0;font-family:monospace;height:100%;padding:20px;">
-        <div id="boot-log"></div>
-      </div>
-    </div>
+    <!-- Mode Toggle -->
+    <select id="mode">
+      <option value="teacher">🎓 Teacher Mode</option>
+      <option value="pastor">⛪ Pastor Mode</option>
+    </select>
 
-    <!-- HOME -->
-    <div class="screen" id="home">
-      <h3>Home</h3>
-      <div class="icon-grid">
-        <div class="app" onclick="show('student')">
-          <div class="icon"></div>
-          Learning Assistant
-        </div>
-        <div class="app">
-          <div class="icon"></div>
-          Browser
-        </div>
-        <div class="app">
-          <div class="icon"></div>
-          System
-        </div>
-      </div>
-    </div>
+    <!-- Dynamic Input -->
+    <input id="topic" placeholder="Enter subject or scripture" />
+    <textarea id="context" placeholder="Lesson goal or explanation focus"></textarea>
 
-    <!-- STUDENT / TEACHER / PASTOR -->
-    <div class="screen" id="student">
-      <h3>Education Layer</h3>
+    <button onclick="generate()">Explain</button>
 
-      <div class="mode-switch">
-        <button onclick="setMode('student')" class="active">Student</button>
-        <button onclick="setMode('teacher')">Teacher</button>
-        <button onclick="setMode('pastor')">Pastor</button>
-      </div>
+    <div class="section-title">AI Explanation</div>
+    <div class="output" id="output"></div>
 
-      <div class="card" id="content-card"></div>
+    <div class="subtitle" id="subtitle"></div>
 
-      <button onclick="speak()">▶ Explain with Voice</button>
-      <button onclick="stopVoice()">⏹ Stop</button>
-      <br><br>
-      <button onclick="show('home')">Back</button>
-    </div>
+    <div class="section-title">Problem It Solves</div>
+    <div class="output" id="problem"></div>
 
-    <div class="subtitles" id="subtitles"></div>
+    <div class="section-title">Solution Provided</div>
+    <div class="output" id="solution"></div>
+
   </div>
 </div>
 
 <script>
-/* BOOT */
-const bootLines = [
-  "Initializing Baint OS...",
-  "Loading education layer...",
-  "Human remains in control...",
-  "System ready."
-];
+function generate() {
+  const mode = document.getElementById("mode").value;
+  const topic = document.getElementById("topic").value;
+  const context = document.getElementById("context").value;
 
-const bootLog = document.getElementById("boot-log");
-let bootIndex = 0;
+  let explanation = "";
+  let problem = "";
+  let solution = "";
 
-function bootNext() {
-  if (bootIndex < bootLines.length) {
-    bootLog.innerHTML += bootLines[bootIndex] + "<br>";
-    bootIndex++;
-    setTimeout(bootNext, 500);
+  if (mode === "teacher") {
+    explanation = `Today we are learning about ${topic}. ${context || 
+      "This concept is broken down in a simple and clear way for students to understand step by step."}`;
+
+    problem = "Students struggle with attention, understanding complex topics, and lack of personalized explanations.";
+
+    solution = "BAINT AIOPs provides real-time explanations, voice guidance, and adaptive learning inside the classroom using one intelligent system.";
   } else {
-    show("home");
+    explanation = `Today's lesson is based on ${topic}. ${context || 
+      "The scripture is explained in a practical and relatable way for daily life."}`;
+
+    problem = "Many church members struggle to understand scriptures deeply during service due to limited time and explanation.";
+
+    solution = "BAINT AIOPs assists pastors and teachers with clear explanations, voice delivery, and structured lessons during services and Sunday school.";
   }
-}
-setTimeout(bootNext, 800);
 
-/* SCREEN SWITCH */
-function show(id) {
-  document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
-  document.getElementById(id).classList.add("active");
-  stopVoice();
+  document.getElementById("output").innerText = explanation;
+  document.getElementById("problem").innerText = problem;
+  document.getElementById("solution").innerText = solution;
+
+  speak(explanation);
 }
 
-/* MODES */
-let mode = "student";
+function speak(text) {
+  const synth = window.speechSynthesis;
+  synth.cancel();
 
-const content = {
-  student:
-    "Photosynthesis is how plants use sunlight, water, and carbon dioxide to make food. This process supports life on Earth.",
-  teacher:
-    "Photosynthesis is a biological process where plants convert light energy into chemical energy. Teachers can guide students step-by-step using this explanation.",
-  pastor:
-    "Photosynthesis reflects the wisdom of creation, where plants sustain life through light, water, and air. This explanation is offered respectfully for teaching and reflection."
-};
+  const utterance = new SpeechSynthesisUtterance(text);
+  utterance.rate = 1;
+  utterance.pitch = 1;
 
-function setMode(m) {
-  mode = m;
-  document.querySelectorAll(".mode-switch button").forEach(b => b.classList.remove("active"));
-  event.target.classList.add("active");
-  render();
-}
+  utterance.onboundary = (event) => {
+    document.getElementById("subtitle").innerText = text;
+  };
 
-/* RENDER */
-const card = document.getElementById("content-card");
-const subtitles = document.getElementById("subtitles");
-
-function render() {
-  card.innerHTML = `<strong>${mode.toUpperCase()} MODE</strong><br><br>${content[mode]}`;
-  subtitles.innerText = content[mode];
-  subtitles.style.display = "block";
-}
-
-render();
-
-/* VOICE */
-let utterance = null;
-
-function speak() {
-  if (!("speechSynthesis" in window)) return;
-  stopVoice();
-  utterance = new SpeechSynthesisUtterance(content[mode]);
-  utterance.rate = 0.9;
-  speechSynthesis.speak(utterance);
-}
-
-function stopVoice() {
-  speechSynthesis.cancel();
+  synth.speak(utterance);
 }
 </script>
 
