@@ -2,13 +2,13 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>BAINT AIOPs – Classroom Demo</title>
+<title>Baint AIOPs – Classroom Demo</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
 body{
   margin:0;
-  background:#ffffff;
+  background:#fff;
   font-family:Arial, sans-serif;
   display:flex;
   justify-content:center;
@@ -16,28 +16,28 @@ body{
   height:100vh;
 }
 
-/* MacBook Shell */
+/* Laptop shell */
 .laptop{
-  width:940px;
+  width:920px;
   height:600px;
   background:#0b0b0b;
-  border-radius:20px;
+  border-radius:18px;
   padding:14px;
-  box-shadow:0 30px 90px rgba(0,0,0,0.6);
+  box-shadow:0 30px 80px rgba(0,0,0,0.55);
   display:flex;
   flex-direction:column;
 }
 
-/* Top Bar */
+/* Top bar */
 .topbar{
-  height:32px;
+  height:30px;
   background:#1a1a1a;
   border-radius:14px 14px 0 0;
-  color:#fff;
+  color:#e5e5e5;
+  font-size:13px;
   display:flex;
   align-items:center;
   padding:0 14px;
-  font-size:14px;
 }
 
 /* Screen */
@@ -46,11 +46,10 @@ body{
   background:#f9fafb;
   border-radius:0 0 16px 16px;
   margin-top:6px;
-  overflow:hidden;
   position:relative;
+  overflow:hidden;
 }
 
-/* Screens */
 .screen{
   display:none;
   height:100%;
@@ -58,49 +57,44 @@ body{
   box-sizing:border-box;
 }
 
-.screen.active{display:block}
+.screen.active{display:block;}
+
+/* Sections */
+.section{
+  margin-bottom:16px;
+}
+
+h3{
+  margin:0 0 8px 0;
+}
 
 /* Buttons */
 button{
-  background:#2563eb;
-  border:none;
-  color:white;
-  padding:10px 18px;
+  padding:8px 14px;
   border-radius:10px;
+  border:none;
   cursor:pointer;
-  font-size:14px;
-  margin-top:8px;
-}
-
-button.secondary{
   background:#e5e7eb;
-  color:#111;
+  margin-right:8px;
+  font-size:13px;
 }
 
-/* Cards */
+button.active{
+  background:#2563eb;
+  color:#fff;
+}
+
+.primary{
+  background:#2563eb;
+  color:#fff;
+}
+
+/* Card */
 .card{
-  background:white;
+  background:#ffffff;
   border-radius:14px;
   padding:16px;
   border:1px solid #e5e7eb;
-  margin-top:14px;
-}
-
-/* Role Switch */
-.role-switch{
-  display:flex;
-  gap:10px;
-  margin-bottom:12px;
-}
-
-.role-switch button{
-  background:#e5e7eb;
-  color:#111;
-}
-
-.role-switch button.active{
-  background:#2563eb;
-  color:#fff;
 }
 
 /* Subtitles */
@@ -110,7 +104,7 @@ button.secondary{
   left:12px;
   right:12px;
   background:rgba(0,0,0,0.8);
-  color:white;
+  color:#fff;
   padding:10px;
   border-radius:10px;
   font-size:13px;
@@ -122,153 +116,150 @@ button.secondary{
 <body>
 
 <div class="laptop">
-  <div class="topbar">BAINT OS — Human-Centric AIOPs (Classroom)</div>
+  <div class="topbar">Baint OS — Classroom AIOPs (Human-Centric)</div>
 
   <div class="screen-shell">
 
     <!-- BOOT -->
     <div class="screen active" id="boot">
-      <div style="background:#0b0b0b;color:#00ff88;font-family:monospace;height:100%;padding:20px;">
-        <div id="bootlog"></div>
-      </div>
-    </div>
-
-    <!-- HOME -->
-    <div class="screen" id="home">
-      <h3>Home</h3>
-      <div class="card">
-        <strong>Education Layer</strong><br>
-        Human-controlled AI assistance for learning and teaching.
-        <br><br>
-        <button onclick="show('classroom')">Open Classroom Demo</button>
+      <div style="background:#111;color:#0f0;font-family:monospace;height:100%;padding:20px;">
+        <div id="bootLog"></div>
       </div>
     </div>
 
     <!-- CLASSROOM -->
     <div class="screen" id="classroom">
-      <h3>Classroom Demo</h3>
 
-      <div class="role-switch">
-        <button class="active" onclick="setRole('student',this)">Student</button>
-        <button onclick="setRole('teacher',this)">Teacher</button>
+      <h3>Classroom Learning Assistant</h3>
+
+      <!-- ROLE -->
+      <div class="section">
+        <strong>Select Role</strong><br><br>
+        <button onclick="setRole('student')" class="active" id="btn-student">Student</button>
+        <button onclick="setRole('teacher')" id="btn-teacher">Teacher</button>
       </div>
 
-      <div class="card" id="lessonCard"></div>
+      <!-- SUBJECT -->
+      <div class="section">
+        <strong>Select Subject</strong><br><br>
+        <button onclick="setSubject('biology')" class="active" id="sub-biology">Biology</button>
+        <button onclick="setSubject('history')" id="sub-history">History</button>
+        <button onclick="setSubject('science')" id="sub-science">Science</button>
+      </div>
 
-      <button onclick="speak()">▶ Explain with Voice</button>
-      <button class="secondary" onclick="stopVoice()">⏹ Stop</button>
-      <br><br>
-      <button class="secondary" onclick="show('home')">Back</button>
+      <!-- CONTENT -->
+      <div class="card" id="contentCard"></div>
+
+      <br>
+      <button class="primary" onclick="speak()">▶ Explain with Voice</button>
+      <button onclick="stopVoice()">⏹ Stop</button>
+
     </div>
 
     <div class="subtitles" id="subtitles"></div>
-
   </div>
 </div>
 
 <script>
 /* BOOT */
 const bootLines=[
-  "Initializing BAINT OS...",
-  "Loading education layer...",
+  "Initializing Baint OS...",
+  "Loading classroom module...",
   "Human remains in control...",
   "System ready."
 ];
-let i=0;
-const bootlog=document.getElementById("bootlog");
+const bootLog=document.getElementById("bootLog");
+let bi=0;
 function boot(){
-  if(i<bootLines.length){
-    bootlog.innerHTML+=bootLines[i]+"<br>";
-    i++;
+  if(bi<bootLines.length){
+    bootLog.innerHTML+=bootLines[bi]+"<br>";
+    bi++;
     setTimeout(boot,500);
   }else{
-    show("home");
+    show("classroom");
   }
 }
-setTimeout(boot,700);
+setTimeout(boot,800);
 
-/* SCREEN SWITCH */
+/* SCREEN */
 function show(id){
   document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
   document.getElementById(id).classList.add("active");
-  stopVoice();
 }
 
-/* CLASSROOM CONTENT */
+/* STATE */
 let role="student";
+let subject="biology";
 
-const content={
-  student:{
-    title:"Subject: Biology",
-    body:
-    "<strong>Assignment:</strong> Explain photosynthesis in simple terms.<br><br>"+
-    "<strong>Guided Explanation:</strong><br>"+
-    "Photosynthesis is how plants use sunlight, water, and carbon dioxide to make food. "+
-    "This process produces oxygen and supports life on Earth.<br><br>"+
-    "<strong>What the student learns:</strong><ul>"+
-    "<li>Core concept explained clearly</li>"+
-    "<li>No replacement of thinking</li>"+
-    "<li>Step-by-step guidance</li>"+
-    "</ul>",
-    voice:
-    "Photosynthesis is how plants use sunlight, water, and carbon dioxide to make food. This process supports life on Earth."
+/* CONTENT DATA */
+const data={
+  biology:{
+    student:"Photosynthesis is the process where plants use sunlight, water, and carbon dioxide to make food. This helps students understand how energy supports life.",
+    teacher:"Photosynthesis converts light energy into chemical energy. Teachers can guide students step-by-step using structured explanations and examples."
   },
-
-  teacher:{
-    title:"Teacher Control View",
-    body:
-    "<strong>Teaching Focus:</strong><br>"+
-    "Photosynthesis converts light energy into chemical energy inside plant cells.<br><br>"+
-    "<strong>Problem this solves:</strong><ul>"+
-    "<li>Students struggle with abstract explanations</li>"+
-    "<li>Limited time for one-on-one guidance</li>"+
-    "</ul>"+
-    "<strong>BAINT AIOPs Solution:</strong><ul>"+
-    "<li>AI assists explanation, not authority</li>"+
-    "<li>Teacher remains in control</li>"+
-    "<li>Consistent learning quality</li>"+
-    "</ul>",
-    voice:
-    "This system helps teachers guide students clearly while remaining fully in control of the learning process."
+  history:{
+    student:"The French Revolution began in 1789 and changed France’s political system. Students learn causes, events, and outcomes clearly.",
+    teacher:"The French Revolution illustrates social inequality, political reform, and economic pressure. Teachers can expand discussion and critical thinking."
+  },
+  science:{
+    student:"The water cycle shows how water moves through evaporation, condensation, and precipitation.",
+    teacher:"The water cycle demonstrates Earth’s natural systems. Teachers can connect climate, weather, and sustainability concepts."
   }
 };
 
-/* RENDER */
-const lessonCard=document.getElementById("lessonCard");
+/* UI */
+const card=document.getElementById("contentCard");
 const subtitles=document.getElementById("subtitles");
 
 function render(){
-  lessonCard.innerHTML=
-    "<strong>"+content[role].title+"</strong><br><br>"+content[role].body;
-  subtitles.innerText=content[role].voice;
+  card.innerHTML=
+  `<strong>Role:</strong> ${role.toUpperCase()}<br>
+   <strong>Subject:</strong> ${subject.toUpperCase()}<br><br>
+   <strong>Explanation</strong><br>
+   ${data[subject][role]}<br><br>
+   <strong>Problem Solved</strong><br>
+   Learners get clear guidance without replacing teachers.<br><br>
+   <strong>Human-Centric Solution</strong><br>
+   AI assists explanation while humans remain in control.`;
+
+  subtitles.innerText=data[subject][role];
+  subtitles.style.display="block";
 }
 
-/* ROLE SWITCH */
-function setRole(r,btn){
+/* ROLE */
+function setRole(r){
   role=r;
-  document.querySelectorAll(".role-switch button").forEach(b=>b.classList.remove("active"));
-  btn.classList.add("active");
-  render();
+  document.getElementById("btn-student").classList.toggle("active",r==="student");
+  document.getElementById("btn-teacher").classList.toggle("active",r==="teacher");
   stopVoice();
+  render();
 }
 
-render();
+/* SUBJECT */
+function setSubject(s){
+  subject=s;
+  ["biology","history","science"].forEach(x=>{
+    document.getElementById("sub-"+x).classList.toggle("active",x===s);
+  });
+  stopVoice();
+  render();
+}
 
 /* VOICE */
 let utter=null;
 function speak(){
-  if(!("speechSynthesis" in window)) return;
+  if(!("speechSynthesis" in window))return;
   stopVoice();
-  utter=new SpeechSynthesisUtterance(content[role].voice);
+  utter=new SpeechSynthesisUtterance(data[subject][role]);
   utter.rate=0.9;
   speechSynthesis.speak(utter);
-  subtitles.style.display="block";
 }
-
 function stopVoice(){
   if("speechSynthesis" in window) speechSynthesis.cancel();
-  subtitles.style.display="none";
 }
+
+/* INIT */
+render();
 </script>
 
 </body>
