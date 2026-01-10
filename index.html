@@ -1,177 +1,310 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>BAINT AIOPs – Education & Faith Demo</title>
+<meta charset="UTF-8">
+<title>Baint OS – Human-Centric AIOPs</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
-  body {
-    background:#0b0b0b;
-    font-family: Arial, sans-serif;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    height:100vh;
-    color:#000;
-  }
+body {
+  margin: 0;
+  background: #e5e7eb;
+  font-family: Arial, sans-serif;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
 
-  /* Black rounded device */
-  .device {
-    background:#000;
-    border-radius:28px;
-    padding:18px;
-    width:360px;
-    box-shadow:0 0 40px rgba(0,255,255,0.15);
-  }
+/* Laptop Shell */
+.laptop {
+  width: 920px;
+  height: 600px;
+  background: #0b0b0b;
+  border-radius: 20px;
+  padding: 14px;
+  box-shadow: 0 40px 100px rgba(0,0,0,0.6);
+  display: flex;
+  flex-direction: column;
+}
 
-  /* White inner board */
-  .screen {
-    background:#fff;
-    border-radius:20px;
-    padding:16px;
-    min-height:520px;
-    display:flex;
-    flex-direction:column;
-    gap:10px;
-  }
+/* Top Bar */
+.top-bar {
+  height: 34px;
+  background: #1a1a1a;
+  border-radius: 14px 14px 0 0;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  font-size: 14px;
+}
 
-  h2 {
-    text-align:center;
-    margin:0;
-  }
+/* Screen */
+.screen-shell {
+  flex: 1;
+  background: #ffffff;
+  border-radius: 0 0 16px 16px;
+  margin-top: 6px;
+  position: relative;
+  overflow: hidden;
+}
 
-  .powered {
-    font-size:12px;
-    text-align:center;
-    color:#666;
-  }
+/* Screens */
+.screen {
+  display: none;
+  height: 100%;
+  padding: 20px;
+  box-sizing: border-box;
+  overflow-y: auto;
+}
 
-  select, input, textarea, button {
-    width:100%;
-    padding:8px;
-    border-radius:8px;
-    border:1px solid #ccc;
-    font-size:14px;
-  }
+.screen.active { display: block; }
 
-  textarea {
-    resize:none;
-    height:70px;
-  }
+/* Home */
+.icon-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  margin-top: 30px;
+}
 
-  button {
-    background:#000;
-    color:#fff;
-    cursor:pointer;
-  }
+.app {
+  text-align: center;
+  cursor: pointer;
+  color: #111;
+}
 
-  button:hover {
-    background:#222;
-  }
+.icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 18px;
+  background: linear-gradient(135deg,#2563eb,#38bdf8);
+  margin: 0 auto 8px;
+}
 
-  .output {
-    background:#f5f5f5;
-    border-radius:10px;
-    padding:10px;
-    font-size:13px;
-    min-height:80px;
-  }
+/* Cards */
+.card {
+  background: #f9fafb;
+  border-radius: 14px;
+  padding: 16px;
+  margin-top: 14px;
+  border: 1px solid #e5e7eb;
+}
 
-  .subtitle {
-    font-size:12px;
-    color:#333;
-    font-style:italic;
-  }
+/* Inputs */
+input, textarea {
+  width: 100%;
+  padding: 10px;
+  border-radius: 10px;
+  border: 1px solid #d1d5db;
+  margin-bottom: 10px;
+  font-size: 14px;
+}
 
-  .section-title {
-    font-weight:bold;
-    font-size:13px;
-    margin-top:6px;
-  }
+/* Buttons */
+button {
+  background: #2563eb;
+  border: none;
+  padding: 10px 18px;
+  border-radius: 10px;
+  color: white;
+  cursor: pointer;
+  margin: 6px 6px 0 0;
+}
+
+/* Mode Switch */
+.mode-switch {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.mode-switch button {
+  background: #e5e7eb;
+  color: #111;
+}
+
+.mode-switch button.active {
+  background: #2563eb;
+  color: #fff;
+}
+
+/* Subtitles */
+.subtitles {
+  position: absolute;
+  bottom: 12px;
+  left: 12px;
+  right: 12px;
+  background: rgba(0,0,0,0.8);
+  color: #fff;
+  padding: 12px;
+  border-radius: 12px;
+  font-size: 13px;
+  display: none;
+}
 </style>
 </head>
 
 <body>
 
-<div class="device">
-  <div class="screen">
+<div class="laptop">
+  <div class="top-bar">Baint OS — Human-Centric AIOPs</div>
 
-    <h2>BAINT AIOPs</h2>
-    <div class="powered">Human-Centric On-Device Intelligence</div>
+  <div class="screen-shell">
 
-    <!-- Mode Toggle -->
-    <select id="mode">
-      <option value="teacher">🎓 Teacher Mode</option>
-      <option value="pastor">⛪ Pastor Mode</option>
-    </select>
+    <!-- BOOT -->
+    <div class="screen active" id="boot">
+      <div style="background:#111;color:#00ff88;font-family:monospace;height:100%;padding:20px;">
+        <div id="boot-log"></div>
+      </div>
+    </div>
 
-    <!-- Dynamic Input -->
-    <input id="topic" placeholder="Enter subject or scripture" />
-    <textarea id="context" placeholder="Lesson goal or explanation focus"></textarea>
+    <!-- HOME -->
+    <div class="screen" id="home">
+      <h3>Home</h3>
+      <div class="icon-grid">
+        <div class="app" onclick="show('education')">
+          <div class="icon"></div>
+          Education Layer
+        </div>
+        <div class="app">
+          <div class="icon"></div>
+          Browser
+        </div>
+        <div class="app">
+          <div class="icon"></div>
+          System
+        </div>
+      </div>
+    </div>
 
-    <button onclick="generate()">Explain</button>
+    <!-- EDUCATION -->
+    <div class="screen" id="education">
+      <h3>Human-Centric Education Layer</h3>
 
-    <div class="section-title">AI Explanation</div>
-    <div class="output" id="output"></div>
+      <div class="mode-switch">
+        <button class="active" onclick="setMode('student', event)">Student</button>
+        <button onclick="setMode('teacher', event)">Teacher</button>
+        <button onclick="setMode('pastor', event)">Pastor</button>
+      </div>
 
-    <div class="subtitle" id="subtitle"></div>
+      <div class="card">
+        <input id="topic" placeholder="Subject or Scripture">
+        <textarea id="details" placeholder="Assignment, lesson focus, or explanation goal"></textarea>
+        <button onclick="generate()">Generate Explanation</button>
+      </div>
 
-    <div class="section-title">Problem It Solves</div>
-    <div class="output" id="problem"></div>
+      <div class="card" id="output"></div>
 
-    <div class="section-title">Solution Provided</div>
-    <div class="output" id="solution"></div>
+      <div class="card">
+        <strong>Problem</strong>
+        <p id="problem"></p>
+      </div>
 
+      <div class="card">
+        <strong>Solution</strong>
+        <p id="solution"></p>
+      </div>
+
+      <button onclick="speak()">▶ Voice Explain</button>
+      <button onclick="stopVoice()">⏹ Stop</button>
+      <br><br>
+      <button onclick="show('home')">Back</button>
+    </div>
+
+    <div class="subtitles" id="subtitles"></div>
   </div>
 </div>
 
 <script>
-function generate() {
-  const mode = document.getElementById("mode").value;
-  const topic = document.getElementById("topic").value;
-  const context = document.getElementById("context").value;
+/* BOOT */
+const bootLines = [
+  "Initializing Baint OS...",
+  "Loading Human-Centric Intelligence...",
+  "AI assists — Human decides...",
+  "System ready."
+];
+let b = 0;
+const bootLog = document.getElementById("boot-log");
 
-  let explanation = "";
-  let problem = "";
-  let solution = "";
-
-  if (mode === "teacher") {
-    explanation = `Today we are learning about ${topic}. ${context || 
-      "This concept is broken down in a simple and clear way for students to understand step by step."}`;
-
-    problem = "Students struggle with attention, understanding complex topics, and lack of personalized explanations.";
-
-    solution = "BAINT AIOPs provides real-time explanations, voice guidance, and adaptive learning inside the classroom using one intelligent system.";
+function boot() {
+  if (b < bootLines.length) {
+    bootLog.innerHTML += bootLines[b] + "<br>";
+    b++;
+    setTimeout(boot, 500);
   } else {
-    explanation = `Today's lesson is based on ${topic}. ${context || 
-      "The scripture is explained in a practical and relatable way for daily life."}`;
+    show("home");
+  }
+}
+setTimeout(boot, 800);
 
-    problem = "Many church members struggle to understand scriptures deeply during service due to limited time and explanation.";
+/* SCREEN */
+function show(id) {
+  document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+  stopVoice();
+}
 
-    solution = "BAINT AIOPs assists pastors and teachers with clear explanations, voice delivery, and structured lessons during services and Sunday school.";
+/* MODE */
+let mode = "student";
+
+function setMode(m, e) {
+  mode = m;
+  document.querySelectorAll(".mode-switch button").forEach(b => b.classList.remove("active"));
+  e.target.classList.add("active");
+}
+
+/* GENERATE */
+function generate() {
+  const topic = document.getElementById("topic").value || "the topic";
+  const details = document.getElementById("details").value || "";
+  let explanation = "", problem = "", solution = "";
+
+  if (mode === "student") {
+    explanation = `This lesson explains ${topic} in a simple and clear way. ${details}`;
+    problem = "Students struggle to understand lessons without personalized guidance.";
+    solution = "BAINT AIOPs explains concepts clearly while keeping the student in control.";
   }
 
-  document.getElementById("output").innerText = explanation;
+  if (mode === "teacher") {
+    explanation = `Subject: ${topic}. ${details || "Step-by-step explanation for classroom teaching."}`;
+    problem = "Teachers manage limited time and different learning speeds.";
+    solution = "BAINT AIOPs assists teachers with structured, scalable explanations.";
+  }
+
+  if (mode === "pastor") {
+    explanation = `Scripture: ${topic}. ${details || "Clear explanation for teaching and reflection."}`;
+    problem = "Many listeners struggle to fully understand teachings during service.";
+    solution = "BAINT AIOPs supports pastors with clear explanations while preserving human authority.";
+  }
+
+  document.getElementById("output").innerHTML =
+    `<strong>${mode.toUpperCase()} MODE</strong><br><br>${explanation}`;
+
   document.getElementById("problem").innerText = problem;
   document.getElementById("solution").innerText = solution;
 
-  speak(explanation);
+  const subtitles = document.getElementById("subtitles");
+  subtitles.innerText = explanation;
+  subtitles.style.display = "block";
 }
 
-function speak(text) {
-  const synth = window.speechSynthesis;
-  synth.cancel();
+/* VOICE */
+let utterance = null;
 
-  const utterance = new SpeechSynthesisUtterance(text);
-  utterance.rate = 1;
-  utterance.pitch = 1;
+function speak() {
+  if (!("speechSynthesis" in window)) return;
+  stopVoice();
+  utterance = new SpeechSynthesisUtterance(
+    document.getElementById("subtitles").innerText
+  );
+  utterance.rate = 0.9;
+  speechSynthesis.speak(utterance);
+}
 
-  utterance.onboundary = (event) => {
-    document.getElementById("subtitle").innerText = text;
-  };
-
-  synth.speak(utterance);
+function stopVoice() {
+  speechSynthesis.cancel();
 }
 </script>
 
