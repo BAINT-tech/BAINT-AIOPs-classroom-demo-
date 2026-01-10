@@ -2,146 +2,119 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Baint OS – Human-Centric AIOPs</title>
+<title>BAINT AIOPs – Classroom Demo</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
-body {
-  margin: 0;
-  background: #e5e7eb;
-  font-family: Arial, sans-serif;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
+body{
+  margin:0;
+  background:#ffffff;
+  font-family:Arial, sans-serif;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  height:100vh;
 }
 
-/* Laptop Shell */
-.laptop {
-  width: 920px;
-  height: 600px;
-  background: #0b0b0b;
-  border-radius: 20px;
-  padding: 14px;
-  box-shadow: 0 40px 100px rgba(0,0,0,0.6);
-  display: flex;
-  flex-direction: column;
+/* MacBook Shell */
+.laptop{
+  width:940px;
+  height:600px;
+  background:#0b0b0b;
+  border-radius:20px;
+  padding:14px;
+  box-shadow:0 30px 90px rgba(0,0,0,0.6);
+  display:flex;
+  flex-direction:column;
 }
 
 /* Top Bar */
-.top-bar {
-  height: 34px;
-  background: #1a1a1a;
-  border-radius: 14px 14px 0 0;
-  color: #fff;
-  display: flex;
-  align-items: center;
-  padding: 0 16px;
-  font-size: 14px;
+.topbar{
+  height:32px;
+  background:#1a1a1a;
+  border-radius:14px 14px 0 0;
+  color:#fff;
+  display:flex;
+  align-items:center;
+  padding:0 14px;
+  font-size:14px;
 }
 
 /* Screen */
-.screen-shell {
-  flex: 1;
-  background: #ffffff;
-  border-radius: 0 0 16px 16px;
-  margin-top: 6px;
-  position: relative;
-  overflow: hidden;
+.screen-shell{
+  flex:1;
+  background:#f9fafb;
+  border-radius:0 0 16px 16px;
+  margin-top:6px;
+  overflow:hidden;
+  position:relative;
 }
 
 /* Screens */
-.screen {
-  display: none;
-  height: 100%;
-  padding: 20px;
-  box-sizing: border-box;
-  overflow-y: auto;
+.screen{
+  display:none;
+  height:100%;
+  padding:20px;
+  box-sizing:border-box;
 }
 
-.screen.active { display: block; }
+.screen.active{display:block}
 
-/* Home */
-.icon-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 24px;
-  margin-top: 30px;
+/* Buttons */
+button{
+  background:#2563eb;
+  border:none;
+  color:white;
+  padding:10px 18px;
+  border-radius:10px;
+  cursor:pointer;
+  font-size:14px;
+  margin-top:8px;
 }
 
-.app {
-  text-align: center;
-  cursor: pointer;
-  color: #111;
-}
-
-.icon {
-  width: 64px;
-  height: 64px;
-  border-radius: 18px;
-  background: linear-gradient(135deg,#2563eb,#38bdf8);
-  margin: 0 auto 8px;
+button.secondary{
+  background:#e5e7eb;
+  color:#111;
 }
 
 /* Cards */
-.card {
-  background: #f9fafb;
-  border-radius: 14px;
-  padding: 16px;
-  margin-top: 14px;
-  border: 1px solid #e5e7eb;
+.card{
+  background:white;
+  border-radius:14px;
+  padding:16px;
+  border:1px solid #e5e7eb;
+  margin-top:14px;
 }
 
-/* Inputs */
-input, textarea {
-  width: 100%;
-  padding: 10px;
-  border-radius: 10px;
-  border: 1px solid #d1d5db;
-  margin-bottom: 10px;
-  font-size: 14px;
+/* Role Switch */
+.role-switch{
+  display:flex;
+  gap:10px;
+  margin-bottom:12px;
 }
 
-/* Buttons */
-button {
-  background: #2563eb;
-  border: none;
-  padding: 10px 18px;
-  border-radius: 10px;
-  color: white;
-  cursor: pointer;
-  margin: 6px 6px 0 0;
+.role-switch button{
+  background:#e5e7eb;
+  color:#111;
 }
 
-/* Mode Switch */
-.mode-switch {
-  display: flex;
-  gap: 10px;
-  margin-bottom: 12px;
-}
-
-.mode-switch button {
-  background: #e5e7eb;
-  color: #111;
-}
-
-.mode-switch button.active {
-  background: #2563eb;
-  color: #fff;
+.role-switch button.active{
+  background:#2563eb;
+  color:#fff;
 }
 
 /* Subtitles */
-.subtitles {
-  position: absolute;
-  bottom: 12px;
-  left: 12px;
-  right: 12px;
-  background: rgba(0,0,0,0.8);
-  color: #fff;
-  padding: 12px;
-  border-radius: 12px;
-  font-size: 13px;
-  display: none;
+.subtitles{
+  position:absolute;
+  bottom:12px;
+  left:12px;
+  right:12px;
+  background:rgba(0,0,0,0.8);
+  color:white;
+  padding:10px;
+  border-radius:10px;
+  font-size:13px;
+  display:none;
 }
 </style>
 </head>
@@ -149,162 +122,152 @@ button {
 <body>
 
 <div class="laptop">
-  <div class="top-bar">Baint OS — Human-Centric AIOPs</div>
+  <div class="topbar">BAINT OS — Human-Centric AIOPs (Classroom)</div>
 
   <div class="screen-shell">
 
     <!-- BOOT -->
     <div class="screen active" id="boot">
-      <div style="background:#111;color:#00ff88;font-family:monospace;height:100%;padding:20px;">
-        <div id="boot-log"></div>
+      <div style="background:#0b0b0b;color:#00ff88;font-family:monospace;height:100%;padding:20px;">
+        <div id="bootlog"></div>
       </div>
     </div>
 
     <!-- HOME -->
     <div class="screen" id="home">
       <h3>Home</h3>
-      <div class="icon-grid">
-        <div class="app" onclick="show('education')">
-          <div class="icon"></div>
-          Education Layer
-        </div>
-        <div class="app">
-          <div class="icon"></div>
-          Browser
-        </div>
-        <div class="app">
-          <div class="icon"></div>
-          System
-        </div>
+      <div class="card">
+        <strong>Education Layer</strong><br>
+        Human-controlled AI assistance for learning and teaching.
+        <br><br>
+        <button onclick="show('classroom')">Open Classroom Demo</button>
       </div>
     </div>
 
-    <!-- EDUCATION -->
-    <div class="screen" id="education">
-      <h3>Human-Centric Education Layer</h3>
+    <!-- CLASSROOM -->
+    <div class="screen" id="classroom">
+      <h3>Classroom Demo</h3>
 
-      <div class="mode-switch">
-        <button class="active" onclick="setMode('student', event)">Student</button>
-        <button onclick="setMode('teacher', event)">Teacher</button>
-        <button onclick="setMode('pastor', event)">Pastor</button>
+      <div class="role-switch">
+        <button class="active" onclick="setRole('student',this)">Student</button>
+        <button onclick="setRole('teacher',this)">Teacher</button>
       </div>
 
-      <div class="card">
-        <input id="topic" placeholder="Subject or Scripture">
-        <textarea id="details" placeholder="Assignment, lesson focus, or explanation goal"></textarea>
-        <button onclick="generate()">Generate Explanation</button>
-      </div>
+      <div class="card" id="lessonCard"></div>
 
-      <div class="card" id="output"></div>
-
-      <div class="card">
-        <strong>Problem</strong>
-        <p id="problem"></p>
-      </div>
-
-      <div class="card">
-        <strong>Solution</strong>
-        <p id="solution"></p>
-      </div>
-
-      <button onclick="speak()">▶ Voice Explain</button>
-      <button onclick="stopVoice()">⏹ Stop</button>
+      <button onclick="speak()">▶ Explain with Voice</button>
+      <button class="secondary" onclick="stopVoice()">⏹ Stop</button>
       <br><br>
-      <button onclick="show('home')">Back</button>
+      <button class="secondary" onclick="show('home')">Back</button>
     </div>
 
     <div class="subtitles" id="subtitles"></div>
+
   </div>
 </div>
 
 <script>
 /* BOOT */
-const bootLines = [
-  "Initializing Baint OS...",
-  "Loading Human-Centric Intelligence...",
-  "AI assists — Human decides...",
+const bootLines=[
+  "Initializing BAINT OS...",
+  "Loading education layer...",
+  "Human remains in control...",
   "System ready."
 ];
-let b = 0;
-const bootLog = document.getElementById("boot-log");
-
-function boot() {
-  if (b < bootLines.length) {
-    bootLog.innerHTML += bootLines[b] + "<br>";
-    b++;
-    setTimeout(boot, 500);
-  } else {
+let i=0;
+const bootlog=document.getElementById("bootlog");
+function boot(){
+  if(i<bootLines.length){
+    bootlog.innerHTML+=bootLines[i]+"<br>";
+    i++;
+    setTimeout(boot,500);
+  }else{
     show("home");
   }
 }
-setTimeout(boot, 800);
+setTimeout(boot,700);
 
-/* SCREEN */
-function show(id) {
-  document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
+/* SCREEN SWITCH */
+function show(id){
+  document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
   document.getElementById(id).classList.add("active");
   stopVoice();
 }
 
-/* MODE */
-let mode = "student";
+/* CLASSROOM CONTENT */
+let role="student";
 
-function setMode(m, e) {
-  mode = m;
-  document.querySelectorAll(".mode-switch button").forEach(b => b.classList.remove("active"));
-  e.target.classList.add("active");
+const content={
+  student:{
+    title:"Subject: Biology",
+    body:
+    "<strong>Assignment:</strong> Explain photosynthesis in simple terms.<br><br>"+
+    "<strong>Guided Explanation:</strong><br>"+
+    "Photosynthesis is how plants use sunlight, water, and carbon dioxide to make food. "+
+    "This process produces oxygen and supports life on Earth.<br><br>"+
+    "<strong>What the student learns:</strong><ul>"+
+    "<li>Core concept explained clearly</li>"+
+    "<li>No replacement of thinking</li>"+
+    "<li>Step-by-step guidance</li>"+
+    "</ul>",
+    voice:
+    "Photosynthesis is how plants use sunlight, water, and carbon dioxide to make food. This process supports life on Earth."
+  },
+
+  teacher:{
+    title:"Teacher Control View",
+    body:
+    "<strong>Teaching Focus:</strong><br>"+
+    "Photosynthesis converts light energy into chemical energy inside plant cells.<br><br>"+
+    "<strong>Problem this solves:</strong><ul>"+
+    "<li>Students struggle with abstract explanations</li>"+
+    "<li>Limited time for one-on-one guidance</li>"+
+    "</ul>"+
+    "<strong>BAINT AIOPs Solution:</strong><ul>"+
+    "<li>AI assists explanation, not authority</li>"+
+    "<li>Teacher remains in control</li>"+
+    "<li>Consistent learning quality</li>"+
+    "</ul>",
+    voice:
+    "This system helps teachers guide students clearly while remaining fully in control of the learning process."
+  }
+};
+
+/* RENDER */
+const lessonCard=document.getElementById("lessonCard");
+const subtitles=document.getElementById("subtitles");
+
+function render(){
+  lessonCard.innerHTML=
+    "<strong>"+content[role].title+"</strong><br><br>"+content[role].body;
+  subtitles.innerText=content[role].voice;
 }
 
-/* GENERATE */
-function generate() {
-  const topic = document.getElementById("topic").value || "the topic";
-  const details = document.getElementById("details").value || "";
-  let explanation = "", problem = "", solution = "";
-
-  if (mode === "student") {
-    explanation = `This lesson explains ${topic} in a simple and clear way. ${details}`;
-    problem = "Students struggle to understand lessons without personalized guidance.";
-    solution = "BAINT AIOPs explains concepts clearly while keeping the student in control.";
-  }
-
-  if (mode === "teacher") {
-    explanation = `Subject: ${topic}. ${details || "Step-by-step explanation for classroom teaching."}`;
-    problem = "Teachers manage limited time and different learning speeds.";
-    solution = "BAINT AIOPs assists teachers with structured, scalable explanations.";
-  }
-
-  if (mode === "pastor") {
-    explanation = `Scripture: ${topic}. ${details || "Clear explanation for teaching and reflection."}`;
-    problem = "Many listeners struggle to fully understand teachings during service.";
-    solution = "BAINT AIOPs supports pastors with clear explanations while preserving human authority.";
-  }
-
-  document.getElementById("output").innerHTML =
-    `<strong>${mode.toUpperCase()} MODE</strong><br><br>${explanation}`;
-
-  document.getElementById("problem").innerText = problem;
-  document.getElementById("solution").innerText = solution;
-
-  const subtitles = document.getElementById("subtitles");
-  subtitles.innerText = explanation;
-  subtitles.style.display = "block";
+/* ROLE SWITCH */
+function setRole(r,btn){
+  role=r;
+  document.querySelectorAll(".role-switch button").forEach(b=>b.classList.remove("active"));
+  btn.classList.add("active");
+  render();
+  stopVoice();
 }
+
+render();
 
 /* VOICE */
-let utterance = null;
-
-function speak() {
-  if (!("speechSynthesis" in window)) return;
+let utter=null;
+function speak(){
+  if(!("speechSynthesis" in window)) return;
   stopVoice();
-  utterance = new SpeechSynthesisUtterance(
-    document.getElementById("subtitles").innerText
-  );
-  utterance.rate = 0.9;
-  speechSynthesis.speak(utterance);
+  utter=new SpeechSynthesisUtterance(content[role].voice);
+  utter.rate=0.9;
+  speechSynthesis.speak(utter);
+  subtitles.style.display="block";
 }
 
-function stopVoice() {
-  speechSynthesis.cancel();
+function stopVoice(){
+  if("speechSynthesis" in window) speechSynthesis.cancel();
+  subtitles.style.display="none";
 }
 </script>
 
