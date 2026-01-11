@@ -108,6 +108,21 @@ button {
   margin-right: 8px;
 }
 
+/* Mode Switch */
+.mode-switch {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+.mode-switch button {
+  background: #e5e7eb;
+  color: #111;
+}
+.mode-switch button.active {
+  background: #2563eb;
+  color: #fff;
+}
+
 /* Subtitles */
 .subtitles {
   position: fixed;
@@ -148,9 +163,27 @@ button {
     <!-- DEMO CLASSROOM -->
     <div class="screen" id="demo" style="display:none;">
 
+      <!-- MODE SELECT -->
+      <div class="section mode-switch">
+        <button onclick="setMode('student')" class="active">Student</button>
+        <button onclick="setMode('teacher')">Teacher</button>
+        <button onclick="setMode('pastor')">Pastor</button>
+      </div>
+
+      <!-- LANGUAGE SELECT -->
+      <div class="section">
+        <h4>Language</h4>
+        <select id="language" onchange="updateContent()">
+          <option value="english">English</option>
+          <option value="spanish">Spanish</option>
+          <option value="french">French</option>
+          <option value="chinese">Chinese</option>
+        </select>
+      </div>
+
       <!-- LEARNING CONTEXT -->
       <div class="section">
-        <h4>1. Learning Context</h4>
+        <h4>Learning Context</h4>
         <select id="subject" onchange="updateContent()">
           <option value="biology">Biology</option>
           <option value="history">History</option>
@@ -166,7 +199,7 @@ button {
 
       <!-- GUIDED EXPLANATION -->
       <div class="section">
-        <h4>2. Guided Explanation (Human-in-Control)</h4>
+        <h4>Guided Explanation (Human-in-Control)</h4>
         <div class="card" id="explanation">
           Select a subject and topic to see the explanation.
         </div>
@@ -177,8 +210,8 @@ button {
 
       <!-- PROBLEM SOLVING -->
       <div class="section">
-        <h4>3. What Problem Does This Solve?</h4>
-        <div class="card">
+        <h4>What Problem Does This Solve?</h4>
+        <div class="card" id="problem-solving">
           • Helps students understand complex topics step-by-step<br>
           • Supports teachers with clear explanations<br>
           • Keeps humans in control of learning decisions<br>
@@ -214,7 +247,6 @@ const bootLines = [
 ];
 
 let bootIndex = 0;
-
 function startBootSequence() {
   if (bootIndex < bootLines.length) {
     bootLog.innerHTML += bootLines[bootIndex] + "<br>";
@@ -229,42 +261,90 @@ function startBootSequence() {
   }
 }
 
-// Classroom content
+// Classroom content per language and mode
 const data = {
-  biology: {
-    photosynthesis:
-      "Photosynthesis is the process by which plants use sunlight, water, and carbon dioxide to produce food. This process releases oxygen and supports life on Earth.",
-    watercycle:
-      "The water cycle explains how water moves through evaporation, condensation, and precipitation, continuously recycling through Earth’s system."
+  english: {
+    student: {
+      biology: {
+        photosynthesis: "Photosynthesis is the process by which plants use sunlight, water, and carbon dioxide to produce food. This process releases oxygen and supports life on Earth.",
+        watercycle: "The water cycle explains how water moves through evaporation, condensation, and precipitation, continuously recycling through Earth’s system."
+      },
+      history: {
+        revolution: "The French Revolution began in 1789 and transformed France by ending monarchy rule and promoting ideas of equality and citizenship."
+      }
+    },
+    teacher: {
+      biology: {
+        photosynthesis: "Photosynthesis is a biological process where teachers can guide students step-by-step, explaining how plants convert light into energy."
+      }
+    },
+    pastor: {
+      science: {
+        photosynthesis: "Photosynthesis reflects the wisdom of creation; plants sustain life through light, water, and air. Lesson for Sunday school."
+      }
+    }
   },
-  history: {
-    revolution:
-      "The French Revolution began in 1789 and transformed France by ending monarchy rule and promoting ideas of equality and citizenship."
+  spanish: {
+    student: {
+      biology: {
+        photosynthesis: "La fotosíntesis es el proceso por el cual las plantas usan la luz solar, el agua y el dióxido de carbono para producir alimento."
+      }
+    }
   },
-  science: {
-    photosynthesis:
-      "Photosynthesis converts light energy into chemical energy stored in plants, forming the base of most food chains."
+  french: {
+    student: {
+      biology: {
+        photosynthesis: "La photosynthèse est le processus par lequel les plantes utilisent la lumière, l’eau et le dioxyde de carbone pour produire de la nourriture."
+      }
+    }
+  },
+  chinese: {
+    student: {
+      biology: {
+        photosynthesis: "光合作用是植物利用阳光、水和二氧化碳制造食物的过程。"
+      }
+    }
   }
 };
 
-const explanationBox = document.getElementById("explanation");
-const subtitles = document.getElementById("subtitles");
-let utterance = null;
+let mode = "student";
 
+// Set mode
+function setMode(m) {
+  mode = m;
+  document.querySelectorAll(".mode-switch button").forEach(b => b.classList.remove("active"));
+  event.target.classList.add("active");
+  updateContent();
+}
+
+// Update content based on subject, topic, language, and mode
 function updateContent() {
   const subject = document.getElementById("subject").value;
   const topic = document.getElementById("topic").value;
-  const text = data[subject]?.[topic] || "No explanation available.";
-  explanationBox.innerText = text;
+  const language = document.getElementById("language").value;
+
+  const text = data[language]?.[mode]?.[subject]?.[topic] || "No explanation available.";
+  document.getElementById("explanation").innerText = text;
 }
+
+// Voice & subtitles
+const subtitles = document.getElementById("subtitles");
+let utterance = null;
 
 function speak() {
   if (!("speechSynthesis" in window)) return;
   stopVoice();
-  const text = explanationBox.innerText;
+  const text = document.getElementById("explanation").innerText;
   subtitles.innerText = text;
   subtitles.style.display = "block";
   utterance = new SpeechSynthesisUtterance(text);
+
+  // Match voice to language
+  const lang = document.getElementById("language").value;
+  const voices = speechSynthesis.getVoices();
+  const langVoices = voices.filter(v => v.lang.startsWith(lang.substring(0,2)));
+  if (langVoices.length > 0) utterance.voice = langVoices[0];
+
   utterance.rate = 0.9;
   utterance.onend = () => subtitles.style.display = "none";
   speechSynthesis.speak(utterance);
@@ -275,7 +355,7 @@ function stopVoice() {
   subtitles.style.display = "none";
 }
 
-// Initialize
+// Initialize first content
 updateContent();
 </script>
 
