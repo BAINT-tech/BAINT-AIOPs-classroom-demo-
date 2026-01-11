@@ -2,113 +2,109 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Baint AIOPs – Classroom Demo</title>
+<title>BAINT OS – Classroom Assistant Demo</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
-body{
-  margin:0;
-  background:#fff;
-  font-family:Arial, sans-serif;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  height:100vh;
+body {
+  margin: 0;
+  background: #ffffff;
+  font-family: Arial, sans-serif;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
 }
 
 /* Laptop shell */
-.laptop{
-  width:920px;
-  height:600px;
-  background:#0b0b0b;
-  border-radius:18px;
-  padding:14px;
-  box-shadow:0 30px 80px rgba(0,0,0,0.55);
-  display:flex;
-  flex-direction:column;
+.laptop {
+  width: 920px;
+  height: 600px;
+  background: rgba(0,0,0,0.92);
+  border-radius: 18px;
+  padding: 14px;
+  box-shadow: 0 30px 80px rgba(0,0,0,0.5);
+  display: flex;
+  flex-direction: column;
 }
 
 /* Top bar */
-.topbar{
-  height:30px;
-  background:#1a1a1a;
-  border-radius:14px 14px 0 0;
-  color:#e5e5e5;
-  font-size:13px;
-  display:flex;
-  align-items:center;
-  padding:0 14px;
+.top-bar {
+  height: 30px;
+  background: #1f1f1f;
+  border-radius: 12px 12px 0 0;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  padding: 0 14px;
+  font-size: 14px;
 }
 
 /* Screen */
-.screen-shell{
-  flex:1;
-  background:#f9fafb;
-  border-radius:0 0 16px 16px;
-  margin-top:6px;
-  position:relative;
-  overflow:hidden;
+.screen-shell {
+  flex: 1;
+  background: #f9fafb;
+  border-radius: 0 0 14px 14px;
+  margin-top: 6px;
+  padding: 22px;
+  overflow-y: auto;
 }
-
-.screen{
-  display:none;
-  height:100%;
-  padding:20px;
-  box-sizing:border-box;
-}
-
-.screen.active{display:block;}
 
 /* Sections */
-.section{
-  margin-bottom:16px;
+.section {
+  margin-bottom: 18px;
 }
 
-h3{
-  margin:0 0 8px 0;
+.section h4 {
+  margin: 0 0 8px;
+  font-size: 15px;
+  color: #111;
+}
+
+/* Inputs */
+select {
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid #d1d5db;
+  font-size: 14px;
+}
+
+/* Cards */
+.card {
+  background: #ffffff;
+  border-radius: 14px;
+  padding: 16px;
+  border: 1px solid #e5e7eb;
+  font-size: 14px;
+  line-height: 1.6;
 }
 
 /* Buttons */
-button{
-  padding:8px 14px;
-  border-radius:10px;
-  border:none;
-  cursor:pointer;
-  background:#e5e7eb;
-  margin-right:8px;
-  font-size:13px;
-}
-
-button.active{
-  background:#2563eb;
-  color:#fff;
-}
-
-.primary{
-  background:#2563eb;
-  color:#fff;
-}
-
-/* Card */
-.card{
-  background:#ffffff;
-  border-radius:14px;
-  padding:16px;
-  border:1px solid #e5e7eb;
+button {
+  background: #2563eb;
+  border: none;
+  padding: 10px 18px;
+  border-radius: 10px;
+  color: #fff;
+  cursor: pointer;
+  font-size: 14px;
+  margin-right: 8px;
 }
 
 /* Subtitles */
-.subtitles{
-  position:absolute;
-  bottom:12px;
-  left:12px;
-  right:12px;
-  background:rgba(0,0,0,0.8);
-  color:#fff;
-  padding:10px;
-  border-radius:10px;
-  font-size:13px;
-  display:none;
+.subtitles {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80%;
+  background: rgba(0,0,0,0.8);
+  color: #fff;
+  padding: 12px;
+  border-radius: 12px;
+  font-size: 13px;
+  display: none;
+  text-align: center;
 }
 </style>
 </head>
@@ -116,150 +112,100 @@ button.active{
 <body>
 
 <div class="laptop">
-  <div class="topbar">Baint OS — Classroom AIOPs (Human-Centric)</div>
+  <div class="top-bar">BAINT OS — Classroom Assistant (Human-Centric AIOPs)</div>
 
   <div class="screen-shell">
 
-    <!-- BOOT -->
-    <div class="screen active" id="boot">
-      <div style="background:#111;color:#0f0;font-family:monospace;height:100%;padding:20px;">
-        <div id="bootLog"></div>
-      </div>
+    <!-- CONTEXT -->
+    <div class="section">
+      <h4>1. Learning Context</h4>
+      <select id="subject" onchange="updateContent()">
+        <option value="biology">Biology</option>
+        <option value="history">History</option>
+        <option value="science">General Science</option>
+      </select>
+
+      <select id="topic" onchange="updateContent()" style="margin-left:10px;">
+        <option value="photosynthesis">Photosynthesis</option>
+        <option value="watercycle">Water Cycle</option>
+        <option value="revolution">French Revolution</option>
+      </select>
     </div>
 
-    <!-- CLASSROOM -->
-    <div class="screen" id="classroom">
-
-      <h3>Classroom Learning Assistant</h3>
-
-      <!-- ROLE -->
-      <div class="section">
-        <strong>Select Role</strong><br><br>
-        <button onclick="setRole('student')" class="active" id="btn-student">Student</button>
-        <button onclick="setRole('teacher')" id="btn-teacher">Teacher</button>
+    <!-- GUIDED EXPLANATION -->
+    <div class="section">
+      <h4>2. Guided Explanation (Human-in-Control)</h4>
+      <div class="card" id="explanation">
+        Select a subject and topic to see the explanation.
       </div>
-
-      <!-- SUBJECT -->
-      <div class="section">
-        <strong>Select Subject</strong><br><br>
-        <button onclick="setSubject('biology')" class="active" id="sub-biology">Biology</button>
-        <button onclick="setSubject('history')" id="sub-history">History</button>
-        <button onclick="setSubject('science')" id="sub-science">Science</button>
-      </div>
-
-      <!-- CONTENT -->
-      <div class="card" id="contentCard"></div>
-
       <br>
-      <button class="primary" onclick="speak()">▶ Explain with Voice</button>
+      <button onclick="speak()">▶ Explain with Voice</button>
       <button onclick="stopVoice()">⏹ Stop</button>
-
     </div>
 
-    <div class="subtitles" id="subtitles"></div>
+    <!-- EDUCATION LAYER -->
+    <div class="section">
+      <h4>3. What Problem Does This Solve?</h4>
+      <div class="card">
+        • Helps students understand complex topics step-by-step<br>
+        • Supports teachers with clear explanations<br>
+        • Keeps humans in control of learning decisions<br>
+        • Reduces confusion and cognitive overload
+      </div>
+    </div>
+
   </div>
 </div>
 
+<div class="subtitles" id="subtitles"></div>
+
 <script>
-/* BOOT */
-const bootLines=[
-  "Initializing Baint OS...",
-  "Loading classroom module...",
-  "Human remains in control...",
-  "System ready."
-];
-const bootLog=document.getElementById("bootLog");
-let bi=0;
-function boot(){
-  if(bi<bootLines.length){
-    bootLog.innerHTML+=bootLines[bi]+"<br>";
-    bi++;
-    setTimeout(boot,500);
-  }else{
-    show("classroom");
-  }
-}
-setTimeout(boot,800);
-
-/* SCREEN */
-function show(id){
-  document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
-  document.getElementById(id).classList.add("active");
-}
-
-/* STATE */
-let role="student";
-let subject="biology";
-
-/* CONTENT DATA */
-const data={
-  biology:{
-    student:"Photosynthesis is the process where plants use sunlight, water, and carbon dioxide to make food. This helps students understand how energy supports life.",
-    teacher:"Photosynthesis converts light energy into chemical energy. Teachers can guide students step-by-step using structured explanations and examples."
+const data = {
+  biology: {
+    photosynthesis:
+      "Photosynthesis is the process by which plants use sunlight, water, and carbon dioxide to produce food. This process releases oxygen and supports life on Earth.",
+    watercycle:
+      "The water cycle explains how water moves through evaporation, condensation, and precipitation, continuously recycling through Earth’s system."
   },
-  history:{
-    student:"The French Revolution began in 1789 and changed France’s political system. Students learn causes, events, and outcomes clearly.",
-    teacher:"The French Revolution illustrates social inequality, political reform, and economic pressure. Teachers can expand discussion and critical thinking."
+  history: {
+    revolution:
+      "The French Revolution began in 1789 and transformed France by ending monarchy rule and promoting ideas of equality and citizenship."
   },
-  science:{
-    student:"The water cycle shows how water moves through evaporation, condensation, and precipitation.",
-    teacher:"The water cycle demonstrates Earth’s natural systems. Teachers can connect climate, weather, and sustainability concepts."
+  science: {
+    photosynthesis:
+      "Photosynthesis converts light energy into chemical energy stored in plants, forming the base of most food chains."
   }
 };
 
-/* UI */
-const card=document.getElementById("contentCard");
-const subtitles=document.getElementById("subtitles");
+const explanationBox = document.getElementById("explanation");
+const subtitles = document.getElementById("subtitles");
+let utterance = null;
 
-function render(){
-  card.innerHTML=
-  `<strong>Role:</strong> ${role.toUpperCase()}<br>
-   <strong>Subject:</strong> ${subject.toUpperCase()}<br><br>
-   <strong>Explanation</strong><br>
-   ${data[subject][role]}<br><br>
-   <strong>Problem Solved</strong><br>
-   Learners get clear guidance without replacing teachers.<br><br>
-   <strong>Human-Centric Solution</strong><br>
-   AI assists explanation while humans remain in control.`;
-
-  subtitles.innerText=data[subject][role];
-  subtitles.style.display="block";
+function updateContent() {
+  const subject = document.getElementById("subject").value;
+  const topic = document.getElementById("topic").value;
+  const text = data[subject]?.[topic] || "No explanation available.";
+  explanationBox.innerText = text;
 }
 
-/* ROLE */
-function setRole(r){
-  role=r;
-  document.getElementById("btn-student").classList.toggle("active",r==="student");
-  document.getElementById("btn-teacher").classList.toggle("active",r==="teacher");
+function speak() {
+  if (!("speechSynthesis" in window)) return;
   stopVoice();
-  render();
+  const text = explanationBox.innerText;
+  subtitles.innerText = text;
+  subtitles.style.display = "block";
+  utterance = new SpeechSynthesisUtterance(text);
+  utterance.rate = 0.9;
+  utterance.onend = () => subtitles.style.display = "none";
+  speechSynthesis.speak(utterance);
 }
 
-/* SUBJECT */
-function setSubject(s){
-  subject=s;
-  ["biology","history","science"].forEach(x=>{
-    document.getElementById("sub-"+x).classList.toggle("active",x===s);
-  });
-  stopVoice();
-  render();
+function stopVoice() {
+  speechSynthesis.cancel();
+  subtitles.style.display = "none";
 }
 
-/* VOICE */
-let utter=null;
-function speak(){
-  if(!("speechSynthesis" in window))return;
-  stopVoice();
-  utter=new SpeechSynthesisUtterance(data[subject][role]);
-  utter.rate=0.9;
-  speechSynthesis.speak(utter);
-}
-function stopVoice(){
-  if("speechSynthesis" in window) speechSynthesis.cancel();
-}
-
-/* INIT */
-render();
+updateContent();
 </script>
 
 </body>
