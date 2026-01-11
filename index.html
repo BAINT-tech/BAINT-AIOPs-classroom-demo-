@@ -2,13 +2,12 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>BAINT OS – Human-Centric Classroom Assistant</title>
+<title>BAINT OS – Classroom Assistant Demo</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <style>
 body {
   margin: 0;
-  background: #f0f0f0;
+  background: #fff;
   font-family: Arial, sans-serif;
   display: flex;
   justify-content: center;
@@ -21,8 +20,8 @@ body {
   width: 920px;
   height: 600px;
   background: rgba(0,0,0,0.92);
-  border-radius: 20px;
-  padding: 16px;
+  border-radius: 18px;
+  padding: 14px;
   box-shadow: 0 30px 80px rgba(0,0,0,0.5);
   display: flex;
   flex-direction: column;
@@ -31,7 +30,7 @@ body {
 
 /* Top bar */
 .top-bar {
-  height: 32px;
+  height: 30px;
   background: #1f1f1f;
   border-radius: 12px 12px 0 0;
   color: #fff;
@@ -41,79 +40,123 @@ body {
   font-size: 14px;
 }
 
-/* Screen shell */
+/* Screen */
 .screen-shell {
   flex: 1;
-  background: #fff;
-  border-radius: 0 0 16px 16px;
+  background: #f9fafb;
+  border-radius: 0 0 14px 14px;
   margin-top: 6px;
   padding: 22px;
   overflow-y: auto;
   position: relative;
 }
 
+/* App Clickable Logo */
+#app-launcher {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  cursor: pointer;
+}
+#app-launcher img {
+  width: 120px;
+  height: 120px;
+  margin-bottom: 20px;
+}
+
 /* Sections */
-.section { margin-bottom: 18px; }
-.section h4 { margin:0 0 8px; font-size:15px; color:#111; }
+.section {
+  margin-bottom: 18px;
+}
 
-/* Mode Switch */
-.mode-switch { display:flex; gap:10px; margin-bottom:12px; }
-.mode-switch button { background:#E5E7EB; color:#111; border:none; padding:6px 12px; border-radius:8px; cursor:pointer; }
-.mode-switch button.active { background:#2563EB; color:#fff; }
+.section h4 {
+  margin: 0 0 8px;
+  font-size: 15px;
+  color: #111;
+}
 
-/* Selects */
-select { padding:8px 10px; border-radius:8px; border:1px solid #d1d5db; font-size:14px; }
+/* Inputs */
+select {
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid #d1d5db;
+  font-size: 14px;
+}
 
 /* Cards */
-.card { background:#f9fafb; border-radius:14px; padding:16px; border:1px solid #e5e7eb; font-size:14px; line-height:1.6; }
+.card {
+  background: #ffffff;
+  border-radius: 14px;
+  padding: 16px;
+  border: 1px solid #e5e7eb;
+  font-size: 14px;
+  line-height: 1.6;
+}
 
 /* Buttons */
-button.action { background:#2563EB; border:none; padding:10px 18px; border-radius:10px; color:#fff; cursor:pointer; font-size:14px; margin-right:8px; }
+button {
+  background: #2563eb;
+  border: none;
+  padding: 10px 18px;
+  border-radius: 10px;
+  color: #fff;
+  cursor: pointer;
+  font-size: 14px;
+  margin-right: 8px;
+}
 
 /* Subtitles */
-.subtitles { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); width: 80%; background: rgba(0,0,0,0.8); color:#fff; padding:12px; border-radius:12px; font-size:13px; display:none; text-align:center; }
-
-/* Boot Screen */
-#boot-screen { display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; font-family: monospace; color:#111; }
-.boot-message { margin: 5px 0; }
-.loading-bar { width:70%; height:6px; background:#ddd; border-radius:4px; overflow:hidden; margin-top:20px; }
-.loading-progress { height:100%; width:0; background:#111; transition: width 0.1s linear; }
-.percentage { margin-top:6px; font-size:0.75rem; color:#888; }
+.subtitles {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80%;
+  background: rgba(0,0,0,0.8);
+  color: #fff;
+  padding: 12px;
+  border-radius: 12px;
+  font-size: 13px;
+  display: none;
+  text-align: center;
+}
 </style>
 </head>
-
 <body>
+
 <div class="laptop">
-  <div class="top-bar">BAINT OS — Human-Centric Classroom Assistant</div>
+  <div class="top-bar">BAINT OS — Classroom Assistant (Human-Centric AIOPs)</div>
 
-  <div class="screen-shell" id="screen-shell">
+  <div class="screen-shell">
 
-    <!-- BOOT SCREEN -->
-    <div id="boot-screen">
-      <h1>BAINT AIOPs</h1>
-      <p>Human-Centric AI on Devices</p>
-      <div id="bootMessages"></div>
-      <div class="loading-bar"><div class="loading-progress" id="loadingProgress"></div></div>
-      <div class="percentage" id="percentage">0%</div>
+    <!-- APP LAUNCHER -->
+    <div id="app-launcher">
+      <img src="https://i.imgur.com/6d3CqjX.png" alt="BAINT Logo">
+      <h3>Click to Launch BAINT Classroom Demo</h3>
     </div>
 
-    <!-- MAIN DEMO -->
-    <div id="main-demo" style="display:none;">
-      <!-- Mode -->
-      <div class="mode-switch">
-        <button onclick="setMode('student')" class="active">Student</button>
-        <button onclick="setMode('teacher')">Teacher</button>
-        <button onclick="setMode('pastor')">Pastor</button>
+    <!-- BOOT SCREEN -->
+    <div class="screen" id="boot" style="display:none;">
+      <div style="background:#111;color:#0f0;font-family:monospace;height:100%;padding:20px;overflow-y:auto;">
+        <div id="boot-log"></div>
       </div>
+    </div>
 
-      <!-- Learning Context -->
+    <!-- DEMO CLASSROOM -->
+    <div class="screen" id="demo" style="display:none;">
+
+      <!-- LEARNING CONTEXT -->
       <div class="section">
         <h4>1. Learning Context</h4>
         <select id="subject" onchange="updateContent()">
           <option value="biology">Biology</option>
           <option value="history">History</option>
-          <option value="science">Science</option>
+          <option value="science">General Science</option>
         </select>
+
         <select id="topic" onchange="updateContent()" style="margin-left:10px;">
           <option value="photosynthesis">Photosynthesis</option>
           <option value="watercycle">Water Cycle</option>
@@ -121,107 +164,86 @@ button.action { background:#2563EB; border:none; padding:10px 18px; border-radiu
         </select>
       </div>
 
-      <!-- Guided Explanation -->
+      <!-- GUIDED EXPLANATION -->
       <div class="section">
         <h4>2. Guided Explanation (Human-in-Control)</h4>
-        <div class="card" id="explanation">Select a subject and topic to see the explanation.</div>
+        <div class="card" id="explanation">
+          Select a subject and topic to see the explanation.
+        </div>
         <br>
-        <button class="action" onclick="speak()">▶ Explain with Voice</button>
-        <button class="action" onclick="stopVoice()">⏹ Stop</button>
+        <button onclick="speak()">▶ Explain with Voice</button>
+        <button onclick="stopVoice()">⏹ Stop</button>
       </div>
 
-      <!-- Problem / Solution -->
+      <!-- PROBLEM SOLVING -->
       <div class="section">
-        <h4>3. Problem Solved / Benefit</h4>
-        <div class="card" id="problem-solution">
+        <h4>3. What Problem Does This Solve?</h4>
+        <div class="card">
           • Helps students understand complex topics step-by-step<br>
           • Supports teachers with clear explanations<br>
           • Keeps humans in control of learning decisions<br>
           • Reduces confusion and cognitive overload
         </div>
       </div>
-    </div>
 
+    </div>
   </div>
 </div>
 
 <div class="subtitles" id="subtitles"></div>
 
 <script>
-// BOOT SEQUENCE
+// App Launcher → Boot → Demo
+const appLauncher = document.getElementById("app-launcher");
+const bootScreen = document.getElementById("boot");
+const demoScreen = document.getElementById("demo");
+const bootLog = document.getElementById("boot-log");
+
+appLauncher.addEventListener("click", () => {
+  appLauncher.style.display = "none";
+  bootScreen.style.display = "block";
+  startBootSequence();
+});
+
+// Boot sequence
 const bootLines = [
-  "Initializing BAINT Core...",
-  "Loading education layer...",
-  "Human remains in control...",
-  "Activating AIOPs Layer...",
-  "System Ready!"
+  "Initializing BAINT OS...",
+  "Loading Human-Centric AI modules...",
+  "Activating Classroom Assistant...",
+  "System ready!"
 ];
-const bootMessagesDiv = document.getElementById("bootMessages");
-const progressBar = document.getElementById("loadingProgress");
-const percentage = document.getElementById("percentage");
-let bootProgress = 0, bootIndex = 0;
 
-function bootStep() {
-  bootProgress++;
-  progressBar.style.width = bootProgress + "%";
-  percentage.innerText = bootProgress + "%";
+let bootIndex = 0;
 
-  if (bootProgress % 20 === 0 && bootIndex < bootLines.length) {
-    const msg = document.createElement("div");
-    msg.className = "boot-message";
-    msg.innerText = bootLines[bootIndex];
-    bootMessagesDiv.appendChild(msg);
+function startBootSequence() {
+  if (bootIndex < bootLines.length) {
+    bootLog.innerHTML += bootLines[bootIndex] + "<br>";
     bootIndex++;
-  }
-
-  if (bootProgress < 100) {
-    requestAnimationFrame(bootStep);
+    setTimeout(startBootSequence, 600);
   } else {
     setTimeout(() => {
-      document.getElementById("boot-screen").style.display = "none";
-      document.getElementById("main-demo").style.display = "block";
-      renderContent();
-    }, 500);
+      bootScreen.style.display = "none";
+      demoScreen.style.display = "block";
+      updateContent();
+    }, 800);
   }
 }
 
-requestAnimationFrame(bootStep);
-
-// MODES
-let mode = "student";
-const modeButtons = document.querySelectorAll(".mode-switch button");
-function setMode(m) {
-  mode = m;
-  modeButtons.forEach(b => b.classList.remove("active"));
-  event.target.classList.add("active");
-  renderContent();
-}
-
-// CONTENT
+// Classroom content
 const data = {
-  student: {
-    biology: {
-      photosynthesis: "Photosynthesis is how plants use sunlight, water, and CO2 to make food. Students remain in control."
-    },
-    history: {
-      revolution: "The French Revolution began in 1789, transforming France politically and socially."
-    }
+  biology: {
+    photosynthesis:
+      "Photosynthesis is the process by which plants use sunlight, water, and carbon dioxide to produce food. This process releases oxygen and supports life on Earth.",
+    watercycle:
+      "The water cycle explains how water moves through evaporation, condensation, and precipitation, continuously recycling through Earth’s system."
   },
-  teacher: {
-    biology: {
-      photosynthesis: "Photosynthesis is the biological process where plants convert light energy into chemical energy. Teachers can guide students step-by-step."
-    },
-    history: {
-      revolution: "French Revolution: Teachers can explain key events, causes, and impacts in detail."
-    }
+  history: {
+    revolution:
+      "The French Revolution began in 1789 and transformed France by ending monarchy rule and promoting ideas of equality and citizenship."
   },
-  pastor: {
-    biology: {
-      photosynthesis: "Photosynthesis reflects the wisdom of creation, where life is sustained through sunlight and water."
-    },
-    history: {
-      revolution: "French Revolution serves as an example of human coordination, governance, and moral lessons."
-    }
+  science: {
+    photosynthesis:
+      "Photosynthesis converts light energy into chemical energy stored in plants, forming the base of most food chains."
   }
 };
 
@@ -230,17 +252,12 @@ const subtitles = document.getElementById("subtitles");
 let utterance = null;
 
 function updateContent() {
-  renderContent();
-}
-
-function renderContent() {
   const subject = document.getElementById("subject").value;
   const topic = document.getElementById("topic").value;
-  const text = data[mode]?.[subject]?.[topic] || "No explanation available.";
+  const text = data[subject]?.[topic] || "No explanation available.";
   explanationBox.innerText = text;
 }
 
-// VOICE
 function speak() {
   if (!("speechSynthesis" in window)) return;
   stopVoice();
@@ -258,6 +275,9 @@ function stopVoice() {
   subtitles.style.display = "none";
 }
 
+// Initialize
+updateContent();
 </script>
+
 </body>
 </html>
