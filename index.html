@@ -2,13 +2,13 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>BAINT OS – Classroom Assistant Demo</title>
+<title>BAINT OS – Human-Centric Classroom Assistant</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
 body {
   margin: 0;
-  background: #ffffff;
+  background: #f0f0f0;
   font-family: Arial, sans-serif;
   display: flex;
   justify-content: center;
@@ -21,16 +21,17 @@ body {
   width: 920px;
   height: 600px;
   background: rgba(0,0,0,0.92);
-  border-radius: 18px;
-  padding: 14px;
+  border-radius: 20px;
+  padding: 16px;
   box-shadow: 0 30px 80px rgba(0,0,0,0.5);
   display: flex;
   flex-direction: column;
+  position: relative;
 }
 
 /* Top bar */
 .top-bar {
-  height: 30px;
+  height: 32px;
   background: #1f1f1f;
   border-radius: 12px 12px 0 0;
   color: #fff;
@@ -40,117 +41,104 @@ body {
   font-size: 14px;
 }
 
-/* Screen */
+/* Screen shell */
 .screen-shell {
   flex: 1;
-  background: #f9fafb;
-  border-radius: 0 0 14px 14px;
+  background: #fff;
+  border-radius: 0 0 16px 16px;
   margin-top: 6px;
   padding: 22px;
   overflow-y: auto;
+  position: relative;
 }
 
 /* Sections */
-.section {
-  margin-bottom: 18px;
-}
+.section { margin-bottom: 18px; }
+.section h4 { margin:0 0 8px; font-size:15px; color:#111; }
 
-.section h4 {
-  margin: 0 0 8px;
-  font-size: 15px;
-  color: #111;
-}
+/* Mode Switch */
+.mode-switch { display:flex; gap:10px; margin-bottom:12px; }
+.mode-switch button { background:#E5E7EB; color:#111; border:none; padding:6px 12px; border-radius:8px; cursor:pointer; }
+.mode-switch button.active { background:#2563EB; color:#fff; }
 
-/* Inputs */
-select {
-  padding: 8px 10px;
-  border-radius: 8px;
-  border: 1px solid #d1d5db;
-  font-size: 14px;
-}
+/* Selects */
+select { padding:8px 10px; border-radius:8px; border:1px solid #d1d5db; font-size:14px; }
 
 /* Cards */
-.card {
-  background: #ffffff;
-  border-radius: 14px;
-  padding: 16px;
-  border: 1px solid #e5e7eb;
-  font-size: 14px;
-  line-height: 1.6;
-}
+.card { background:#f9fafb; border-radius:14px; padding:16px; border:1px solid #e5e7eb; font-size:14px; line-height:1.6; }
 
 /* Buttons */
-button {
-  background: #2563eb;
-  border: none;
-  padding: 10px 18px;
-  border-radius: 10px;
-  color: #fff;
-  cursor: pointer;
-  font-size: 14px;
-  margin-right: 8px;
-}
+button.action { background:#2563EB; border:none; padding:10px 18px; border-radius:10px; color:#fff; cursor:pointer; font-size:14px; margin-right:8px; }
 
 /* Subtitles */
-.subtitles {
-  position: fixed;
-  bottom: 20px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 80%;
-  background: rgba(0,0,0,0.8);
-  color: #fff;
-  padding: 12px;
-  border-radius: 12px;
-  font-size: 13px;
-  display: none;
-  text-align: center;
-}
+.subtitles { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); width: 80%; background: rgba(0,0,0,0.8); color:#fff; padding:12px; border-radius:12px; font-size:13px; display:none; text-align:center; }
+
+/* Boot Screen */
+#boot-screen { display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; font-family: monospace; color:#111; }
+.boot-message { margin: 5px 0; }
+.loading-bar { width:70%; height:6px; background:#ddd; border-radius:4px; overflow:hidden; margin-top:20px; }
+.loading-progress { height:100%; width:0; background:#111; transition: width 0.1s linear; }
+.percentage { margin-top:6px; font-size:0.75rem; color:#888; }
 </style>
 </head>
 
 <body>
-
 <div class="laptop">
-  <div class="top-bar">BAINT OS — Classroom Assistant (Human-Centric AIOPs)</div>
+  <div class="top-bar">BAINT OS — Human-Centric Classroom Assistant</div>
 
-  <div class="screen-shell">
+  <div class="screen-shell" id="screen-shell">
 
-    <!-- CONTEXT -->
-    <div class="section">
-      <h4>1. Learning Context</h4>
-      <select id="subject" onchange="updateContent()">
-        <option value="biology">Biology</option>
-        <option value="history">History</option>
-        <option value="science">General Science</option>
-      </select>
-
-      <select id="topic" onchange="updateContent()" style="margin-left:10px;">
-        <option value="photosynthesis">Photosynthesis</option>
-        <option value="watercycle">Water Cycle</option>
-        <option value="revolution">French Revolution</option>
-      </select>
+    <!-- BOOT SCREEN -->
+    <div id="boot-screen">
+      <h1>BAINT AIOPs</h1>
+      <p>Human-Centric AI on Devices</p>
+      <div id="bootMessages"></div>
+      <div class="loading-bar"><div class="loading-progress" id="loadingProgress"></div></div>
+      <div class="percentage" id="percentage">0%</div>
     </div>
 
-    <!-- GUIDED EXPLANATION -->
-    <div class="section">
-      <h4>2. Guided Explanation (Human-in-Control)</h4>
-      <div class="card" id="explanation">
-        Select a subject and topic to see the explanation.
+    <!-- MAIN DEMO -->
+    <div id="main-demo" style="display:none;">
+      <!-- Mode -->
+      <div class="mode-switch">
+        <button onclick="setMode('student')" class="active">Student</button>
+        <button onclick="setMode('teacher')">Teacher</button>
+        <button onclick="setMode('pastor')">Pastor</button>
       </div>
-      <br>
-      <button onclick="speak()">▶ Explain with Voice</button>
-      <button onclick="stopVoice()">⏹ Stop</button>
-    </div>
 
-    <!-- EDUCATION LAYER -->
-    <div class="section">
-      <h4>3. What Problem Does This Solve?</h4>
-      <div class="card">
-        • Helps students understand complex topics step-by-step<br>
-        • Supports teachers with clear explanations<br>
-        • Keeps humans in control of learning decisions<br>
-        • Reduces confusion and cognitive overload
+      <!-- Learning Context -->
+      <div class="section">
+        <h4>1. Learning Context</h4>
+        <select id="subject" onchange="updateContent()">
+          <option value="biology">Biology</option>
+          <option value="history">History</option>
+          <option value="science">Science</option>
+        </select>
+        <select id="topic" onchange="updateContent()" style="margin-left:10px;">
+          <option value="photosynthesis">Photosynthesis</option>
+          <option value="watercycle">Water Cycle</option>
+          <option value="revolution">French Revolution</option>
+        </select>
+      </div>
+
+      <!-- Guided Explanation -->
+      <div class="section">
+        <h4>2. Guided Explanation (Human-in-Control)</h4>
+        <div class="card" id="explanation">Select a subject and topic to see the explanation.</div>
+        <br>
+        <button class="action" onclick="speak()">▶ Explain with Voice</button>
+        <button class="action" onclick="stopVoice()">⏹ Stop</button>
+      </div>
+
+      <!-- Problem / Solution -->
+      <div class="section">
+        <h4>3. Problem Solved / Benefit</h4>
+        <div class="card" id="problem-solution">
+          • Helps students understand complex topics step-by-step<br>
+          • Supports teachers with clear explanations<br>
+          • Keeps humans in control of learning decisions<br>
+          • Reduces confusion and cognitive overload
+        </div>
       </div>
     </div>
 
@@ -160,20 +148,80 @@ button {
 <div class="subtitles" id="subtitles"></div>
 
 <script>
+// BOOT SEQUENCE
+const bootLines = [
+  "Initializing BAINT Core...",
+  "Loading education layer...",
+  "Human remains in control...",
+  "Activating AIOPs Layer...",
+  "System Ready!"
+];
+const bootMessagesDiv = document.getElementById("bootMessages");
+const progressBar = document.getElementById("loadingProgress");
+const percentage = document.getElementById("percentage");
+let bootProgress = 0, bootIndex = 0;
+
+function bootStep() {
+  bootProgress++;
+  progressBar.style.width = bootProgress + "%";
+  percentage.innerText = bootProgress + "%";
+
+  if (bootProgress % 20 === 0 && bootIndex < bootLines.length) {
+    const msg = document.createElement("div");
+    msg.className = "boot-message";
+    msg.innerText = bootLines[bootIndex];
+    bootMessagesDiv.appendChild(msg);
+    bootIndex++;
+  }
+
+  if (bootProgress < 100) {
+    requestAnimationFrame(bootStep);
+  } else {
+    setTimeout(() => {
+      document.getElementById("boot-screen").style.display = "none";
+      document.getElementById("main-demo").style.display = "block";
+      renderContent();
+    }, 500);
+  }
+}
+
+requestAnimationFrame(bootStep);
+
+// MODES
+let mode = "student";
+const modeButtons = document.querySelectorAll(".mode-switch button");
+function setMode(m) {
+  mode = m;
+  modeButtons.forEach(b => b.classList.remove("active"));
+  event.target.classList.add("active");
+  renderContent();
+}
+
+// CONTENT
 const data = {
-  biology: {
-    photosynthesis:
-      "Photosynthesis is the process by which plants use sunlight, water, and carbon dioxide to produce food. This process releases oxygen and supports life on Earth.",
-    watercycle:
-      "The water cycle explains how water moves through evaporation, condensation, and precipitation, continuously recycling through Earth’s system."
+  student: {
+    biology: {
+      photosynthesis: "Photosynthesis is how plants use sunlight, water, and CO2 to make food. Students remain in control."
+    },
+    history: {
+      revolution: "The French Revolution began in 1789, transforming France politically and socially."
+    }
   },
-  history: {
-    revolution:
-      "The French Revolution began in 1789 and transformed France by ending monarchy rule and promoting ideas of equality and citizenship."
+  teacher: {
+    biology: {
+      photosynthesis: "Photosynthesis is the biological process where plants convert light energy into chemical energy. Teachers can guide students step-by-step."
+    },
+    history: {
+      revolution: "French Revolution: Teachers can explain key events, causes, and impacts in detail."
+    }
   },
-  science: {
-    photosynthesis:
-      "Photosynthesis converts light energy into chemical energy stored in plants, forming the base of most food chains."
+  pastor: {
+    biology: {
+      photosynthesis: "Photosynthesis reflects the wisdom of creation, where life is sustained through sunlight and water."
+    },
+    history: {
+      revolution: "French Revolution serves as an example of human coordination, governance, and moral lessons."
+    }
   }
 };
 
@@ -182,12 +230,17 @@ const subtitles = document.getElementById("subtitles");
 let utterance = null;
 
 function updateContent() {
+  renderContent();
+}
+
+function renderContent() {
   const subject = document.getElementById("subject").value;
   const topic = document.getElementById("topic").value;
-  const text = data[subject]?.[topic] || "No explanation available.";
+  const text = data[mode]?.[subject]?.[topic] || "No explanation available.";
   explanationBox.innerText = text;
 }
 
+// VOICE
 function speak() {
   if (!("speechSynthesis" in window)) return;
   stopVoice();
@@ -205,8 +258,6 @@ function stopVoice() {
   subtitles.style.display = "none";
 }
 
-updateContent();
 </script>
-
 </body>
 </html>
