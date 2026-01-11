@@ -116,7 +116,7 @@ button {
 <body>
 
 <div class="laptop">
-  <div class="top-bar">BAINT OS — Classroom Assistant (Human-Centric AIOPs)</div>
+  <div class="top-bar">BAINT OS — Classroom Assistant Demo</div>
   <div class="screen-shell">
 
     <!-- APP LAUNCHER -->
@@ -135,17 +135,19 @@ button {
     <!-- DEMO CLASSROOM -->
     <div class="screen" id="demo" style="display:none;">
 
-      <!-- MODE & LANGUAGE -->
+      <!-- ROLE & LANGUAGE -->
       <div class="section">
-        <h4>Mode & Language</h4>
-        <select id="mode" onchange="updateContent()">
-          <option value="student">Student</option>
+        <h4>Role & Language</h4>
+        <select id="role" onchange="updateContent()">
           <option value="teacher">Teacher</option>
+          <option value="student">Student</option>
         </select>
 
         <select id="language" onchange="updateContent()">
           <option value="en">English</option>
           <option value="es">Spanish</option>
+          <option value="zh">Chinese</option>
+          <option value="fr">French</option>
         </select>
       </div>
 
@@ -163,7 +165,7 @@ button {
 
       <!-- GUIDED EXPLANATION -->
       <div class="section">
-        <h4>2. Guided Explanation (Human-in-Control)</h4>
+        <h4>2. Guided Explanation</h4>
         <div class="card" id="explanation">Select a subject and topic to see the explanation.</div>
         <br>
         <button onclick="speak()">▶ Explain with Voice</button>
@@ -219,76 +221,101 @@ function startBootSequence() {
   }
 }
 
-// Data with Student & Teacher mode + multi-language
+// Data for Teacher/Student + Multilingual
 const data = {
   biology: {
     photosynthesis: {
-      student: {
-        en: "Photosynthesis is how plants use sunlight, water, and carbon dioxide to make food. This supports life on Earth.",
-        es: "La fotosíntesis es cómo las plantas usan la luz solar, el agua y el dióxido de carbono para producir alimento. Esto sostiene la vida en la Tierra."
-      },
       teacher: {
-        en: "Photosynthesis is a biological process where plants convert light energy into chemical energy. Teachers can guide students step-by-step.",
-        es: "La fotosíntesis es un proceso biológico donde las plantas convierten la energía de la luz en energía química. Los maestros pueden guiar a los estudiantes paso a paso."
+        en: "Teacher explains Photosynthesis in detail: Plants convert sunlight into chemical energy. Step-by-step guidance.",
+        es: "El maestro explica la fotosíntesis: las plantas convierten la luz solar en energía química. Guía paso a paso.",
+        zh: "老师详细讲解光合作用：植物将阳光转化为化学能。逐步指导。",
+        fr: "Le professeur explique la photosynthèse : les plantes transforment la lumière du soleil en énergie chimique. Guide étape par étape."
+      },
+      student: {
+        en: "Student observes Photosynthesis: Plants convert sunlight into energy. Learn step-by-step.",
+        es: "El estudiante observa la fotosíntesis: las plantas convierten la luz solar en energía. Aprender paso a paso.",
+        zh: "学生观察光合作用：植物将阳光转化为能量。逐步学习。",
+        fr: "L'étudiant observe la photosynthèse : les plantes transforment la lumière du soleil en énergie. Apprendre étape par étape."
       }
     },
     watercycle: {
-      student: {
-        en: "The water cycle shows how water evaporates, condenses, and precipitates, continuously circulating through Earth's system.",
-        es: "El ciclo del agua muestra cómo el agua se evapora, condensa y precipita, circulando continuamente por el sistema de la Tierra."
-      },
       teacher: {
-        en: "The water cycle involves evaporation, condensation, precipitation, and collection. Teachers can explain each step clearly.",
-        es: "El ciclo del agua involucra evaporación, condensación, precipitación y recolección. Los maestros pueden explicar cada paso claramente."
+        en: "Teacher explains Water Cycle: Evaporation, Condensation, Precipitation. Step-by-step demonstration.",
+        es: "El maestro explica el ciclo del agua: evaporación, condensación, precipitación. Demostración paso a paso.",
+        zh: "老师讲解水循环：蒸发，冷凝，降水。逐步演示。",
+        fr: "Le professeur explique le cycle de l'eau : évaporation, condensation, précipitation. Démonstration étape par étape."
+      },
+      student: {
+        en: "Student observes Water Cycle: Water evaporates, condenses, and precipitates. Learn step-by-step.",
+        es: "El estudiante observa el ciclo del agua: el agua se evapora, se condensa y precipita. Aprender paso a paso.",
+        zh: "学生观察水循环：水蒸发、冷凝并降水。逐步学习。",
+        fr: "L'étudiant observe le cycle de l'eau : l'eau s'évapore, se condense et précipite. Apprendre étape par étape."
       }
     }
   },
   history: {
     revolution: {
-      student: {
-        en: "The French Revolution started in 1789 and changed France’s society and government.",
-        es: "La Revolución Francesa comenzó en 1789 y cambió la sociedad y el gobierno de Francia."
-      },
       teacher: {
-        en: "The French Revolution involved the end of monarchy, rise of equality ideas, and political reform. Teachers can guide students through key events.",
-        es: "La Revolución Francesa involucró el fin de la monarquía, el auge de las ideas de igualdad y la reforma política. Los maestros pueden guiar a los estudiantes a través de eventos clave."
+        en: "Teacher explains French Revolution: End of monarchy, rise of equality, political reform.",
+        es: "El maestro explica la Revolución Francesa: fin de la monarquía, auge de la igualdad, reforma política.",
+        zh: "老师讲解法国大革命：结束君主制，平等思想兴起，政治改革。",
+        fr: "Le professeur explique la Révolution française : fin de la monarchie, émergence de l'égalité, réforme politique."
+      },
+      student: {
+        en: "Student observes French Revolution: End of monarchy, rise of equality, political reform.",
+        es: "El estudiante observa la Revolución Francesa: fin de la monarquía, auge de la igualdad, reforma política.",
+        zh: "学生观察法国大革命：结束君主制，平等思想兴起，政治改革。",
+        fr: "L'étudiant observe la Révolution française : fin de la monarchie, émergence de l'égalité, réforme politique."
       }
     },
     ww2: {
-      student: {
-        en: "World War II was a global conflict from 1939-1945, affecting millions worldwide.",
-        es: "La Segunda Guerra Mundial fue un conflicto global de 1939-1945 que afectó a millones en todo el mundo."
-      },
       teacher: {
-        en: "World War II involved major battles, political changes, and human impact. Teachers can provide structured explanations of events.",
-        es: "La Segunda Guerra Mundial involucró grandes batallas, cambios políticos e impacto humano. Los maestros pueden proporcionar explicaciones estructuradas de los eventos."
+        en: "Teacher explains World War II: Global conflict from 1939-1945, major battles and political changes.",
+        es: "El maestro explica la Segunda Guerra Mundial: conflicto global 1939-1945, grandes batallas y cambios políticos.",
+        zh: "老师讲解二战：1939-1945年全球冲突，主要战役和政治变化。",
+        fr: "Le professeur explique la Seconde Guerre mondiale : conflit mondial 1939-1945, grandes batailles et changements politiques."
+      },
+      student: {
+        en: "Student observes World War II: Global conflict, major battles, political changes.",
+        es: "El estudiante observa la Segunda Guerra Mundial: conflicto global, grandes batallas, cambios políticos.",
+        zh: "学生观察二战：全球冲突，主要战役，政治变化。",
+        fr: "L'étudiant observe la Seconde Guerre mondiale : conflit mondial, grandes batailles, changements politiques."
       }
     }
   },
   science: {
     states: {
-      student: {
-        en: "Matter exists in solid, liquid, and gas states. Understanding these helps in everyday science.",
-        es: "La materia existe en estados sólido, líquido y gaseoso. Entender esto ayuda en la ciencia cotidiana."
-      },
       teacher: {
-        en: "States of matter include solid, liquid, and gas. Teachers can demonstrate with examples and experiments.",
-        es: "Los estados de la materia incluyen sólido, líquido y gas. Los maestros pueden demostrar con ejemplos y experimentos."
+        en: "Teacher explains States of Matter: Solid, Liquid, Gas. Step-by-step examples.",
+        es: "El maestro explica los estados de la materia: sólido, líquido, gas. Ejemplos paso a paso.",
+        zh: "老师讲解物质状态：固体，液体，气体。逐步示例。",
+        fr: "Le professeur explique les états de la matière : solide, liquide, gaz. Exemples étape par étape."
+      },
+      student: {
+        en: "Student observes States of Matter: Solid, Liquid, Gas. Learn step-by-step.",
+        es: "El estudiante observa los estados de la materia: sólido, líquido, gas. Aprender paso a paso.",
+        zh: "学生观察物质状态：固体，液体，气体。逐步学习。",
+        fr: "L'étudiant observe les états de la matière : solide, liquide, gaz. Apprendre étape par étape."
       }
     },
     newton: {
-      student: {
-        en: "Newton’s Laws explain motion: objects move based on force and mass. Simple for students to grasp.",
-        es: "Las Leyes de Newton explican el movimiento: los objetos se mueven según la fuerza y la masa. Fácil de entender para los estudiantes."
-      },
       teacher: {
-        en: "Newton’s Laws describe inertia, force, and action-reaction. Teachers can show examples to explain clearly.",
-        es: "Las Leyes de Newton describen la inercia, la fuerza y acción-reacción. Los maestros pueden mostrar ejemplos para explicar claramente."
+        en: "Teacher explains Newton’s Laws: Inertia, Force, Action-Reaction. Examples included.",
+        es: "El maestro explica las Leyes de Newton: inercia, fuerza, acción-reacción. Ejemplos incluidos.",
+        zh: "老师讲解牛顿定律：惯性，力，作用-反作用。包含示例。",
+        fr: "Le professeur explique les lois de Newton : inertie, force, action-réaction. Exemples inclus."
+      },
+      student: {
+        en: "Student observes Newton’s Laws: Inertia, Force, Action-Reaction. Learn via examples.",
+        es: "El estudiante observa las Leyes de Newton: inercia, fuerza, acción-reacción. Aprender mediante ejemplos.",
+        zh: "学生观察牛顿定律：惯性，力，作用-反作用。通过示例学习。",
+        fr: "L'étudiant observe les lois de Newton : inertie, force, action-réaction. Apprendre via des exemples."
       }
     }
   }
 };
 
+// DOM elements
 const explanationBox = document.getElementById("explanation");
 const subtitles = document.getElementById("subtitles");
 
@@ -306,23 +333,22 @@ function updateTopics() {
   });
 }
 
-// Update Explanation + Problem solving
+// Update explanation and problem-solving
 function updateContent() {
   const subject = document.getElementById("subject").value;
   const topic = document.getElementById("topic").value;
-  const mode = document.getElementById("mode").value;
+  const role = document.getElementById("role").value;
   const lang = document.getElementById("language").value;
 
-  const text = data[subject]?.[topic]?.[mode]?.[lang] || "No explanation available.";
+  const text = data[subject]?.[topic]?.[role]?.[lang] || "No explanation available.";
   explanationBox.innerText = text;
 
-  // Problem solving card
   const problemCard = document.getElementById("problem-solving");
   problemCard.innerHTML = `
     • Understands topic step-by-step<br>
-    • Guides ${mode === "teacher" ? "teaching" : "learning"} decisions<br>
+    • ${role === "teacher" ? "Supports teaching guidance" : "Observes learning clearly"}<br>
     • Reduces confusion and cognitive overload<br>
-    • Supports human-in-control education
+    • Human-in-control education
   `;
 }
 
@@ -348,6 +374,5 @@ function stopVoice() {
 updateTopics();
 updateContent();
 </script>
-
 </body>
 </html>
