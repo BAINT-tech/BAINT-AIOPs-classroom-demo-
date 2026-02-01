@@ -5,31 +5,103 @@
 <title>BAINT OS – Classroom Assistant Demo</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style>
-body { margin:0; background:#f3f3f3; font-family:Arial,sans-serif; display:flex; justify-content:center; align-items:center; height:100vh; }
-.laptop { width:960px; height:640px; background:#000; border-radius:32px; padding:16px; box-shadow:0 20px 60px rgba(0,0,0,0.5); display:flex; flex-direction:column; }
-.top-bar { height:36px; background:#1c1c1c; border-radius:18px 18px 0 0; color:#fff; display:flex; align-items:center; padding:0 16px; font-size:14px; font-weight:bold; }
-.screen-shell { flex:1; background:#f9fafb; border-radius:0 0 28px 28px; margin-top:6px; padding:22px; overflow-y:auto; }
-.section { margin-bottom:20px; }
-.section h4 { margin:0 0 8px; font-size:15px; }
-select, input { padding:8px 10px; border-radius:8px; border:1px solid #d1d5db; font-size:14px; margin-right:8px; }
-input[type="text"], input[type="email"] { width:60%; }
-.card { background:#ffffff; border-radius:14px; padding:16px; border:1px solid #e5e7eb; font-size:14px; line-height:1.6; min-height:60px; }
-button { background:#2563eb; border:none; padding:10px 18px; border-radius:10px; color:#fff; cursor:pointer; font-size:14px; margin-top:6px; }
-.waitlist { background:#eef2ff; border:1px dashed #6366f1; border-radius:14px; padding:16px; }
-.success { color:#047857; font-size:13px; margin-top:8px; }
-.subtitles { position:fixed; bottom:20px; left:50%; transform:translateX(-50%); width:80%; background:rgba(0,0,0,0.8); color:#fff; padding:12px; border-radius:12px; font-size:13px; display:none; text-align:center; }
+body {
+  margin: 0;
+  background: #f3f3f3;
+  font-family: Arial, sans-serif;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+.laptop {
+  width: 960px;
+  height: 650px;
+  background: #000;
+  border-radius: 28px;
+  padding: 16px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+  display: flex;
+  flex-direction: column;
+}
+.top-bar {
+  height: 36px;
+  background: #1c1c1c;
+  border-radius: 18px 18px 0 0;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  font-size: 14px;
+  font-weight: bold;
+}
+.screen-shell {
+  flex: 1;
+  background: #f9fafb;
+  border-radius: 0 0 28px 28px;
+  margin-top: 6px;
+  padding: 22px;
+  overflow-y: auto;
+  position: relative;
+}
+.section { margin-bottom: 20px; }
+.section h4 { margin: 0 0 8px; font-size: 15px; }
+select, input { padding: 8px 10px; border-radius: 8px; border: 1px solid #d1d5db; font-size: 14px; margin-right: 8px; }
+input[type="text"], input[type="email"] { width: 60%; }
+.card {
+  background: #ffffff;
+  border-radius: 14px;
+  padding: 16px;
+  border: 1px solid #e5e7eb;
+  font-size: 14px;
+  line-height: 1.6;
+  min-height: 60px;
+}
+button {
+  background: #2563eb;
+  border: none;
+  padding: 10px 18px;
+  border-radius: 10px;
+  color: #fff;
+  cursor: pointer;
+  font-size: 14px;
+  margin-top: 6px;
+}
+button.mic { background: #10b981; margin-left: 8px; }
+.waitlist {
+  background: #eef2ff;
+  border: 1px dashed #6366f1;
+  border-radius: 14px;
+  padding: 16px;
+}
+.success { color: #047857; font-size: 13px; margin-top: 8px; }
+.subtitles {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80%;
+  background: rgba(0,0,0,0.8);
+  color: #fff;
+  padding: 12px;
+  border-radius: 12px;
+  font-size: 13px;
+  display: none;
+  text-align: center;
+}
 </style>
 </head>
 <body>
+
 <div class="laptop">
   <div class="top-bar">BAINT OS — Classroom Assistant Demo</div>
   <div class="screen-shell">
 
     <!-- APP LAUNCHER -->
-<div id="app-launcher" class="section">
-  <img src="logo.png" alt="Baint OS Logo" style="width:120px;height:120px;margin-bottom:12px;">
-  <h3 style="cursor:pointer;" onclick="launchDemo()">Click to Launch BAINT Classroom Demo</h3>
-</div>
+    <div class="section" id="app-launcher">
+      <img src="logo.png" alt="BAINT Logo" style="width:120px; height:120px;">
+      <button onclick="launchDemo()">Click to Launch BAINT Classroom Demo</button>
+    </div>
 
     <!-- BOOT SCREEN -->
     <div class="section" id="boot" style="display:none;">
@@ -41,6 +113,7 @@ button { background:#2563eb; border:none; padding:10px 18px; border-radius:10px;
     <!-- DEMO -->
     <div id="demo" style="display:none;">
 
+      <!-- ROLE & LANGUAGE -->
       <div class="section">
         <h4>Role & Language</h4>
         <select id="role" onchange="updateContent()">
@@ -55,6 +128,7 @@ button { background:#2563eb; border:none; padding:10px 18px; border-radius:10px;
         </select>
       </div>
 
+      <!-- LEARNING CONTEXT -->
       <div class="section">
         <h4>Learning Context</h4>
         <select id="subject" onchange="updateTopics(); updateContent();">
@@ -65,23 +139,26 @@ button { background:#2563eb; border:none; padding:10px 18px; border-radius:10px;
         <select id="topic" onchange="updateContent()"></select>
       </div>
 
+      <!-- GUIDED EXPLANATION -->
       <div class="section">
-        <h4>Guided Explanation (Teacher)</h4>
-        <div class="card" id="explanation"></div>
+        <h4>Teacher Explanation</h4>
+        <div class="card" id="explanation">Select a subject and topic to see the explanation.</div>
         <br>
-        <button onclick="speak()">▶ Explain with Voice</button>
+        <button onclick="speak()">▶ Teacher Voice Explainer</button>
         <button onclick="stopVoice()">⏹ Stop</button>
       </div>
 
+      <!-- STUDENT QUESTION -->
       <div class="section">
         <h4>Student Question</h4>
         <input type="text" id="studentQuestion" placeholder="Ask your question..." />
+        <button class="mic" onclick="askWithMic()">🎙️</button>
         <button onclick="answerQuestion()">Ask</button>
-        <button onclick="startMic()">🎙️ Speak</button>
         <div class="card" id="teacherReply">Teacher will reply here...</div>
         <button onclick="speakReply()">▶ Listen Reply</button>
       </div>
 
+      <!-- FEEDBACK -->
       <div class="section">
         <h4>Feedback</h4>
         <input type="text" id="feedbackInput" placeholder="Share your feedback..." />
@@ -89,11 +166,13 @@ button { background:#2563eb; border:none; padding:10px 18px; border-radius:10px;
         <div class="card" id="feedbackList">Feedback will appear here...</div>
       </div>
 
+      <!-- PROBLEM SOLVING -->
       <div class="section">
         <h4>What Problem Does This Solve?</h4>
         <div class="card" id="problem-solving"></div>
       </div>
 
+      <!-- WAITLIST -->
       <div class="section waitlist">
         <h4>🚀 Join the BAINT Waitlist</h4>
         <p style="font-size:13px;">Human-centric AI supporting teachers and students.</p>
@@ -110,119 +189,209 @@ button { background:#2563eb; border:none; padding:10px 18px; border-radius:10px;
 <div class="subtitles" id="subtitles"></div>
 
 <script>
+/* APP LAUNCH → BOOT → DEMO */
 const appLauncher = document.getElementById("app-launcher");
 const bootScreen = document.getElementById("boot");
 const demoScreen = document.getElementById("demo");
 const bootLog = document.getElementById("boot-log");
-const explanationBox = document.getElementById("explanation");
-const teacherReplyBox = document.getElementById("teacherReply");
-const feedbackList = document.getElementById("feedbackList");
-const subtitles = document.getElementById("subtitles");
 
-// Launch
 function launchDemo() {
   appLauncher.style.display = "none";
   bootScreen.style.display = "block";
   startBootSequence();
 }
 
-// Boot sequence
-const bootLines = ["Initializing BAINT OS...","Loading Human-Centric AI modules...","Activating Classroom Assistant...","System ready!"];
+const bootLines = [
+  "Initializing BAINT OS...",
+  "Loading Human-Centric AI modules...",
+  "Activating Classroom Assistant...",
+  "System ready!"
+];
+
 let bootIndex = 0;
 function startBootSequence() {
   if (bootIndex < bootLines.length) {
-    bootLog.innerHTML += bootLines[bootIndex]+"<br>";
+    bootLog.innerHTML += bootLines[bootIndex] + "<br>";
     bootIndex++;
-    setTimeout(startBootSequence,600);
+    setTimeout(startBootSequence, 600);
   } else {
-    setTimeout(()=>{ bootScreen.style.display="none"; demoScreen.style.display="block"; updateTopics(); updateContent(); },800);
+    setTimeout(() => {
+      bootScreen.style.display = "none";
+      demoScreen.style.display = "block";
+      updateTopics();
+      updateContent();
+    }, 800);
   }
 }
 
-// Data
+/* DEMO DATA WITH DEFINITIONS */
 const data = {
-  biology:{
-    photosynthesis:{
-      definition:{ en:"Photosynthesis: Plants convert sunlight into chemical energy step-by-step.", es:"Fotosíntesis: las plantas convierten la luz solar en energía química paso a paso.", zh:"光合作用：植物将阳光转化为化学能，逐步进行。", fr:"Photosynthèse : les plantes convertissent la lumière du soleil en énergie chimique étape par étape." },
-      teacher:{ en:"Plants absorb sunlight via chlorophyll. Step 1: Light absorption. Step 2: Conversion to chemical energy. Step 3: Energy storage.", es:"Las plantas absorben luz mediante clorofila. Paso 1: absorción de luz. Paso 2: conversión en energía química. Paso 3: almacenamiento de energía.", zh:"植物通过叶绿素吸收阳光。步骤1：光吸收。步骤2：转化为化学能。步骤3：储存能量。", fr:"Les plantes absorbent la lumière via la chlorophylle. Étape 1 : absorption. Étape 2 : conversion en énergie chimique. Étape 3 : stockage." },
-      student:{ en:"Observe plants converting sunlight to energy. Learn step-by-step.", es:"Observe cómo las plantas convierten la luz en energía. Aprenda paso a paso.", zh:"观察植物将阳光转化为能量。逐步学习。", fr:"Observez comment les plantes convertissent la lumière en énergie. Apprenez étape par étape." }
+  biology: {
+    definition: {
+      en: "Biology is the study of living organisms, their structure, function, growth, origin, evolution, and distribution. Step-by-step, we explore cells, tissues, organs, and systems.",
+      es: "La biología es el estudio de los organismos vivos, su estructura, función, crecimiento, origen, evolución y distribución. Exploramos células, tejidos, órganos y sistemas paso a paso.",
+      zh: "生物学是研究生物体的学科，包括其结构、功能、成长、起源、进化和分布。逐步探索细胞、组织、器官和系统。",
+      fr: "La biologie est l'étude des organismes vivants, leur structure, fonction, croissance, origine, évolution et répartition. Étape par étape, nous explorons cellules, tissus, organes et systèmes."
     },
-    watercycle:{
-      definition:{ en:"Water Cycle: Evaporation, condensation, precipitation step-by-step.", es:"Ciclo del agua: evaporación, condensación, precipitación paso a paso.", zh:"水循环：蒸发、冷凝、降水，逐步进行。", fr:"Cycle de l'eau : évaporation, condensation, précipitation étape par étape." },
-      teacher:{ en:"Water evaporates, forms clouds, then precipitates. Step 1: Evaporation. Step 2: Condensation. Step 3: Precipitation.", es:"El agua se evapora, forma nubes y luego precipita. Paso 1: evaporación. Paso 2: condensación. Paso 3: precipitación.", zh:"水蒸发，形成云，然后降水。步骤1：蒸发。步骤2：凝结。步骤3：降水。", fr:"L'eau s'évapore, forme des nuages, puis précipite. Étape 1 : évaporation. Étape 2 : condensation. Étape 3 : précipitation." },
-      student:{ en:"Observe water cycle step-by-step.", es:"Observe el ciclo del agua paso a paso.", zh:"逐步观察水循环。", fr:"Observez le cycle de l'eau étape par étape." }
+    photosynthesis: {
+      teacher: {
+        en:"Teacher explains Photosynthesis: Plants convert sunlight into chemical energy. Step-by-step explanation with examples.",
+        es:"El maestro explica la fotosíntesis: las plantas convierten la luz solar en energía química. Explicación paso a paso con ejemplos.",
+        zh:"老师讲解光合作用：植物将阳光转化为化学能。逐步解释并附示例。",
+        fr:"Le professeur explique la photosynthèse : les plantes transforment la lumière du soleil en énergie chimique. Explication étape par étape avec exemples."
+      },
+      student: {
+        en:"Student observes Photosynthesis step-by-step.",
+        es:"El estudiante observa la fotosíntesis paso a paso.",
+        zh:"学生观察光合作用步骤。",
+        fr:"L'étudiant observe la photosynthèse étape par étape."
+      }
+    },
+    watercycle: {
+      teacher: {
+        en:"Teacher explains Water Cycle: Evaporation, Condensation, Precipitation. Step-by-step guidance.",
+        es:"El maestro explica el ciclo del agua: evaporación, condensación, precipitación. Guía paso a paso.",
+        zh:"老师讲解水循环：蒸发，冷凝，降水。逐步指导。",
+        fr:"Le professeur explique le cycle de l'eau : évaporation, condensation, précipitation. Guide étape par étape."
+      },
+      student: {
+        en:"Student observes Water Cycle step-by-step.",
+        es:"El estudiante observa el ciclo del agua paso a paso.",
+        zh:"学生观察水循环步骤。",
+        fr:"L'étudiant observe le cycle de l'eau étape par étape."
+      }
     }
   },
-  history:{
-    revolution:{
-      definition:{ en:"French Revolution: End monarchy, equality rise, political reform step-by-step.", es:"Revolución Francesa: fin de la monarquía, auge de igualdad, reforma política paso a paso.", zh:"法国大革命：结束君主制，平等和政治改革逐步进行。", fr:"Révolution française : fin de la monarchie, égalité et réforme politique étape par étape." },
-      teacher:{ en:"End monarchy, equality rises, reform. Step 1: Social unrest. Step 2: Revolution. Step 3: Political change.", es:"Fin de monarquía, igualdad surge, reforma. Paso 1: malestar social. Paso 2: revolución. Paso 3: cambio político.", zh:"结束君主制，平等兴起，改革。步骤1：社会动荡。步骤2：革命。步骤3：政治变革。", fr:"Fin de la monarchie, émergence de l'égalité, réforme. Étape 1 : troubles sociaux. Étape 2 : révolution. Étape 3 : changement politique." },
-      student:{ en:"Observe French Revolution step-by-step.", es:"Observe la Revolución Francesa paso a paso.", zh:"逐步观察法国大革命。", fr:"Observez la Révolution française étape par étape." }
+  history: {
+    definition: {
+      en:"History is the study of past events, societies, and civilizations, helping us understand human development step by step.",
+      es:"La historia es el estudio de eventos pasados, sociedades y civilizaciones, ayudándonos a entender el desarrollo humano paso a paso.",
+      zh:"历史是研究过去事件、社会和文明，帮助我们逐步理解人类发展。",
+      fr:"L'histoire est l'étude des événements passés, des sociétés et des civilisations, nous aidant à comprendre le développement humain étape par étape."
+    },
+    revolution: {
+      teacher: {
+        en:"Teacher explains French Revolution: End of monarchy, rise of equality, step-by-step changes.",
+        es:"El maestro explica la Revolución Francesa: fin de la monarquía, auge de la igualdad, cambios paso a paso.",
+        zh:"老师讲解法国大革命：结束君主制，平等兴起，逐步变化。",
+        fr:"Le professeur explique la Révolution française : fin de la monarchie, émergence de l'égalité, changements étape par étape."
+      },
+      student: {
+        en:"Student observes French Revolution step by step.",
+        es:"El estudiante observa la Revolución Francesa paso a paso.",
+        zh:"学生观察法国大革命步骤。",
+        fr:"L'étudiant observe la Révolution française étape par étape."
+      }
     }
   },
-  science:{
-    states:{
-      definition:{ en:"States of Matter: Solid, Liquid, Gas step-by-step.", es:"Estados de la materia: sólido, líquido, gas paso a paso.", zh:"物质状态：固体，液体，气体，逐步进行。", fr:"États de la matière : solide, liquide, gaz étape par étape." },
-      teacher:{ en:"Solid, liquid, gas. Step 1: Identify. Step 2: Observe properties. Step 3: Understand changes.", es:"Sólido, líquido, gas. Paso 1: identificar. Paso 2: observar propiedades. Paso 3: entender cambios.", zh:"固体，液体，气体。步骤1：识别。步骤2：观察属性。步骤3：理解变化。", fr:"Solide, liquide, gaz. Étape 1 : identifier. Étape 2 : observer propriétés. Étape 3 : comprendre changements." },
-      student:{ en:"Observe solids, liquids, gases step-by-step.", es:"Observe sólidos, líquidos y gases paso a paso.", zh:"逐步观察固体、液体、气体。", fr:"Observez solides, liquides, gaz étape par étape." }
+  science: {
+    definition: {
+      en:"Science is the systematic study of the natural and physical world through observation and experiments.",
+      es:"La ciencia es el estudio sistemático del mundo natural y físico mediante observación y experimentos.",
+      zh:"科学是通过观察和实验系统地研究自然界和物理世界。",
+      fr:"La science est l'étude systématique du monde naturel et physique par l'observation et l'expérimentation."
+    },
+    states: {
+      teacher: {
+        en:"Teacher explains States of Matter: Solid, Liquid, Gas. Step-by-step examples.",
+        es:"El maestro explica los estados de la materia: sólido, líquido, gas. Ejemplos paso a paso.",
+        zh:"老师讲解物质状态：固体，液体，气体。逐步示例。",
+        fr:"Le professeur explique les états de la matière : solide, liquide, gaz. Exemples étape par étape."
+      },
+      student: {
+        en:"Student observes States of Matter step by step.",
+        es:"El estudiante observa los estados de la materia paso a paso.",
+        zh:"学生观察物质状态步骤。",
+        fr:"L'étudiant observe les états de la matière étape par étape."
+      }
     }
   }
 };
 
-// Topics
+/* DOM ELEMENTS */
+const explanationBox = document.getElementById("explanation");
+const teacherReplyBox = document.getElementById("teacherReply");
+const feedbackList = document.getElementById("feedbackList");
+const subtitles = document.getElementById("subtitles");
+
+/* TOPICS */
 function updateTopics(){
-  const subject=document.getElementById("subject").value;
-  const topicSelect=document.getElementById("topic");
+  const subject = document.getElementById("subject").value;
+  const topicSelect = document.getElementById("topic");
   topicSelect.innerHTML="";
-  Object.keys(data[subject]).forEach(t=>{
-    const opt=document.createElement("option");
-    opt.value=t;
-    opt.innerText=t.charAt(0).toUpperCase()+t.slice(1);
-    topicSelect.appendChild(opt);
+  Object.keys(data[subject]).filter(t=>t!=="definition").forEach(t=>{
+    let o=document.createElement("option");
+    o.value=t;
+    o.innerText=t.charAt(0).toUpperCase()+t.slice(1);
+    topicSelect.appendChild(o);
   });
 }
 
-// Update content
+/* CONTENT */
 function updateContent(){
   const subject=document.getElementById("subject").value;
   const topic=document.getElementById("topic").value;
   const role=document.getElementById("role").value;
   const lang=document.getElementById("language").value;
-
-  const text=data[subject]?.[topic]?.[role]?.[lang]||"Select a topic to begin.";
-  explanationBox.innerText=text;
-
-  const problemCard=document.getElementById("problem-solving");
-  problemCard.innerHTML=`• Understands topic step-by-step<br>• ${role==="teacher"?"Supports teaching guidance":"Observes learning clearly"}<br>• Reduces confusion<br>• Human-in-control education`;
+  const def = data[subject].definition[lang];
+  explanationBox.innerText=`${def}\n\nTopic Explanation:\n${data[subject][topic][role][lang]}`;
+  document.getElementById("problem-solving").innerHTML=`• Understands topic step-by-step<br>• ${role==="teacher"?"Supports teaching guidance":"Observes learning clearly"}<br>• Reduces confusion<br>• Human-in-control education`;
 }
 
-// Voice
+/* VOICE */
 let utterance=null;
-function speak(){ stopVoice(); const text=explanationBox.innerText; subtitles.innerText=text; subtitles.style.display="block"; utterance=new SpeechSynthesisUtterance(text); utterance.rate=0.9; utterance.onend=()=>subtitles.style.display="none"; speechSynthesis.speak(utterance); }
+function speak(){
+  stopVoice();
+  const text=explanationBox.innerText;
+  subtitles.innerText=text;
+  subtitles.style.display="block";
+  utterance=new SpeechSynthesisUtterance(text);
+  utterance.rate=0.9;
+  utterance.onend=()=>subtitles.style.display="none";
+  speechSynthesis.speak(utterance);
+}
 function stopVoice(){ speechSynthesis.cancel(); subtitles.style.display="none"; }
 
-// Student Q&A
+/* STUDENT QUESTION */
 function answerQuestion(){
-  const q=document.getElementById("studentQuestion").value.trim(); if(!q) return;
+  const q=document.getElementById("studentQuestion").value.trim();
+  if(!q) return;
   const subject=document.getElementById("subject").value;
   const topic=document.getElementById("topic").value;
-  const topicExplanation=data[subject]?.[topic]?.teacher?.en || "Let's explore this topic further.";
-  const reply=`You asked: "${q}". ${topicExplanation}`;
-  teacherReplyBox.innerText=reply; speakReply(); document.getElementById("studentQuestion").value="";
+  const role="teacher";
+  const lang=document.getElementById("language").value;
+  teacherReplyBox.innerText=`Student asked: "${q}"\n\nStep-by-step answer:\n${data[subject][topic][role][lang]}`;
+  speakReply();
+  document.getElementById("studentQuestion").value="";
 }
-function speakReply(){ stopVoice(); const text=teacherReplyBox.innerText; subtitles.innerText=text; subtitles.style.display="block"; utterance=new SpeechSynthesisUtterance(text); utterance.rate=0.9; utterance.onend=()=>subtitles.style.display="none"; speechSynthesis.speak(utterance); }
-
-// Mic
-function startMic(){
-  if(!('webkitSpeechRecognition' in window||'SpeechRecognition' in window)){ alert("Mic not supported"); return; }
-  const Recognition=window.SpeechRecognition||window.webkitSpeechRecognition;
-  const rec=new Recognition();
-  rec.lang='en-US'; rec.interimResults=false;
-  rec.onresult=(e)=>{ document.getElementById("studentQuestion").value=e.results[0][0].transcript; };
-  rec.start();
+function speakReply(){
+  stopVoice();
+  const text=teacherReplyBox.innerText;
+  subtitles.innerText=text;
+  subtitles.style.display="block";
+  utterance=new SpeechSynthesisUtterance(text);
+  utterance.rate=0.9;
+  utterance.onend=()=>subtitles.style.display="none";
+  speechSynthesis.speak(utterance);
 }
 
-// Feedback
+/* MIC INPUT */
+function askWithMic(){
+  if(!navigator.mediaDevices || !window.SpeechRecognition && !window.webkitSpeechRecognition){
+    alert("Speech Recognition not supported.");
+    return;
+  }
+  const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+  recognition.lang=document.getElementById("language").value;
+  recognition.start();
+  recognition.onresult = (event)=>{
+    const spoken = event.results[0][0].transcript;
+    document.getElementById("studentQuestion").value = spoken;
+    answerQuestion();
+  };
+}
+
+/* FEEDBACK */
 function submitFeedback(){
   const feedback=document.getElementById("feedbackInput").value.trim();
   if(!feedback) return;
@@ -237,18 +406,27 @@ function renderFeedback(){
   feedbackList.innerHTML=list.map(f=>`• ${f.feedback}`).join("<br>");
 }
 
-// Waitlist
+/* WAITLIST */
 function joinWaitlist(){
   const email=document.getElementById("waitlistEmail").value.trim();
   const msg=document.getElementById("waitlistMessage");
-  if(!email||!email.includes("@")){ msg.style.color="red"; msg.innerText="Please enter a valid email"; return; }
-  msg.style.color="#047857"; msg.innerText="Thank you! Check your email to confirm.";
-  // Send via mailto
-  window.location.href=`mailto:baintcomputer@gmail.com?subject=BAINT Waitlist&body=Please add ${email} to the waitlist.`;
+  if(!email || !email.includes("@")){
+    msg.style.color="red";
+    msg.innerText="Please enter a valid email.";
+    return;
+  }
+  let list=JSON.parse(localStorage.getItem("baint_waitlist"))||[];
+  list.push({email,date:new Date().toISOString()});
+  localStorage.setItem("baint_waitlist",JSON.stringify(list));
+  window.location.href=`mailto:baintcomputer@gmail.com?subject=BAINT Waitlist Signup&body=New signup: ${email}`;
+  msg.style.color="#047857";
+  msg.innerText="You're on the waitlist. Thanks!";
 }
 
-// Initialize
-updateTopics(); updateContent(); renderFeedback();
+/* INIT */
+updateTopics();
+updateContent();
+renderFeedback();
 </script>
 </body>
 </html>
