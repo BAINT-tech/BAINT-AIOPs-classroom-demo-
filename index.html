@@ -49,7 +49,6 @@ body {
 }
 
 .section { margin-bottom: 20px; }
-
 .section h4 { margin: 0 0 8px; font-size: 15px; }
 
 select, input {
@@ -60,9 +59,7 @@ select, input {
   margin-right: 8px;
 }
 
-input[type="text"], input[type="email"] {
-  width: 60%;
-}
+input[type="text"], input[type="email"] { width: 60%; }
 
 .card {
   background: #fff;
@@ -72,6 +69,7 @@ input[type="text"], input[type="email"] {
   font-size: 14px;
   line-height: 1.6;
   min-height: 60px;
+  white-space: pre-wrap;
 }
 
 button {
@@ -85,8 +83,6 @@ button {
   margin-top: 6px;
 }
 
-button.mic { background: #10b981; margin-left: 8px; }
-
 .waitlist {
   background: #eef2ff;
   border: 1px dashed #6366f1;
@@ -94,11 +90,7 @@ button.mic { background: #10b981; margin-left: 8px; }
   padding: 16px;
 }
 
-.success {
-  color: #047857;
-  font-size: 13px;
-  margin-top: 8px;
-}
+.success { color: #047857; font-size: 13px; margin-top: 8px; }
 
 .subtitles {
   position: fixed;
@@ -115,11 +107,7 @@ button.mic { background: #10b981; margin-left: 8px; }
   text-align: center;
 }
 
-.disclaimer {
-  font-size: 12px;
-  color: #6b7280;
-  margin-top: 6px;
-}
+.disclaimer { font-size: 12px; color: #6b7280; margin-top: 6px; }
 </style>
 </head>
 
@@ -127,52 +115,44 @@ button.mic { background: #10b981; margin-left: 8px; }
 
 <div class="laptop">
   <div class="top-bar">BAINT OS — Classroom Assistant Demo</div>
-
   <div class="screen-shell">
 
     <!-- LAUNCH -->
-     <div id="app-launcher" class="section">  
-      <img src="logo.png" style="width:120px;height:120px;margin-bottom:12px;">  
-      <h3 onclick="launchDemo()" style="cursor:pointer;">  
-      <h3 onclick="launchDemo()" style="cursor:pointer;">
-        Click to Launch BAINT Classroom Demo
-      </h3>
- <div class="disclaimer">Demo partially AI-assisted for guidance. Human supervision encouraged.</div>
+    <div id="app-launcher" class="section">
+      <img src="logo.png" alt="Baint OS Logo" style="width:120px;height:120px;margin-bottom:12px;">
+      <h3 style="cursor:pointer;" onclick="launchDemo()">Click to Launch BAINT Classroom Demo</h3>
+      <div class="disclaimer">Demo partially AI-assisted for guidance. Human supervision encouraged.</div>
     </div>
 
     <!-- BOOT -->
     <div class="section" id="boot" style="display:none;">
       <div style="background:#111;color:#0f0;font-family:monospace;padding:20px;">
-  <div id="app-launcher" class="section">
-  <img src="logo.png" alt="Baint OS Logo" style="width:120px;height:120px;margin-bottom:12px;">
-  <h3 style="cursor:pointer;" onclick="launchDemo()">Click to Launch BAINT Classroom Demo</h3>
-  </div>
-       <div id="boot-log"></div>
+        <div id="boot-log"></div>
       </div>
     </div>
 
     <!-- DEMO -->
     <div id="demo" style="display:none;">
 
-      <!-- SUBJECT + LANGUAGE -->
       <div class="section">
-        <h4>Learning Setup</h4>
+        <h4 id="label-setup">Learning Setup</h4>
 
-        <select id="language">
-  <option value="en">English</option>
-  <option value="zh">Chinese</option>
-  <option value="fr">French</option>
-  <option value="es">Spanish</option>
-  <option value="th">Thai</option>
-  <option value="ko">Korean</option>
-  <option value="vi">Vietnamese</option>
+        <select id="language" onchange="switchLanguage()">
+          <option value="en">🇺🇸 English</option>
+          <option value="zh">🇨🇳 Chinese</option>
+          <option value="fr">🇫🇷 French</option>
+          <option value="es">🇪🇸 Spanish</option>
+          <option value="th">🇹🇭 Thai</option>
+          <option value="ko">🇰🇷 Korean</option>
+          <option value="vi">🇻🇳 Vietnamese</option>
         </select>
+
         <select id="mode" onchange="updateContent()">
-  <option value="step">Step-by-step</option>
-  <option value="simple">Simple</option>
-  <option value="logic">Logical</option>
-  <option value="context">Context</option>
-  <option value="human">Human</option>
+          <option value="step">Step-by-step</option>
+          <option value="simple">Simple</option>
+          <option value="logic">Logical</option>
+          <option value="context">Context</option>
+          <option value="human">Human</option>
         </select>
 
         <select id="subject" onchange="updateTopics(); updateContent();">
@@ -186,37 +166,31 @@ button.mic { background: #10b981; margin-left: 8px; }
         <select id="topic" onchange="updateContent()"></select>
       </div>
 
-      <!-- EXPLANATION -->
       <div class="section">
-        <h4>BAINT AI Classroom Assistant</h4>
+        <h4 id="label-assistant">BAINT AI Classroom Assistant</h4>
         <div class="card" id="explanation"></div>
-
-        <button onclick="speak()">🎙️ BAINT Voice Explainer</button>
-        <button onclick="stopVoice()">⏹ Stop Voice</button>
+        <button id="btn-speak" onclick="speak()">🎙️ BAINT Voice Explainer</button>
+        <button id="btn-stop" onclick="stopVoice()">⏹ Stop Voice</button>
       </div>
 
-      <!-- QUESTION -->
       <div class="section">
         <input type="text" id="studentQuestion" placeholder="Ask BAINT AI..." />
-        <button onclick="answerQuestion()">Ask</button>
-
-        <div class="card" id="teacherReply">BAINT AI will respond here...</div>
-        <button onclick="speakReply()">🔊 Listen Answer</button>
+        <button id="btn-ask" onclick="answerQuestion()">Ask</button>
+        <div class="card" id="teacherReply"></div>
+        <button id="btn-listen" onclick="speakReply()">🔊 Listen Answer</button>
       </div>
 
-      <!-- FEEDBACK -->
       <div class="section">
-        <h4>Feedback</h4>
+        <h4 id="label-feedback">Feedback</h4>
         <input type="text" id="feedbackInput" />
-        <button onclick="submitFeedback()">Submit</button>
+        <button id="btn-feedback" onclick="submitFeedback()">Submit</button>
         <div class="card" id="feedbackList"></div>
       </div>
 
-      <!-- WAITLIST -->
       <div class="section waitlist">
-        <h4>Join BAINT Waitlist</h4>
+        <h4 id="label-waitlist">Join BAINT Waitlist</h4>
         <input type="email" id="waitlistEmail" />
-        <button onclick="joinWaitlist()">Join</button>
+        <button id="btn-join" onclick="joinWaitlist()">Join</button>
         <div id="waitlistMessage" class="success"></div>
       </div>
 
@@ -228,332 +202,459 @@ button.mic { background: #10b981; margin-left: 8px; }
 
 <script>
 
-const appLauncher=document.getElementById("app-launcher");
-const bootScreen=document.getElementById("boot");
-const demoScreen=document.getElementById("demo");
-const bootLog=document.getElementById("boot-log");
+const appLauncher = document.getElementById("app-launcher");
+const bootScreen  = document.getElementById("boot");
+const demoScreen  = document.getElementById("demo");
+const bootLog     = document.getElementById("boot-log");
 
-const bootLines=[
-"Booting BAINT AI...",
-"Loading Classroom Engine...",
-"Activating Voice System...",
-"Ready."
-];
-
-/* DATA */
-const data = {
-  biology: {
-    photosynthesis: `
-Photosynthesis is the process plants use to make food.
-
-Step 1: Plants take in sunlight through leaves  
-Step 2: They absorb carbon dioxide from air  
-Step 3: Water is absorbed from roots  
-Step 4: Chlorophyll converts energy into glucose  
-
-Example:
-A tree uses sunlight to grow fruits and leaves.
-
-Simple Summary:
-Plants “eat” sunlight to survive.
-`,
-
-    cell: `
-Cells are the basic building blocks of life.
-
-Step 1: All living things are made of cells  
-Step 2: Cells have nucleus, membrane, cytoplasm  
-Step 3: They perform life functions  
-
-Example:
-Your skin is made of millions of cells.
-
-Summary:
-Cells = tiny units that form life.
-`,
-
-    digestion: `
-Digestion is how food is broken down in the body.
-
-Step 1: Food enters mouth  
-Step 2: Stomach breaks it down  
-Step 3: Nutrients are absorbed  
-
-Example:
-Rice becomes energy in your body.
-
-Summary:
-Digestion = turning food into energy.
-`,
-
-    genetics: `
-Genetics is how traits are passed from parents.
-
-Step 1: DNA carries information  
-Step 2: Genes control traits  
-Step 3: Traits are inherited  
-
-Example:
-Eye color comes from parents.
-
-Summary:
-Genes = biological information transfer.
-`
+/* ── UI TRANSLATIONS ── */
+const ui = {
+  en: {
+    setup:       "Learning Setup",
+    assistant:   "BAINT AI Classroom Assistant",
+    speak:       "🎙️ BAINT Voice Explainer",
+    stop:        "⏹ Stop Voice",
+    ask:         "Ask",
+    placeholder: "Ask BAINT AI...",
+    listen:      "🔊 Listen Answer",
+    feedback:    "Feedback",
+    submit:      "Submit",
+    waitlist:    "Join BAINT Waitlist",
+    join:        "Join",
+    replyDefault:"BAINT AI will respond here...",
+    waitlistOk:  "You're on the waitlist!",
+    boot: ["Booting BAINT AI...","Loading Classroom Engine...","Activating Voice System...","Ready."],
+    modes: ["Step-by-step","Simple","Logical","Context","Human"],
+    subjects: ["Biology","History","Science","Mathematics","Computer Science"]
   },
-
-  math: {
-    algebra: `
-Algebra is solving unknown values using symbols.
-
-Step 1: Identify unknown (x)  
-Step 2: Form equation  
-Step 3: Solve step-by-step  
-
-Example:
-x + 5 = 10 → x = 5  
-
-Summary:
-Algebra = solving missing numbers.
-`,
-
-    ratio: `
-Ratios compare two quantities.
-
-Step 1: Write values  
-Step 2: Simplify  
-
-Example:
-2:4 = 1:2  
-
-Summary:
-Ratio = comparison tool.
-`
+  zh: {
+    setup:       "学习设置",
+    assistant:   "BAINT AI 课堂助手",
+    speak:       "🎙️ 语音讲解",
+    stop:        "⏹ 停止语音",
+    ask:         "提问",
+    placeholder: "向 BAINT AI 提问...",
+    listen:      "🔊 收听答案",
+    feedback:    "反馈",
+    submit:      "提交",
+    waitlist:    "加入候补名单",
+    join:        "加入",
+    replyDefault:"BAINT AI 将在此处回复...",
+    waitlistOk:  "您已加入候补名单！",
+    boot: ["正在启动 BAINT AI...","加载课堂引擎...","激活语音系统...","准备就绪。"],
+    modes: ["逐步讲解","简单","逻辑分析","情境联系","人性化"],
+    subjects: ["生物学","历史","科学","数学","计算机科学"]
   },
-
-  science: {
-    gravity: `
-Gravity is a force that pulls objects down.
-
-Step 1: Earth has mass  
-Step 2: Mass creates pull  
-Step 3: Everything falls toward Earth  
-
-Example:
-Apple falling from tree.
-
-Summary:
-Gravity = Earth's pulling force.
-`,
-
-    energy: `
-Energy is the ability to do work.
-
-Step 1: Exists in many forms  
-Step 2: Can change form  
-Step 3: Cannot be destroyed  
-
-Example:
-Food → energy for movement  
-
-Summary:
-Energy = power to do work.
-`
+  fr: {
+    setup:       "Configuration d'apprentissage",
+    assistant:   "Assistant IA BAINT en classe",
+    speak:       "🎙️ Explication vocale BAINT",
+    stop:        "⏹ Arrêter la voix",
+    ask:         "Demander",
+    placeholder: "Posez une question à BAINT AI...",
+    listen:      "🔊 Écouter la réponse",
+    feedback:    "Retour d'information",
+    submit:      "Soumettre",
+    waitlist:    "Rejoindre la liste d'attente",
+    join:        "Rejoindre",
+    replyDefault:"BAINT AI répondra ici...",
+    waitlistOk:  "Vous êtes sur la liste d'attente !",
+    boot: ["Démarrage de BAINT AI...","Chargement du moteur de classe...","Activation du système vocal...","Prêt."],
+    modes: ["Étape par étape","Simple","Logique","Contexte","Humain"],
+    subjects: ["Biologie","Histoire","Science","Mathématiques","Informatique"]
   },
-
-  history: {
-    revolution: `
-A revolution is a major change in society.
-
-Step 1: People are dissatisfied  
-Step 2: Conflict begins  
-Step 3: Government changes  
-
-Example:
-French Revolution changed France.
-
-Summary:
-Revolution = big political change.
-`,
-
-    ww1: `
-World War 1 was a global conflict.
-
-Step 1: Political tension  
-Step 2: Alliances formed  
-Step 3: War begins in 1914  
-
-Summary:
-WW1 = global war between nations.
-`
+  es: {
+    setup:       "Configuración de aprendizaje",
+    assistant:   "Asistente IA BAINT en el aula",
+    speak:       "🎙️ Explicador de voz BAINT",
+    stop:        "⏹ Detener voz",
+    ask:         "Preguntar",
+    placeholder: "Pregunta a BAINT AI...",
+    listen:      "🔊 Escuchar respuesta",
+    feedback:    "Comentarios",
+    submit:      "Enviar",
+    waitlist:    "Unirse a la lista de espera",
+    join:        "Unirse",
+    replyDefault:"BAINT AI responderá aquí...",
+    waitlistOk:  "¡Estás en la lista de espera!",
+    boot: ["Iniciando BAINT AI...","Cargando motor de clase...","Activando sistema de voz...","Listo."],
+    modes: ["Paso a paso","Simple","Lógico","Contexto","Humano"],
+    subjects: ["Biología","Historia","Ciencia","Matemáticas","Informática"]
   },
-
-  computer: {
-    ai: `
-AI is machines simulating human intelligence.
-
-Step 1: Machines learn data  
-Step 2: Patterns are recognized  
-Step 3: Decisions are made  
-
-Example:
-Chatbots answering questions.
-
-Summary:
-AI = machine thinking system.
-`,
-
-    internet: `
-Internet connects computers worldwide.
-
-Step 1: Devices connect  
-Step 2: Data is shared  
-Step 3: Communication happens  
-
-Summary:
-Internet = global communication network.
-`
+  th: {
+    setup:       "การตั้งค่าการเรียนรู้",
+    assistant:   "ผู้ช่วย AI BAINT ในห้องเรียน",
+    speak:       "🎙️ อธิบายด้วยเสียง BAINT",
+    stop:        "⏹ หยุดเสียง",
+    ask:         "ถาม",
+    placeholder: "ถาม BAINT AI...",
+    listen:      "🔊 ฟังคำตอบ",
+    feedback:    "ข้อเสนอแนะ",
+    submit:      "ส่ง",
+    waitlist:    "เข้าร่วมรายการรอ",
+    join:        "เข้าร่วม",
+    replyDefault:"BAINT AI จะตอบที่นี่...",
+    waitlistOk:  "คุณอยู่ในรายการรอแล้ว!",
+    boot: ["กำลังบู๊ต BAINT AI...","กำลังโหลดเครื่องมือห้องเรียน...","กำลังเปิดใช้งานระบบเสียง...","พร้อมแล้ว"],
+    modes: ["ทีละขั้นตอน","เรียบง่าย","เชิงตรรกะ","บริบท","แบบมนุษย์"],
+    subjects: ["ชีววิทยา","ประวัติศาสตร์","วิทยาศาสตร์","คณิตศาสตร์","วิทยาการคอมพิวเตอร์"]
+  },
+  ko: {
+    setup:       "학습 설정",
+    assistant:   "BAINT AI 교실 어시스턴트",
+    speak:       "🎙️ BAINT 음성 설명",
+    stop:        "⏹ 음성 중지",
+    ask:         "질문하기",
+    placeholder: "BAINT AI에게 질문하세요...",
+    listen:      "🔊 답변 듣기",
+    feedback:    "피드백",
+    submit:      "제출",
+    waitlist:    "대기자 명단 등록",
+    join:        "등록",
+    replyDefault:"BAINT AI가 여기에 응답합니다...",
+    waitlistOk:  "대기자 명단에 등록되었습니다!",
+    boot: ["BAINT AI 부팅 중...","교실 엔진 로딩 중...","음성 시스템 활성화 중...","준비 완료."],
+    modes: ["단계별","간단히","논리적","맥락","인간적"],
+    subjects: ["생물학","역사","과학","수학","컴퓨터 과학"]
+  },
+  vi: {
+    setup:       "Cài đặt học tập",
+    assistant:   "Trợ lý AI BAINT trong lớp học",
+    speak:       "🎙️ Giải thích bằng giọng nói BAINT",
+    stop:        "⏹ Dừng giọng nói",
+    ask:         "Hỏi",
+    placeholder: "Hỏi BAINT AI...",
+    listen:      "🔊 Nghe câu trả lời",
+    feedback:    "Phản hồi",
+    submit:      "Gửi",
+    waitlist:    "Tham gia danh sách chờ",
+    join:        "Tham gia",
+    replyDefault:"BAINT AI sẽ trả lời ở đây...",
+    waitlistOk:  "Bạn đã có trong danh sách chờ!",
+    boot: ["Đang khởi động BAINT AI...","Đang tải công cụ lớp học...","Đang kích hoạt hệ thống giọng nói...","Sẵn sàng."],
+    modes: ["Từng bước","Đơn giản","Logic","Bối cảnh","Nhân văn"],
+    subjects: ["Sinh học","Lịch sử","Khoa học","Toán học","Khoa học máy tính"]
   }
 };
 
-/* LAUNCH */
-function launchDemo(){
-  appLauncher.style.display="none";
-  bootScreen.style.display="block";
+/* ── CONTENT DATA (all 7 languages) ── */
+const data = {
 
-  let i=0;
+  /* ═══════════ ENGLISH ═══════════ */
+  en: {
+    biology: {
+      photosynthesis: `Photosynthesis is the process plants use to make food.\n\nStep 1: Plants take in sunlight through leaves\nStep 2: They absorb carbon dioxide from air\nStep 3: Water is absorbed from roots\nStep 4: Chlorophyll converts energy into glucose\n\nExample: A tree uses sunlight to grow fruits and leaves.\n\nSummary: Plants "eat" sunlight to survive.`,
+      cell: `Cells are the basic building blocks of life.\n\nStep 1: All living things are made of cells\nStep 2: Cells have nucleus, membrane, cytoplasm\nStep 3: They perform life functions\n\nExample: Your skin is made of millions of cells.\n\nSummary: Cells = tiny units that form life.`,
+      digestion: `Digestion is how food is broken down in the body.\n\nStep 1: Food enters mouth\nStep 2: Stomach breaks it down\nStep 3: Nutrients are absorbed\n\nExample: Rice becomes energy in your body.\n\nSummary: Digestion = turning food into energy.`,
+      genetics: `Genetics is how traits are passed from parents.\n\nStep 1: DNA carries information\nStep 2: Genes control traits\nStep 3: Traits are inherited\n\nExample: Eye color comes from parents.\n\nSummary: Genes = biological information transfer.`
+    },
+    math: {
+      algebra: `Algebra is solving unknown values using symbols.\n\nStep 1: Identify unknown (x)\nStep 2: Form equation\nStep 3: Solve step-by-step\n\nExample: x + 5 = 10 → x = 5\n\nSummary: Algebra = solving missing numbers.`,
+      ratio: `Ratios compare two quantities.\n\nStep 1: Write values\nStep 2: Simplify\n\nExample: 2:4 = 1:2\n\nSummary: Ratio = comparison tool.`
+    },
+    science: {
+      gravity: `Gravity is a force that pulls objects down.\n\nStep 1: Earth has mass\nStep 2: Mass creates pull\nStep 3: Everything falls toward Earth\n\nExample: Apple falling from tree.\n\nSummary: Gravity = Earth's pulling force.`,
+      energy: `Energy is the ability to do work.\n\nStep 1: Exists in many forms\nStep 2: Can change form\nStep 3: Cannot be destroyed\n\nExample: Food → energy for movement\n\nSummary: Energy = power to do work.`
+    },
+    history: {
+      revolution: `A revolution is a major change in society.\n\nStep 1: People are dissatisfied\nStep 2: Conflict begins\nStep 3: Government changes\n\nExample: French Revolution changed France.\n\nSummary: Revolution = big political change.`,
+      ww1: `World War 1 was a global conflict.\n\nStep 1: Political tension\nStep 2: Alliances formed\nStep 3: War begins in 1914\n\nSummary: WW1 = global war between nations.`
+    },
+    computer: {
+      ai: `AI is machines simulating human intelligence.\n\nStep 1: Machines learn data\nStep 2: Patterns are recognized\nStep 3: Decisions are made\n\nExample: Chatbots answering questions.\n\nSummary: AI = machine thinking system.`,
+      internet: `Internet connects computers worldwide.\n\nStep 1: Devices connect\nStep 2: Data is shared\nStep 3: Communication happens\n\nSummary: Internet = global communication network.`
+    }
+  },
+
+  /* ═══════════ CHINESE ═══════════ */
+  zh: {
+    biology: {
+      photosynthesis: `光合作用是植物制造食物的过程。\n\n第1步：植物通过叶片吸收阳光\n第2步：吸收空气中的二氧化碳\n第3步：根部吸收水分\n第4步：叶绿素将能量转化为葡萄糖\n\n例子：一棵树利用阳光生长果实和叶子。\n\n总结：植物靠"吃"阳光生存。`,
+      cell: `细胞是生命的基本组成单位。\n\n第1步：所有生物都由细胞构成\n第2步：细胞具有细胞核、细胞膜、细胞质\n第3步：它们执行生命功能\n\n例子：你的皮肤由数百万个细胞组成。\n\n总结：细胞 = 构成生命的微小单位。`,
+      digestion: `消化是食物在体内被分解的过程。\n\n第1步：食物进入口腔\n第2步：胃将其分解\n第3步：营养物质被吸收\n\n例子：米饭在体内转化为能量。\n\n总结：消化 = 将食物转化为能量。`,
+      genetics: `遗传学研究特征如何从父母传给后代。\n\n第1步：DNA携带遗传信息\n第2步：基因控制特征\n第3步：特征被遗传\n\n例子：眼睛颜色来自父母。\n\n总结：基因 = 生物信息的传递。`
+    },
+    math: {
+      algebra: `代数是用符号求解未知值的数学。\n\n第1步：识别未知数（x）\n第2步：建立方程\n第3步：逐步求解\n\n例子：x + 5 = 10 → x = 5\n\n总结：代数 = 求解未知数。`,
+      ratio: `比率用于比较两个数量。\n\n第1步：写出数值\n第2步：化简\n\n例子：2:4 = 1:2\n\n总结：比率 = 比较工具。`
+    },
+    science: {
+      gravity: `重力是将物体向下拉的力。\n\n第1步：地球有质量\n第2步：质量产生引力\n第3步：一切都向地球坠落\n\n例子：苹果从树上落下。\n\n总结：重力 = 地球的吸引力。`,
+      energy: `能量是做功的能力。\n\n第1步：以多种形式存在\n第2步：可以改变形式\n第3步：不能被消灭\n\n例子：食物 → 运动所需能量\n\n总结：能量 = 做功的力量。`
+    },
+    history: {
+      revolution: `革命是社会的重大变革。\n\n第1步：人民不满\n第2步：冲突开始\n第3步：政府改变\n\n例子：法国大革命改变了法国。\n\n总结：革命 = 重大政治变革。`,
+      ww1: `第一次世界大战是一场全球性冲突。\n\n第1步：政治紧张局势\n第2步：联盟形成\n第3步：1914年战争爆发\n\n总结：一战 = 国家之间的全球战争。`
+    },
+    computer: {
+      ai: `人工智能是机器模拟人类智能的技术。\n\n第1步：机器学习数据\n第2步：识别模式\n第3步：做出决策\n\n例子：聊天机器人回答问题。\n\n总结：人工智能 = 机器思维系统。`,
+      internet: `互联网将全球计算机连接起来。\n\n第1步：设备连接\n第2步：数据共享\n第3步：通信实现\n\n总结：互联网 = 全球通信网络。`
+    }
+  },
+
+  /* ═══════════ FRENCH ═══════════ */
+  fr: {
+    biology: {
+      photosynthesis: `La photosynthèse est le processus par lequel les plantes fabriquent leur nourriture.\n\nÉtape 1 : Les plantes captent la lumière du soleil par leurs feuilles\nÉtape 2 : Elles absorbent le dioxyde de carbone de l'air\nÉtape 3 : L'eau est absorbée par les racines\nÉtape 4 : La chlorophylle convertit l'énergie en glucose\n\nExemple : Un arbre utilise la lumière du soleil pour faire pousser ses fruits et feuilles.\n\nRésumé : Les plantes "mangent" la lumière du soleil pour survivre.`,
+      cell: `Les cellules sont les unités de base de la vie.\n\nÉtape 1 : Tous les êtres vivants sont composés de cellules\nÉtape 2 : Les cellules ont un noyau, une membrane et un cytoplasme\nÉtape 3 : Elles accomplissent les fonctions vitales\n\nExemple : Ta peau est composée de millions de cellules.\n\nRésumé : Cellule = petite unité constituant la vie.`,
+      digestion: `La digestion est la façon dont la nourriture est décomposée dans le corps.\n\nÉtape 1 : La nourriture entre par la bouche\nÉtape 2 : L'estomac la décompose\nÉtape 3 : Les nutriments sont absorbés\n\nExemple : Le riz devient de l'énergie dans ton corps.\n\nRésumé : Digestion = transformer la nourriture en énergie.`,
+      genetics: `La génétique étudie comment les traits sont transmis des parents aux enfants.\n\nÉtape 1 : L'ADN porte l'information\nÉtape 2 : Les gènes contrôlent les traits\nÉtape 3 : Les traits sont hérités\n\nExemple : La couleur des yeux vient des parents.\n\nRésumé : Gènes = transfert d'information biologique.`
+    },
+    math: {
+      algebra: `L'algèbre consiste à résoudre des valeurs inconnues à l'aide de symboles.\n\nÉtape 1 : Identifier l'inconnu (x)\nÉtape 2 : Former l'équation\nÉtape 3 : Résoudre étape par étape\n\nExemple : x + 5 = 10 → x = 5\n\nRésumé : Algèbre = résoudre des nombres manquants.`,
+      ratio: `Les ratios comparent deux quantités.\n\nÉtape 1 : Écrire les valeurs\nÉtape 2 : Simplifier\n\nExemple : 2:4 = 1:2\n\nRésumé : Ratio = outil de comparaison.`
+    },
+    science: {
+      gravity: `La gravité est une force qui attire les objets vers le bas.\n\nÉtape 1 : La Terre a une masse\nÉtape 2 : La masse crée une attraction\nÉtape 3 : Tout tombe vers la Terre\n\nExemple : Une pomme tombe d'un arbre.\n\nRésumé : Gravité = force d'attraction de la Terre.`,
+      energy: `L'énergie est la capacité à effectuer un travail.\n\nÉtape 1 : Existe sous de nombreuses formes\nÉtape 2 : Peut changer de forme\nÉtape 3 : Ne peut pas être détruite\n\nExemple : Nourriture → énergie pour le mouvement\n\nRésumé : Énergie = puissance pour travailler.`
+    },
+    history: {
+      revolution: `Une révolution est un changement majeur dans la société.\n\nÉtape 1 : Le peuple est mécontent\nÉtape 2 : Un conflit commence\nÉtape 3 : Le gouvernement change\n\nExemple : La Révolution française a transformé la France.\n\nRésumé : Révolution = grand changement politique.`,
+      ww1: `La Première Guerre mondiale était un conflit mondial.\n\nÉtape 1 : Tensions politiques\nÉtape 2 : Formation d'alliances\nÉtape 3 : La guerre commence en 1914\n\nRésumé : WWI = guerre mondiale entre nations.`
+    },
+    computer: {
+      ai: `L'IA est la simulation de l'intelligence humaine par des machines.\n\nÉtape 1 : Les machines apprennent des données\nÉtape 2 : Les modèles sont reconnus\nÉtape 3 : Des décisions sont prises\n\nExemple : Des chatbots répondant à des questions.\n\nRésumé : IA = système de réflexion des machines.`,
+      internet: `Internet connecte les ordinateurs du monde entier.\n\nÉtape 1 : Les appareils se connectent\nÉtape 2 : Les données sont partagées\nÉtape 3 : La communication se produit\n\nRésumé : Internet = réseau de communication mondial.`
+    }
+  },
+
+  /* ═══════════ SPANISH ═══════════ */
+  es: {
+    biology: {
+      photosynthesis: `La fotosíntesis es el proceso mediante el cual las plantas producen su alimento.\n\nPaso 1: Las plantas absorben la luz solar a través de las hojas\nPaso 2: Absorben dióxido de carbono del aire\nPaso 3: El agua es absorbida por las raíces\nPaso 4: La clorofila convierte la energía en glucosa\n\nEjemplo: Un árbol usa la luz solar para hacer crecer sus frutos y hojas.\n\nResumen: Las plantas "comen" luz solar para sobrevivir.`,
+      cell: `Las células son los bloques fundamentales de la vida.\n\nPaso 1: Todos los seres vivos están formados por células\nPaso 2: Las células tienen núcleo, membrana y citoplasma\nPaso 3: Realizan las funciones vitales\n\nEjemplo: Tu piel está formada por millones de células.\n\nResumen: Célula = unidad pequeña que forma la vida.`,
+      digestion: `La digestión es cómo se descompone el alimento en el cuerpo.\n\nPaso 1: El alimento entra por la boca\nPaso 2: El estómago lo descompone\nPaso 3: Los nutrientes son absorbidos\n\nEjemplo: El arroz se convierte en energía en tu cuerpo.\n\nResumen: Digestión = convertir alimento en energía.`,
+      genetics: `La genética estudia cómo se transmiten los rasgos de padres a hijos.\n\nPaso 1: El ADN lleva la información\nPaso 2: Los genes controlan los rasgos\nPaso 3: Los rasgos son heredados\n\nEjemplo: El color de ojos viene de los padres.\n\nResumen: Genes = transferencia de información biológica.`
+    },
+    math: {
+      algebra: `El álgebra consiste en resolver valores desconocidos usando símbolos.\n\nPaso 1: Identificar el desconocido (x)\nPaso 2: Formar la ecuación\nPaso 3: Resolver paso a paso\n\nEjemplo: x + 5 = 10 → x = 5\n\nResumen: Álgebra = resolver números faltantes.`,
+      ratio: `Las razones comparan dos cantidades.\n\nPaso 1: Escribir los valores\nPaso 2: Simplificar\n\nEjemplo: 2:4 = 1:2\n\nResumen: Razón = herramienta de comparación.`
+    },
+    science: {
+      gravity: `La gravedad es una fuerza que atrae los objetos hacia abajo.\n\nPaso 1: La Tierra tiene masa\nPaso 2: La masa crea atracción\nPaso 3: Todo cae hacia la Tierra\n\nEjemplo: Una manzana cayendo de un árbol.\n\nResumen: Gravedad = fuerza de atracción de la Tierra.`,
+      energy: `La energía es la capacidad de realizar trabajo.\n\nPaso 1: Existe en muchas formas\nPaso 2: Puede cambiar de forma\nPaso 3: No puede ser destruida\n\nEjemplo: Alimento → energía para moverse\n\nResumen: Energía = poder para trabajar.`
+    },
+    history: {
+      revolution: `Una revolución es un cambio importante en la sociedad.\n\nPaso 1: El pueblo está insatisfecho\nPaso 2: Comienza el conflicto\nPaso 3: El gobierno cambia\n\nEjemplo: La Revolución Francesa transformó Francia.\n\nResumen: Revolución = gran cambio político.`,
+      ww1: `La Primera Guerra Mundial fue un conflicto global.\n\nPaso 1: Tensión política\nPaso 2: Se forman alianzas\nPaso 3: La guerra comienza en 1914\n\nResumen: WWI = guerra global entre naciones.`
+    },
+    computer: {
+      ai: `La IA es la simulación de la inteligencia humana por máquinas.\n\nPaso 1: Las máquinas aprenden datos\nPaso 2: Se reconocen patrones\nPaso 3: Se toman decisiones\n\nEjemplo: Chatbots respondiendo preguntas.\n\nResumen: IA = sistema de pensamiento de máquinas.`,
+      internet: `Internet conecta computadoras de todo el mundo.\n\nPaso 1: Los dispositivos se conectan\nPaso 2: Los datos se comparten\nPaso 3: La comunicación ocurre\n\nResumen: Internet = red de comunicación global.`
+    }
+  },
+
+  /* ═══════════ THAI ═══════════ */
+  th: {
+    biology: {
+      photosynthesis: `การสังเคราะห์แสงคือกระบวนการที่พืชใช้ในการสร้างอาหาร\n\nขั้นที่ 1: พืชรับแสงอาทิตย์ผ่านใบ\nขั้นที่ 2: ดูดซับคาร์บอนไดออกไซด์จากอากาศ\nขั้นที่ 3: รากดูดซับน้ำ\nขั้นที่ 4: คลอโรฟิลล์แปลงพลังงานเป็นกลูโคส\n\nตัวอย่าง: ต้นไม้ใช้แสงอาทิตย์เพื่อเจริญเติบโต\n\nสรุป: พืช "กิน" แสงอาทิตย์เพื่อความอยู่รอด`,
+      cell: `เซลล์คือหน่วยพื้นฐานของสิ่งมีชีวิต\n\nขั้นที่ 1: สิ่งมีชีวิตทุกชนิดประกอบด้วยเซลล์\nขั้นที่ 2: เซลล์มีนิวเคลียส เยื่อหุ้มเซลล์ และไซโตพลาสซึม\nขั้นที่ 3: เซลล์ทำหน้าที่ต่างๆ ของสิ่งมีชีวิต\n\nตัวอย่าง: ผิวหนังของคุณประกอบด้วยเซลล์หลายล้านเซลล์\n\nสรุป: เซลล์ = หน่วยเล็กๆ ที่ประกอบเป็นสิ่งมีชีวิต`,
+      digestion: `การย่อยอาหารคือกระบวนการที่ร่างกายย่อยสลายอาหาร\n\nขั้นที่ 1: อาหารเข้าสู่ปาก\nขั้นที่ 2: กระเพาะย่อยสลายอาหาร\nขั้นที่ 3: สารอาหารถูกดูดซึม\n\nตัวอย่าง: ข้าวกลายเป็นพลังงานในร่างกาย\n\nสรุป: การย่อยอาหาร = การเปลี่ยนอาหารเป็นพลังงาน`,
+      genetics: `พันธุศาสตร์คือการศึกษาการถ่ายทอดลักษณะจากพ่อแม่สู่ลูก\n\nขั้นที่ 1: DNA บรรจุข้อมูลทางพันธุกรรม\nขั้นที่ 2: ยีนควบคุมลักษณะต่างๆ\nขั้นที่ 3: ลักษณะถูกถ่ายทอดทางพันธุกรรม\n\nตัวอย่าง: สีตามาจากพ่อแม่\n\nสรุป: ยีน = การถ่ายทอดข้อมูลทางชีววิทยา`
+    },
+    math: {
+      algebra: `พีชคณิตคือการหาค่าที่ไม่รู้จักโดยใช้สัญลักษณ์\n\nขั้นที่ 1: ระบุค่าที่ไม่รู้จัก (x)\nขั้นที่ 2: สร้างสมการ\nขั้นที่ 3: แก้สมการทีละขั้น\n\nตัวอย่าง: x + 5 = 10 → x = 5\n\nสรุป: พีชคณิต = การหาตัวเลขที่หายไป`,
+      ratio: `อัตราส่วนใช้เปรียบเทียบปริมาณสองอย่าง\n\nขั้นที่ 1: เขียนค่า\nขั้นที่ 2: ลดรูป\n\nตัวอย่าง: 2:4 = 1:2\n\nสรุป: อัตราส่วน = เครื่องมือเปรียบเทียบ`
+    },
+    science: {
+      gravity: `แรงโน้มถ่วงคือแรงที่ดึงวัตถุลงสู่พื้น\n\nขั้นที่ 1: โลกมีมวล\nขั้นที่ 2: มวลสร้างแรงดึงดูด\nขั้นที่ 3: ทุกสิ่งตกสู่พื้นโลก\n\nตัวอย่าง: แอปเปิ้ลหล่นจากต้นไม้\n\nสรุป: แรงโน้มถ่วง = แรงดึงดูดของโลก`,
+      energy: `พลังงานคือความสามารถในการทำงาน\n\nขั้นที่ 1: มีอยู่ในหลายรูปแบบ\nขั้นที่ 2: สามารถเปลี่ยนรูปแบบได้\nขั้นที่ 3: ไม่สามารถถูกทำลายได้\n\nตัวอย่าง: อาหาร → พลังงานสำหรับการเคลื่อนไหว\n\nสรุป: พลังงาน = กำลังในการทำงาน`
+    },
+    history: {
+      revolution: `การปฏิวัติคือการเปลี่ยนแปลงครั้งใหญ่ในสังคม\n\nขั้นที่ 1: ประชาชนไม่พอใจ\nขั้นที่ 2: ความขัดแย้งเริ่มต้น\nขั้นที่ 3: รัฐบาลเปลี่ยนแปลง\n\nตัวอย่าง: การปฏิวัติฝรั่งเศสเปลี่ยนแปลงฝรั่งเศส\n\nสรุป: การปฏิวัติ = การเปลี่ยนแปลงทางการเมืองครั้งใหญ่`,
+      ww1: `สงครามโลกครั้งที่ 1 เป็นความขัดแย้งระดับโลก\n\nขั้นที่ 1: ความตึงเครียดทางการเมือง\nขั้นที่ 2: การก่อตั้งพันธมิตร\nขั้นที่ 3: สงครามเริ่มต้นในปี 1914\n\nสรุป: สงครามโลกครั้งที่ 1 = สงครามระดับโลกระหว่างประเทศต่างๆ`
+    },
+    computer: {
+      ai: `ปัญญาประดิษฐ์คือเครื่องจักรที่จำลองสติปัญญาของมนุษย์\n\nขั้นที่ 1: เครื่องจักรเรียนรู้จากข้อมูล\nขั้นที่ 2: จดจำรูปแบบ\nขั้นที่ 3: ตัดสินใจ\n\nตัวอย่าง: แชทบอตตอบคำถาม\n\nสรุป: AI = ระบบการคิดของเครื่องจักร`,
+      internet: `อินเทอร์เน็ตเชื่อมต่อคอมพิวเตอร์ทั่วโลก\n\nขั้นที่ 1: อุปกรณ์เชื่อมต่อกัน\nขั้นที่ 2: ข้อมูลถูกแบ่งปัน\nขั้นที่ 3: การสื่อสารเกิดขึ้น\n\nสรุป: อินเทอร์เน็ต = เครือข่ายการสื่อสารระดับโลก`
+    }
+  },
+
+  /* ═══════════ KOREAN ═══════════ */
+  ko: {
+    biology: {
+      photosynthesis: `광합성은 식물이 음식을 만드는 과정입니다.\n\n1단계: 식물은 잎을 통해 햇빛을 흡수합니다\n2단계: 공기 중의 이산화탄소를 흡수합니다\n3단계: 뿌리에서 물을 흡수합니다\n4단계: 엽록소가 에너지를 포도당으로 변환합니다\n\n예시: 나무는 햇빛을 이용해 열매와 잎을 키웁니다.\n\n요약: 식물은 햇빛을 "먹고" 생존합니다.`,
+      cell: `세포는 생명의 기본 구성 단위입니다.\n\n1단계: 모든 생물은 세포로 이루어져 있습니다\n2단계: 세포에는 핵, 세포막, 세포질이 있습니다\n3단계: 생명 기능을 수행합니다\n\n예시: 피부는 수백만 개의 세포로 이루어져 있습니다.\n\n요약: 세포 = 생명을 구성하는 작은 단위.`,
+      digestion: `소화는 음식이 몸에서 분해되는 방식입니다.\n\n1단계: 음식이 입으로 들어옵니다\n2단계: 위에서 분해됩니다\n3단계: 영양분이 흡수됩니다\n\n예시: 밥이 몸에서 에너지로 변환됩니다.\n\n요약: 소화 = 음식을 에너지로 전환.`,
+      genetics: `유전학은 형질이 부모로부터 전달되는 방식을 연구합니다.\n\n1단계: DNA가 정보를 운반합니다\n2단계: 유전자가 형질을 제어합니다\n3단계: 형질이 유전됩니다\n\n예시: 눈 색깔은 부모로부터 옵니다.\n\n요약: 유전자 = 생물학적 정보 전달.`
+    },
+    math: {
+      algebra: `대수학은 기호를 사용하여 미지수를 구하는 것입니다.\n\n1단계: 미지수(x) 파악\n2단계: 방정식 만들기\n3단계: 단계별 풀기\n\n예시: x + 5 = 10 → x = 5\n\n요약: 대수학 = 모르는 수 구하기.`,
+      ratio: `비율은 두 양을 비교합니다.\n\n1단계: 값 쓰기\n2단계: 단순화\n\n예시: 2:4 = 1:2\n\n요약: 비율 = 비교 도구.`
+    },
+    science: {
+      gravity: `중력은 물체를 아래로 당기는 힘입니다.\n\n1단계: 지구는 질량을 가집니다\n2단계: 질량은 당기는 힘을 만듭니다\n3단계: 모든 것이 지구를 향해 떨어집니다\n\n예시: 나무에서 사과가 떨어짐.\n\n요약: 중력 = 지구의 당기는 힘.`,
+      energy: `에너지는 일을 할 수 있는 능력입니다.\n\n1단계: 여러 형태로 존재합니다\n2단계: 형태가 바뀔 수 있습니다\n3단계: 파괴될 수 없습니다\n\n예시: 음식 → 운동을 위한 에너지\n\n요약: 에너지 = 일을 하는 힘.`
+    },
+    history: {
+      revolution: `혁명은 사회의 큰 변화입니다.\n\n1단계: 사람들이 불만을 가집니다\n2단계: 갈등이 시작됩니다\n3단계: 정부가 바뀝니다\n\n예시: 프랑스 혁명이 프랑스를 바꿨습니다.\n\n요약: 혁명 = 큰 정치적 변화.`,
+      ww1: `제1차 세계대전은 전 세계적인 분쟁이었습니다.\n\n1단계: 정치적 긴장\n2단계: 동맹 형성\n3단계: 1914년 전쟁 시작\n\n요약: 1차 세계대전 = 국가 간 세계 전쟁.`
+    },
+    computer: {
+      ai: `AI는 기계가 인간의 지능을 모방하는 것입니다.\n\n1단계: 기계가 데이터를 학습합니다\n2단계: 패턴을 인식합니다\n3단계: 결정을 내립니다\n\n예시: 질문에 답하는 챗봇.\n\n요약: AI = 기계 사고 시스템.`,
+      internet: `인터넷은 전 세계 컴퓨터를 연결합니다.\n\n1단계: 장치들이 연결됩니다\n2단계: 데이터가 공유됩니다\n3단계: 통신이 이루어집니다\n\n요약: 인터넷 = 글로벌 통신 네트워크.`
+    }
+  },
+
+  /* ═══════════ VIETNAMESE ═══════════ */
+  vi: {
+    biology: {
+      photosynthesis: `Quang hợp là quá trình thực vật tạo ra thức ăn.\n\nBước 1: Thực vật hấp thụ ánh sáng mặt trời qua lá\nBước 2: Hấp thụ khí CO2 từ không khí\nBước 3: Rễ hút nước\nBước 4: Chất diệp lục chuyển đổi năng lượng thành glucose\n\nVí dụ: Cây dùng ánh sáng mặt trời để phát triển quả và lá.\n\nTóm tắt: Thực vật "ăn" ánh sáng mặt trời để tồn tại.`,
+      cell: `Tế bào là đơn vị cơ bản cấu tạo nên sự sống.\n\nBước 1: Mọi sinh vật đều được tạo thành từ tế bào\nBước 2: Tế bào có nhân, màng tế bào và tế bào chất\nBước 3: Chúng thực hiện các chức năng sống\n\nVí dụ: Da của bạn được tạo thành từ hàng triệu tế bào.\n\nTóm tắt: Tế bào = đơn vị nhỏ tạo nên sự sống.`,
+      digestion: `Tiêu hóa là cách thức ăn được phân giải trong cơ thể.\n\nBước 1: Thức ăn vào miệng\nBước 2: Dạ dày phân giải thức ăn\nBước 3: Các chất dinh dưỡng được hấp thụ\n\nVí dụ: Cơm trở thành năng lượng trong cơ thể bạn.\n\nTóm tắt: Tiêu hóa = biến thức ăn thành năng lượng.`,
+      genetics: `Di truyền học nghiên cứu cách các đặc điểm được truyền từ cha mẹ sang con.\n\nBước 1: ADN mang thông tin di truyền\nBước 2: Gen kiểm soát các đặc điểm\nBước 3: Các đặc điểm được di truyền\n\nVí dụ: Màu mắt đến từ bố mẹ.\n\nTóm tắt: Gen = truyền thông tin sinh học.`
+    },
+    math: {
+      algebra: `Đại số là giải các giá trị ẩn bằng ký hiệu.\n\nBước 1: Xác định ẩn số (x)\nBước 2: Lập phương trình\nBước 3: Giải từng bước\n\nVí dụ: x + 5 = 10 → x = 5\n\nTóm tắt: Đại số = tìm số còn thiếu.`,
+      ratio: `Tỉ lệ so sánh hai đại lượng.\n\nBước 1: Viết các giá trị\nBước 2: Rút gọn\n\nVí dụ: 2:4 = 1:2\n\nTóm tắt: Tỉ lệ = công cụ so sánh.`
+    },
+    science: {
+      gravity: `Trọng lực là lực kéo các vật xuống phía dưới.\n\nBước 1: Trái Đất có khối lượng\nBước 2: Khối lượng tạo ra lực hút\nBước 3: Mọi thứ đều rơi về phía Trái Đất\n\nVí dụ: Quả táo rơi từ cây.\n\nTóm tắt: Trọng lực = lực hút của Trái Đất.`,
+      energy: `Năng lượng là khả năng thực hiện công việc.\n\nBước 1: Tồn tại dưới nhiều dạng\nBước 2: Có thể chuyển đổi dạng\nBước 3: Không thể bị tiêu hủy\n\nVí dụ: Thức ăn → năng lượng để di chuyển\n\nTóm tắt: Năng lượng = sức mạnh để làm việc.`
+    },
+    history: {
+      revolution: `Cách mạng là sự thay đổi lớn trong xã hội.\n\nBước 1: Người dân không hài lòng\nBước 2: Xung đột bắt đầu\nBước 3: Chính phủ thay đổi\n\nVí dụ: Cách mạng Pháp đã thay đổi nước Pháp.\n\nTóm tắt: Cách mạng = thay đổi chính trị lớn.`,
+      ww1: `Chiến tranh Thế giới thứ nhất là một cuộc xung đột toàn cầu.\n\nBước 1: Căng thẳng chính trị\nBước 2: Các liên minh hình thành\nBước 3: Chiến tranh bắt đầu năm 1914\n\nTóm tắt: WWI = chiến tranh toàn cầu giữa các quốc gia.`
+    },
+    computer: {
+      ai: `AI là máy móc mô phỏng trí tuệ con người.\n\nBước 1: Máy móc học từ dữ liệu\nBước 2: Nhận dạng các mẫu\nBước 3: Đưa ra quyết định\n\nVí dụ: Chatbot trả lời câu hỏi.\n\nTóm tắt: AI = hệ thống tư duy của máy móc.`,
+      internet: `Internet kết nối máy tính trên toàn thế giới.\n\nBước 1: Các thiết bị kết nối\nBước 2: Dữ liệu được chia sẻ\nBước 3: Giao tiếp diễn ra\n\nTóm tắt: Internet = mạng truyền thông toàn cầu.`
+    }
+  }
+};
+
+/* ── VOICE LANG MAP ── */
+const voiceMap = { en:"en", zh:"zh", fr:"fr", es:"es", th:"th", ko:"ko", vi:"vi" };
+
+/* ── BOOT ── */
+function launchDemo(){
+  appLauncher.style.display = "none";
+  bootScreen.style.display  = "block";
+
+  const lang = document.getElementById("language").value;
+  const lines = ui[lang].boot;
+  let i = 0;
+
   function run(){
-    if(i<bootLines.length){
-      bootLog.innerHTML+=bootLines[i]+"<br>";
+    if(i < lines.length){
+      bootLog.innerHTML += lines[i] + "<br>";
       i++;
-      setTimeout(run,500);
+      setTimeout(run, 500);
     } else {
-      setTimeout(()=>{
-        bootScreen.style.display="none";
-        demoScreen.style.display="block";
-        updateTopics();
-        updateContent();
-      },500);
+      setTimeout(() => {
+        bootScreen.style.display = "none";
+        demoScreen.style.display = "block";
+        switchLanguage();
+      }, 500);
     }
   }
   run();
 }
 
-/* TOPICS */
+/* ── SWITCH LANGUAGE ── */
+function switchLanguage(){
+  const lang = document.getElementById("language").value;
+  const t    = ui[lang];
+
+  // UI labels
+  document.getElementById("label-setup").innerText     = t.setup;
+  document.getElementById("label-assistant").innerText = t.assistant;
+  document.getElementById("label-feedback").innerText  = t.feedback;
+  document.getElementById("label-waitlist").innerText  = t.waitlist;
+  document.getElementById("btn-speak").innerText       = t.speak;
+  document.getElementById("btn-stop").innerText        = t.stop;
+  document.getElementById("btn-ask").innerText         = t.ask;
+  document.getElementById("btn-listen").innerText      = t.listen;
+  document.getElementById("btn-feedback").innerText    = t.submit;
+  document.getElementById("btn-join").innerText        = t.join;
+  document.getElementById("studentQuestion").placeholder = t.placeholder;
+  document.getElementById("teacherReply").innerText    = t.replyDefault;
+
+  // Mode options
+  const modeEl = document.getElementById("mode");
+  const modeVals = ["step","simple","logic","context","human"];
+  modeVals.forEach((v,i) => { modeEl.options[i].text = t.modes[i]; });
+
+  // Subject options
+  const subjectEl  = document.getElementById("subject");
+  const subjectVals = ["biology","history","science","math","computer"];
+  subjectVals.forEach((v,i) => { subjectEl.options[i].text = t.subjects[i]; });
+
+  updateTopics();
+  updateContent();
+}
+
+/* ── TOPICS ── */
 function updateTopics(){
-  const subject=document.getElementById("subject").value;
-  const topic=document.getElementById("topic");
+  const lang    = document.getElementById("language").value;
+  const subject = document.getElementById("subject").value;
+  const topicEl = document.getElementById("topic");
 
-  topic.innerHTML="";
+  topicEl.innerHTML = "";
 
-  const keys = Object.keys(data[subject]);
-
-  keys.forEach(t=>{
-    let opt=document.createElement("option");
-    opt.value=t;
-    opt.innerText = t.charAt(0).toUpperCase() + t.slice(1);
-    topic.appendChild(opt);
+  const keys = Object.keys(data[lang][subject]);
+  keys.forEach(k => {
+    const opt = document.createElement("option");
+    opt.value    = k;
+    opt.innerText = k.charAt(0).toUpperCase() + k.slice(1);
+    topicEl.appendChild(opt);
   });
 
-  topic.value = keys[0];
+  topicEl.value = keys[0];
 }
-/* CONTENT */
+
+/* ── CONTENT ── */
 function updateContent(){
-  const s=document.getElementById("subject").value;
-  const t=document.getElementById("topic").value;
-  const mode=document.getElementById("mode").value;
-  const lang=document.getElementById("language").value;
+  const lang  = document.getElementById("language").value;
+  const s     = document.getElementById("subject").value;
+  const t     = document.getElementById("topic").value;
+  const mode  = document.getElementById("mode").value;
 
-  let base=data[s][t];
-  let output="";
+  if(!data[lang] || !data[lang][s] || !data[lang][s][t]) return;
 
-  if(mode==="step"){
-    output="Step-by-step explanation:\n\n"+base;
-  }
-  else if(mode==="simple"){
-    output="Simple explanation:\n\n"+base.split("\n")[0];
-  }
-  else if(mode==="logic"){
-    output="Logical breakdown:\n\n"+base;
-  }
-  else if(mode==="context"){
-    output="Real-life context:\n\n"+base;
-  }
-  else if(mode==="human"){
-    output="Think of it like this:\n\n"+base;
-  }
+  const base = data[lang][s][t];
+  let output = "";
 
-  // Language labels (lightweight for now)
-  if(lang==="th") output="คำอธิบาย:\n\n"+output;
-  if(lang==="ko") output="설명:\n\n"+output;
-  if(lang==="vi") output="Giải thích:\n\n"+output;
+  if(mode === "step")    output = ui[lang].modes[0] + ":\n\n" + base;
+  else if(mode === "simple")  output = ui[lang].modes[1] + ":\n\n" + base.split("\n")[0];
+  else if(mode === "logic")   output = ui[lang].modes[2] + ":\n\n" + base;
+  else if(mode === "context") output = ui[lang].modes[3] + ":\n\n" + base;
+  else if(mode === "human")   output = ui[lang].modes[4] + ":\n\n" + base;
 
-  document.getElementById("explanation").innerText=
-  "BAINT AI Classroom Assistant\n\n"+output;
+  document.getElementById("explanation").innerText =
+    ui[lang].assistant + "\n\n" + output;
 }
 
-/* VOICE SYSTEM */
+/* ── VOICE ── */
 let utterance;
 
-function getVoice(lang) {
+function getVoice(lang){
   const voices = speechSynthesis.getVoices();
-
-  return voices.find(v =>
-    v.lang.toLowerCase().includes(lang)
-  ) || voices.find(v =>
-    v.lang.toLowerCase().includes("en")
-  );
+  return voices.find(v => v.lang.toLowerCase().includes(lang)) ||
+         voices.find(v => v.lang.toLowerCase().includes("en"));
 }
 
 function speak(){
   stopVoice();
-
   const lang = document.getElementById("language").value;
   const text = document.getElementById("explanation").innerText;
-
-  document.getElementById("subtitles").style.display = "block";
+  document.getElementById("subtitles").style.display  = "block";
   document.getElementById("subtitles").innerText = text;
-
-  utterance = new SpeechSynthesisUtterance(text);
-
-  // map dropdown to real browser codes
-  let voiceLang = "en";
-
-  if(lang === "zh") voiceLang = "zh";
-  if(lang === "fr") voiceLang = "fr";
-  if(lang === "es") voiceLang = "es";
-  if(lang === "th") voiceLang = "th";
-if(lang === "ko") voiceLang = "ko";
-if(lang === "vi") voiceLang = "vi";
-
-  utterance.voice = getVoice(voiceLang);
-  utterance.lang = voiceLang;
-
+  utterance       = new SpeechSynthesisUtterance(text);
+  utterance.voice = getVoice(voiceMap[lang]);
+  utterance.lang  = voiceMap[lang];
   speechSynthesis.speak(utterance);
 }
 
 function speakReply(){
   stopVoice();
-
   const lang = document.getElementById("language").value;
   const text = document.getElementById("teacherReply").innerText;
-
-  document.getElementById("subtitles").style.display = "block";
+  document.getElementById("subtitles").style.display  = "block";
   document.getElementById("subtitles").innerText = text;
-
-  utterance = new SpeechSynthesisUtterance(text);
-
-  let voiceLang = "en";
-
-  if(lang === "zh") voiceLang = "zh";
-  if(lang === "fr") voiceLang = "fr";
-  if(lang === "es") voiceLang = "es";
-  if(lang === "th") voiceLang = "th";
-if(lang === "ko") voiceLang = "ko";
-if(lang === "vi") voiceLang = "vi";
-
-  utterance.voice = getVoice(voiceLang);
-  utterance.lang = voiceLang;
-
+  utterance       = new SpeechSynthesisUtterance(text);
+  utterance.voice = getVoice(voiceMap[lang]);
+  utterance.lang  = voiceMap[lang];
   speechSynthesis.speak(utterance);
 }
 
@@ -562,53 +663,49 @@ function stopVoice(){
   document.getElementById("subtitles").style.display = "none";
 }
 
-// important fix: load voices properly
-speechSynthesis.onvoiceschanged = () => {
-  speechSynthesis.getVoices();
-};
+speechSynthesis.onvoiceschanged = () => { speechSynthesis.getVoices(); };
 
-/* QUESTION */
+/* ── QUESTION ── */
 function answerQuestion(){
-  const q=document.getElementById("studentQuestion").value;
-  const s=document.getElementById("subject").value;
-  const t=document.getElementById("topic").value;
+  const lang = document.getElementById("language").value;
+  const q    = document.getElementById("studentQuestion").value;
+  const s    = document.getElementById("subject").value;
+  const t    = document.getElementById("topic").value;
+  const mode = document.getElementById("mode").value;
 
-  document.getElementById("teacherReply").innerText=
-`BAINT AI RESPONSE
+  const base = data[lang][s][t];
+  let reply  = "";
 
-Question: ${q}
+  if(mode === "step")    reply = ui[lang].modes[0] + ":\n\n" + base;
+  else if(mode === "simple")  reply = ui[lang].modes[1] + ":\n\n" + base.split("\n")[0];
+  else if(mode === "logic")   reply = ui[lang].modes[2] + ":\n\n" + base;
+  else if(mode === "context") reply = ui[lang].modes[3] + ":\n\n" + base;
+  else if(mode === "human")   reply = ui[lang].modes[4] + ":\n\n" + base;
 
-Answer:
-${data[s][t]}`;
+  document.getElementById("teacherReply").innerText =
+    ui[lang].assistant + "\n\n" + q + "\n\n" + reply;
 }
 
-/* FEEDBACK */
+/* ── FEEDBACK ── */
 function submitFeedback(){
-  const f=document.getElementById("feedbackInput").value;
-  let list=JSON.parse(localStorage.getItem("baint_feedback"))||[];
+  const f    = document.getElementById("feedbackInput").value;
+  let list   = JSON.parse(localStorage.getItem("baint_feedback")) || [];
   list.push(f);
-  localStorage.setItem("baint_feedback",JSON.stringify(list));
-
-  document.getElementById("feedbackList").innerHTML=
-  list.map(x=>"• "+x).join("<br>");
+  localStorage.setItem("baint_feedback", JSON.stringify(list));
+  document.getElementById("feedbackList").innerHTML = list.map(x => "• " + x).join("<br>");
 }
 
-/* WAITLIST */
+/* ── WAITLIST ── */
 function joinWaitlist(){
-  const email=document.getElementById("waitlistEmail").value;
-
-  let list=JSON.parse(localStorage.getItem("baint_waitlist"))||[];
+  const lang  = document.getElementById("language").value;
+  const email = document.getElementById("waitlistEmail").value;
+  let list    = JSON.parse(localStorage.getItem("baint_waitlist")) || [];
   list.push(email);
-  localStorage.setItem("baint_waitlist",JSON.stringify(list));
-
-  window.location.href=
-  `mailto:baintcomputer@gmail.com?subject=BAINT Waitlist&body=New signup: ${email}`;
-
-  document.getElementById("waitlistMessage").innerText=
-  "You're on the waitlist!";
+  localStorage.setItem("baint_waitlist", JSON.stringify(list));
+  window.location.href = `mailto:baintcomputer@gmail.com?subject=BAINT Waitlist&body=New signup: ${email}`;
+  document.getElementById("waitlistMessage").innerText = ui[lang].waitlistOk;
 }
 
 </script>
-
 </body>
 </html>
