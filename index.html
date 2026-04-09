@@ -521,6 +521,9 @@ function speak(){
   if(lang === "zh") voiceLang = "zh";
   if(lang === "fr") voiceLang = "fr";
   if(lang === "es") voiceLang = "es";
+  if(lang === "th") voiceLang = "th";
+if(lang === "ko") voiceLang = "ko";
+if(lang === "vi") voiceLang = "vi";
 
   utterance.voice = getVoice(voiceLang);
   utterance.lang = voiceLang;
@@ -544,6 +547,9 @@ function speakReply(){
   if(lang === "zh") voiceLang = "zh";
   if(lang === "fr") voiceLang = "fr";
   if(lang === "es") voiceLang = "es";
+  if(lang === "th") voiceLang = "th";
+if(lang === "ko") voiceLang = "ko";
+if(lang === "vi") voiceLang = "vi";
 
   utterance.voice = getVoice(voiceLang);
   utterance.lang = voiceLang;
