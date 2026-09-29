@@ -92,22 +92,52 @@ button {
 
 .success { color: #047857; font-size: 13px; margin-top: 8px; }
 
-.subtitles {
-  position: fixed;
-  bottom: 20px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 80%;
-  background: rgba(0,0,0,0.8);
-  color: #fff;
-  padding: 12px;
-  border-radius: 12px;
-  font-size: 13px;
-  display: none;
-  text-align: center;
-}
 
 .disclaimer { font-size: 12px; color: #6b7280; margin-top: 6px; }
+
+.chat-window {
+  background:#f3f4f6;
+  border:1px solid #e5e7eb;
+  border-radius:16px;
+  padding:14px;
+  min-height:180px;
+  max-height:360px;
+  overflow-y:auto;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+.chat-message {
+  max-width:82%;
+  padding:11px 13px;
+  border-radius:14px;
+  font-size:14px;
+  line-height:1.55;
+  white-space:pre-wrap;
+}
+.chat-message.user {
+  align-self:flex-end;
+  background:#2563eb;
+  color:#fff;
+  border-bottom-right-radius:5px;
+}
+.chat-message.baint {
+  align-self:flex-start;
+  background:#fff;
+  color:#111827;
+  border:1px solid #e5e7eb;
+  border-bottom-left-radius:5px;
+}
+.chat-label {
+  font-size:11px;
+  font-weight:700;
+  margin-bottom:4px;
+  opacity:.7;
+}
+.question-row { display:flex; align-items:center; gap:8px; width:100%; }
+.question-row input { flex:1; margin-right:0; }
+.send-button { width:42px; height:42px; padding:0; margin-top:0; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:22px; line-height:1; }
+.voice-toggle { min-width:42px; }
 </style>
 </head>
 
@@ -145,6 +175,8 @@ button {
           <option value="th">🇹🇭 Thai</option>
           <option value="ko">🇰🇷 Korean</option>
           <option value="vi">🇻🇳 Vietnamese</option>
+          <option value="ja">🇯🇵 Japanese</option>
+          <option value="ar">🇦🇪 Arabic (UAE)</option>
         </select>
 
         <select id="mode" onchange="updateContent()">
@@ -156,11 +188,18 @@ button {
         </select>
 
         <select id="subject" onchange="updateTopics(); updateContent();">
-          <option value="biology">Biology</option>
-          <option value="history">History</option>
-          <option value="science">Science</option>
           <option value="math">Mathematics</option>
+          <option value="biology">Biology</option>
+          <option value="chemistry">Chemistry</option>
+          <option value="history">History</option>
           <option value="computer">Computer Science</option>
+          <option value="biochemistry">Biochemistry</option>
+          <option value="histology">Histology</option>
+          <option value="enzymology">Advanced Enzymology</option>
+          <option value="purine_pyrimidine">Biosynthesis of Purine and Pyrimidine</option>
+          <option value="cholesterol">Biosynthesis of Cholesterol</option>
+          <option value="engineering">Engineering / Practical Problem-Solving</option>
+          <option value="physics">Physics</option>
         </select>
 
         <select id="topic" onchange="updateContent()"></select>
@@ -168,37 +207,24 @@ button {
 
       <div class="section">
         <h4 id="label-assistant">BAINT AI Classroom Assistant</h4>
-        <div class="card" id="explanation"></div>
-        <button id="btn-speak" onclick="speak()">🎙️ BAINT Voice Explainer</button>
-        <button id="btn-stop" onclick="stopVoice()">⏹ Stop Voice</button>
+        <div class="chat-window" id="explanation"></div>
+        <button id="btn-voice" class="voice-toggle" onclick="toggleVoice()">🔊 Listen</button>
       </div>
 
       <div class="section">
-        <input type="text" id="studentQuestion" placeholder="Ask BAINT AI..." />
-        <button id="btn-ask" onclick="answerQuestion()">Ask</button>
-        <div class="card" id="teacherReply"></div>
-        <button id="btn-listen" onclick="speakReply()">🔊 Listen Answer</button>
+        <div class="question-row">
+          <input type="text" id="studentQuestion" placeholder="Ask BAINT AI..." onkeydown="if(event.key==='Enter') answerQuestion()" />
+          <button id="btn-ask" class="send-button" onclick="answerQuestion()" aria-label="Send question" title="Send question">➤</button>
+        </div>
       </div>
 
-      <div class="section">
-        <h4 id="label-feedback">Feedback</h4>
-        <input type="text" id="feedbackInput" />
-        <button id="btn-feedback" onclick="submitFeedback()">Submit</button>
-        <div class="card" id="feedbackList"></div>
-      </div>
-
-      <div class="section waitlist">
-        <h4 id="label-waitlist">Join BAINT Waitlist</h4>
-        <input type="email" id="waitlistEmail" />
-        <button id="btn-join" onclick="joinWaitlist()">Join</button>
-        <div id="waitlistMessage" class="success"></div>
       </div>
 
     </div>
   </div>
 </div>
 
-<div class="subtitles" id="subtitles"></div>
+
 
 <script>
 
@@ -225,7 +251,7 @@ const ui = {
     waitlistOk:  "You're on the waitlist!",
     boot: ["Booting BAINT AI...","Loading Classroom Engine...","Activating Voice System...","Ready."],
     modes: ["Step-by-step","Simple","Logical","Context","Human"],
-    subjects: ["Biology","History","Science","Mathematics","Computer Science"]
+    subjects: ["Mathematics","Biology","Chemistry","History","Computer Science","Biochemistry","Histology","Advanced Enzymology","Biosynthesis of Purine and Pyrimidine","Biosynthesis of Cholesterol","Engineering / Practical Problem-Solving","Physics"]
   },
   zh: {
     setup:       "学习设置",
@@ -243,7 +269,7 @@ const ui = {
     waitlistOk:  "您已加入候补名单！",
     boot: ["正在启动 BAINT AI...","加载课堂引擎...","激活语音系统...","准备就绪。"],
     modes: ["逐步讲解","简单","逻辑分析","情境联系","人性化"],
-    subjects: ["生物学","历史","科学","数学","计算机科学"]
+    subjects: ["数学","生物学","化学","历史","计算机科学","生物化学","组织学","高级酶学","嘌呤与嘧啶的生物合成","胆固醇的生物合成","工程学 / 实际问题解决","物理学"]
   },
   fr: {
     setup:       "Configuration d'apprentissage",
@@ -261,7 +287,7 @@ const ui = {
     waitlistOk:  "Vous êtes sur la liste d'attente !",
     boot: ["Démarrage de BAINT AI...","Chargement du moteur de classe...","Activation du système vocal...","Prêt."],
     modes: ["Étape par étape","Simple","Logique","Contexte","Humain"],
-    subjects: ["Biologie","Histoire","Science","Mathématiques","Informatique"]
+    subjects: ["Mathématiques","Biologie","Chimie","Histoire","Informatique","Biochimie","Histologie","Enzymologie avancée","Biosynthèse des purines et pyrimidines","Biosynthèse du cholestérol","Ingénierie / résolution de problèmes pratiques","Physique"]
   },
   es: {
     setup:       "Configuración de aprendizaje",
@@ -279,7 +305,7 @@ const ui = {
     waitlistOk:  "¡Estás en la lista de espera!",
     boot: ["Iniciando BAINT AI...","Cargando motor de clase...","Activando sistema de voz...","Listo."],
     modes: ["Paso a paso","Simple","Lógico","Contexto","Humano"],
-    subjects: ["Biología","Historia","Ciencia","Matemáticas","Informática"]
+    subjects: ["Matemáticas","Biología","Química","Historia","Ciencias de la Computación","Bioquímica","Histología","Enzimología avanzada","Biosíntesis de purinas y pirimidinas","Biosíntesis del colesterol","Ingeniería / resolución práctica de problemas","Física"]
   },
   th: {
     setup:       "การตั้งค่าการเรียนรู้",
@@ -297,7 +323,7 @@ const ui = {
     waitlistOk:  "คุณอยู่ในรายการรอแล้ว!",
     boot: ["กำลังบู๊ต BAINT AI...","กำลังโหลดเครื่องมือห้องเรียน...","กำลังเปิดใช้งานระบบเสียง...","พร้อมแล้ว"],
     modes: ["ทีละขั้นตอน","เรียบง่าย","เชิงตรรกะ","บริบท","แบบมนุษย์"],
-    subjects: ["ชีววิทยา","ประวัติศาสตร์","วิทยาศาสตร์","คณิตศาสตร์","วิทยาการคอมพิวเตอร์"]
+    subjects: ["คณิตศาสตร์","ชีววิทยา","เคมี","ประวัติศาสตร์","วิทยาการคอมพิวเตอร์","ชีวเคมี","จุลกายวิภาคศาสตร์","เอนไซม์วิทยาขั้นสูง","การสังเคราะห์ทางชีวภาพของพิวรีนและไพริมิดีน","การสังเคราะห์คอเลสเตอรอล","วิศวกรรม / การแก้ปัญหาเชิงปฏิบัติ","ฟิสิกส์"]
   },
   ko: {
     setup:       "학습 설정",
@@ -315,7 +341,7 @@ const ui = {
     waitlistOk:  "대기자 명단에 등록되었습니다!",
     boot: ["BAINT AI 부팅 중...","교실 엔진 로딩 중...","음성 시스템 활성화 중...","준비 완료."],
     modes: ["단계별","간단히","논리적","맥락","인간적"],
-    subjects: ["생물학","역사","과학","수학","컴퓨터 과학"]
+    subjects: ["수학","생물학","화학","역사","컴퓨터 과학","생화학","조직학","고급 효소학","퓨린 및 피리미딘 생합성","콜레스테롤 생합성","공학 / 실용 문제 해결","물리학"]
   },
   vi: {
     setup:       "Cài đặt học tập",
@@ -333,11 +359,17 @@ const ui = {
     waitlistOk:  "Bạn đã có trong danh sách chờ!",
     boot: ["Đang khởi động BAINT AI...","Đang tải công cụ lớp học...","Đang kích hoạt hệ thống giọng nói...","Sẵn sàng."],
     modes: ["Từng bước","Đơn giản","Logic","Bối cảnh","Nhân văn"],
-    subjects: ["Sinh học","Lịch sử","Khoa học","Toán học","Khoa học máy tính"]
+    subjects: ["Toán học","Sinh học","Hóa học","Lịch sử","Khoa học máy tính","Hóa sinh","Mô học","Enzym học nâng cao","Sinh tổng hợp Purine và Pyrimidine","Sinh tổng hợp Cholesterol","Kỹ thuật / giải quyết vấn đề thực tế","Vật lý"]
+  },
+  ja: {
+    setup: "学習設定", assistant: "BAINT AI Classroom Assistant", speak: "🔊 聞く", stop: "⏹ 停止", ask: "", placeholder: "BAINT AIに質問...", listen: "", feedback: "", submit: "", waitlist: "", join: "", replyDefault: "ここにBAINT AIの回答が表示されます...", waitlistOk: "", boot: ["BAINT AIを起動中...","授業エンジンを読み込み中...","音声システムを有効化中...","準備完了。"], modes: ["ステップごと","シンプル","論理的","文脈","人間的"], subjects: ["数学","生物学","化学","歴史","コンピュータサイエンス","生化学","組織学","高度な酵素学","プリンとピリミジンの生合成","コレステロールの生合成","工学 / 実践的な問題解決","物理学"]
+  },
+  ar: {
+    setup: "إعداد التعلم", assistant: "مساعد BAINT AI للفصل الدراسي", speak: "🔊 استماع", stop: "⏹ إيقاف", ask: "", placeholder: "اسأل BAINT AI...", listen: "", feedback: "", submit: "", waitlist: "", join: "", replyDefault: "ستظهر إجابة BAINT AI هنا...", waitlistOk: "", boot: ["جارٍ تشغيل BAINT AI...","جارٍ تحميل محرك الفصل...","جارٍ تفعيل نظام الصوت...","جاهز."], modes: ["خطوة بخطوة","بسيط","منطقي","سياق","إنساني"], subjects: ["الرياضيات","الأحياء","الكيمياء","التاريخ","علوم الحاسوب","الكيمياء الحيوية","علم الأنسجة","علم الإنزيمات المتقدم","التخليق الحيوي للبيورين والبيريميدين","التخليق الحيوي للكوليسترول","الهندسة / حل المشكلات العملية","الفيزياء"]
   }
 };
 
-/* ── CONTENT DATA (all 7 languages) ── */
+/* ── CONTENT DATA (all 9 UI languages; subject fallbacks remain available) ── */
 const data = {
 
   /* ═══════════ ENGLISH ═══════════ */
@@ -520,11 +552,67 @@ const data = {
       ai: `AI là máy móc mô phỏng trí tuệ con người.\n\nBước 1: Máy móc học từ dữ liệu\nBước 2: Nhận dạng các mẫu\nBước 3: Đưa ra quyết định\n\nVí dụ: Chatbot trả lời câu hỏi.\n\nTóm tắt: AI = hệ thống tư duy của máy móc.`,
       internet: `Internet kết nối máy tính trên toàn thế giới.\n\nBước 1: Các thiết bị kết nối\nBước 2: Dữ liệu được chia sẻ\nBước 3: Giao tiếp diễn ra\n\nTóm tắt: Internet = mạng truyền thông toàn cầu.`
     }
+  },
+
+  /* ═══════════ ADDITIONAL INVITE SUBJECTS ═══════════ */
+  chemistry: {
+    chemical_bonding: `Chemical bonding explains how atoms interact to become more stable.\n\nKey idea: atoms can transfer or share electrons.\nStep 1: Identify the atoms and their valence electrons\nStep 2: Decide whether electrons are transferred or shared\nStep 3: Identify the bond type\n\nExample: Sodium transfers an electron to chlorine, forming NaCl.\n\nSharp check: Do not memorize the bond name alone. Ask what happens to the electrons.`,
+    chemical_reactions: `A chemical reaction rearranges atoms to form new substances.\n\nStep 1: Identify the reactants\nStep 2: Identify the products\nStep 3: Check that atoms are conserved\nStep 4: Balance the equation\n\nExample: 2H₂ + O₂ → 2H₂O.\n\nSharp check: A balanced equation must have the same number of each type of atom on both sides.`,
+    organic_chemistry: `Organic chemistry focuses mainly on carbon-containing compounds.\n\nStart with structure rather than memorization.\nStep 1: Identify the carbon skeleton\nStep 2: Find the functional group\nStep 3: Check the bonds and formula\nStep 4: Predict the important reaction or property\n\nExample: An alcohol contains a hydroxyl (-OH) functional group.`
+  },
+  biochemistry: {
+    proteins_enzymes: `Proteins are chains of amino acids that fold into structures with specific functions. Enzymes are proteins or catalytic molecules that speed up biochemical reactions without being consumed.\n\nThink in three layers: structure → interaction → function.\nExample: An enzyme binds a substrate at its active site and helps a reaction occur more easily.`,
+    metabolism: `Metabolism is the network of chemical reactions that keeps cells functioning.\n\nSeparate the idea into pathways, inputs, outputs and regulation.\nStep 1: Identify the starting molecule\nStep 2: Follow the major pathway steps\nStep 3: Track energy or reducing equivalents\nStep 4: Identify where the pathway is regulated.`,
+    biomolecules: `The major biological macromolecules are carbohydrates, lipids, proteins and nucleic acids.\n\nDo not learn them as isolated lists. Compare their building blocks, bonds, structures and major functions.`
+  },
+  histology: {
+    epithelial_tissue: `Epithelial tissue covers surfaces, lines cavities and forms many glands.\n\nFor identification, use structure first. Check cell shape, number of layers, surface specializations and location.\n\nExample: Simple squamous epithelium is a single thin layer suited to exchange.`,
+    connective_tissue: `Connective tissue supports, connects and protects other tissues.\n\nLook for cells, extracellular matrix and fibres.\n\nSharp check: In histology, the appearance under the microscope should be connected to the tissue's function and location.`,
+    tissue_identification: `To identify a tissue, do not rely on one visual feature.\n\nStep 1: Count the layers\nStep 2: Identify cell shape\nStep 3: Look at the matrix or fibres\nStep 4: Check the location and function\nStep 5: Compare with the closest alternatives.`
+  },
+  enzymology: {
+    enzyme_kinetics: `Enzyme kinetics studies how reaction rate changes with substrate concentration and other conditions.\n\nStart by identifying the variables: enzyme concentration, substrate concentration, temperature, pH and inhibitors.\n\nA useful model is Michaelis-Menten kinetics, where Vmax describes the maximum rate and Km is the substrate concentration associated with half Vmax under the model assumptions.`,
+    enzyme_inhibition: `Enzyme inhibition describes how a molecule reduces enzyme activity.\n\nCompare the inhibitor with the substrate and ask where it binds.\n\nFor common models, distinguish competitive, noncompetitive and uncompetitive inhibition by how binding occurs and how apparent kinetic parameters change.`,
+    enzyme_mechanism: `An enzyme mechanism explains how an enzyme converts substrate into product.\n\nFollow the sequence: binding → catalytic steps → product formation → product release.\n\nThe active site provides interactions that help lower the activation barrier.`
+  },
+  purine_pyrimidine: {
+    purine_pathway: `Purine biosynthesis builds purine nucleotides through a regulated pathway.\n\nFor studying it, track the precursor, major intermediates, key enzymes and final nucleotide products.\n\nA good study method is to draw the pathway and mark the committed or strongly regulated steps instead of memorizing an isolated list.`,
+    pyrimidine_pathway: `Pyrimidine biosynthesis builds pyrimidine nucleotides through a sequence of reactions.\n\nTrack the pathway from its early precursors through the ring-building steps and nucleotide formation.\n\nFocus on what each enzyme changes and where regulation occurs.`,
+    pathway_comparison: `Purine and pyrimidine biosynthesis can be compared by asking how their rings are constructed and then attached to the ribose-phosphate framework.\n\nFor an exam question, compare precursors, major steps, regulation and final nucleotide products.`
+  },
+  cholesterol: {
+    cholesterol_synthesis: `Cholesterol biosynthesis is a multi-step pathway that begins with acetyl-CoA and proceeds through several intermediates to cholesterol.\n\nA useful study path is: precursor → major intermediate → rate-limiting step → downstream products → regulation.\n\nThe pathway is strongly associated with HMG-CoA reductase as a major regulatory enzyme.`,
+    cholesterol_regulation: `Cholesterol synthesis is regulated so cells can balance cholesterol production and availability.\n\nWhen studying regulation, connect enzyme activity with cellular cholesterol levels and hormonal or transcriptional control rather than memorizing disconnected facts.`,
+    clinical_context: `Cholesterol has structural and metabolic roles and is also a precursor for steroid hormones, bile acids and vitamin D.\n\nWhen studying clinical questions, separate normal biological function from what happens when cholesterol balance is disrupted.`
+  },
+  engineering: {
+    free_body_diagrams: `A free-body diagram isolates an object and shows the external forces acting on it.\n\nStep 1: Choose the object\nStep 2: Draw the force directions\nStep 3: Label known and unknown quantities\nStep 4: Choose axes\nStep 5: Apply the relevant equations.\n\nSharp check: Do not add forces just because they seem physically possible. Include forces actually acting on the chosen object.`,
+    engineering_calculations: `Engineering calculations should connect the physical situation to the equation instead of starting with numbers.\n\nUse this order: given values → required quantity → governing principle → units → substitution → result → reasonableness check.\n\nAlways check whether the final unit makes sense.`,
+    practical_problem_solving: `Practical engineering problems connect theory to a real system.\n\nStep 1: Describe the physical situation\nStep 2: Identify constraints and assumptions\nStep 3: Draw a useful diagram or model\nStep 4: Select the governing principle\nStep 5: Calculate or test\nStep 6: Compare the result with the real-world situation.`
+  },
+  physics: {
+    motion_forces: `Physics explains motion by connecting measurable quantities such as displacement, velocity, acceleration and force.\n\nStep 1: Identify what is known\nStep 2: Identify what is unknown\nStep 3: Choose the governing relationship\nStep 4: Keep units consistent\nStep 5: Check whether the result is physically reasonable.`,
+    energy: `Energy is a quantity that can be transferred or transformed between forms.\n\nFor a mechanics problem, identify the initial and final energy states, include relevant work or losses, then solve for the unknown.\n\nExample: gravitational potential energy can become kinetic energy as an object falls.`,
+    electricity: `Basic circuit analysis connects voltage, current and resistance.\n\nStart by identifying the circuit structure and the known quantities. Then choose the appropriate relationship, keep units consistent and check the direction or magnitude of the result.\n\nFor a simple resistor, Ohm's law relates voltage, current and resistance.`
   }
 };
 
+/* Add the invite subjects to English data and safely fall back to English content for other interface languages. */
+["chemistry","biochemistry","histology","enzymology","purine_pyrimidine","cholesterol","engineering","physics"].forEach(subject => {
+  if(data[subject]) {
+    data.en[subject] = data[subject];
+    delete data[subject];
+  }
+});
+Object.keys(data).forEach(lang => {
+  if(lang === "en") return;
+  ["chemistry","biochemistry","histology","enzymology","purine_pyrimidine","cholesterol","engineering","physics"].forEach(subject => {
+    if(!data[lang][subject]) data[lang][subject] = data.en[subject];
+  });
+});
+
 /* ── VOICE LANG MAP ── */
-const voiceMap = { en:"en", zh:"zh", fr:"fr", es:"es", th:"th", ko:"ko", vi:"vi" };
+const voiceMap = { en:"en", zh:"zh", fr:"fr", es:"es", th:"th", ko:"ko", vi:"vi", ja:"ja", ar:"ar" };
 
 /* ── BOOT ── */
 function launchDemo(){
@@ -559,16 +647,10 @@ function switchLanguage(){
   // UI labels
   document.getElementById("label-setup").innerText     = t.setup;
   document.getElementById("label-assistant").innerText = t.assistant;
-  document.getElementById("label-feedback").innerText  = t.feedback;
-  document.getElementById("label-waitlist").innerText  = t.waitlist;
-  document.getElementById("btn-speak").innerText       = t.speak;
-  document.getElementById("btn-stop").innerText        = t.stop;
-  document.getElementById("btn-ask").innerText         = t.ask;
-  document.getElementById("btn-listen").innerText      = t.listen;
-  document.getElementById("btn-feedback").innerText    = t.submit;
-  document.getElementById("btn-join").innerText        = t.join;
+  const voiceButton = document.getElementById("btn-voice");
+  voiceButton.innerText = t.speak;
   document.getElementById("studentQuestion").placeholder = t.placeholder;
-  document.getElementById("teacherReply").innerText    = t.replyDefault;
+
 
   // Mode options
   const modeEl = document.getElementById("mode");
@@ -577,7 +659,7 @@ function switchLanguage(){
 
   // Subject options
   const subjectEl  = document.getElementById("subject");
-  const subjectVals = ["biology","history","science","math","computer"];
+  const subjectVals = ["math","biology","chemistry","history","computer","biochemistry","histology","enzymology","purine_pyrimidine","cholesterol","engineering","physics"];
   subjectVals.forEach((v,i) => { subjectEl.options[i].text = t.subjects[i]; });
 
   updateTopics();
@@ -585,126 +667,260 @@ function switchLanguage(){
 }
 
 /* ── TOPICS ── */
+function getSubjectData(lang, subject){
+  if(data[lang] && data[lang][subject]) return data[lang][subject];
+  // Never fall back to English inside a selected non-English language.
+  // Keep the topic structure, but let the response engine explain it in the selected language.
+  const english = data.en[subject] || {};
+  const synthetic = {};
+  Object.keys(english).forEach(k => {
+    synthetic[k] = "";
+  });
+  return synthetic;
+}
+
+function prettyTopic(topic){
+  return topic.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
+}
+
+const topicLabels = {
+  zh:{algebra:"代数",ratio:"比率",photosynthesis:"光合作用",cell:"细胞",digestion:"消化",genetics:"遗传学",gravity:"重力",energy:"能量",revolution:"革命",ww1:"第一次世界大战",ai:"人工智能",internet:"互联网"},
+  ja:{algebra:"代数",ratio:"比率",photosynthesis:"光合成",cell:"細胞",digestion:"消化",genetics:"遺伝学",gravity:"重力",energy:"エネルギー",revolution:"革命",ww1:"第一次世界大戦",ai:"人工知能",internet:"インターネット"},
+  ko:{algebra:"대수학",ratio:"비율",photosynthesis:"광합성",cell:"세포",digestion:"소화",genetics:"유전학",gravity:"중력",energy:"에너지",revolution:"혁명",ww1:"제1차 세계대전",ai:"인공지능",internet:"인터넷"},
+  th:{algebra:"พีชคณิต",ratio:"อัตราส่วน",photosynthesis:"การสังเคราะห์แสง",cell:"เซลล์",digestion:"การย่อยอาหาร",genetics:"พันธุศาสตร์",gravity:"แรงโน้มถ่วง",energy:"พลังงาน",revolution:"การปฏิวัติ",ww1:"สงครามโลกครั้งที่ 1",ai:"ปัญญาประดิษฐ์",internet:"อินเทอร์เน็ต"},
+  vi:{algebra:"Đại số",ratio:"Tỉ lệ",photosynthesis:"Quang hợp",cell:"Tế bào",digestion:"Tiêu hóa",genetics:"Di truyền học",gravity:"Trọng lực",energy:"Năng lượng",revolution:"Cách mạng",ww1:"Chiến tranh Thế giới thứ nhất",ai:"Trí tuệ nhân tạo",internet:"Internet"},
+  fr:{algebra:"Algèbre",ratio:"Rapport",photosynthesis:"Photosynthèse",cell:"Cellule",digestion:"Digestion",genetics:"Génétique",gravity:"Gravité",energy:"Énergie",revolution:"Révolution",ww1:"Première Guerre mondiale",ai:"Intelligence artificielle",internet:"Internet"},
+  es:{algebra:"Álgebra",ratio:"Razón",photosynthesis:"Fotosíntesis",cell:"Célula",digestion:"Digestión",genetics:"Genética",gravity:"Gravedad",energy:"Energía",revolution:"Revolución",ww1:"Primera Guerra Mundial",ai:"Inteligencia artificial",internet:"Internet"},
+  ar:{algebra:"الجبر",ratio:"النسبة",photosynthesis:"البناء الضوئي",cell:"الخلية",digestion:"الهضم",genetics:"علم الوراثة",gravity:"الجاذبية",energy:"الطاقة",revolution:"الثورة",ww1:"الحرب العالمية الأولى",ai:"الذكاء الاصطناعي",internet:"الإنترنت"}
+};
+
+function localizedTopicName(lang, topic){
+  return topicLabels[lang]?.[topic] || prettyTopic(topic);
+}
+
 function updateTopics(){
   const lang    = document.getElementById("language").value;
   const subject = document.getElementById("subject").value;
   const topicEl = document.getElementById("topic");
+  const subjectData = getSubjectData(lang, subject);
+  const keys = Object.keys(subjectData);
 
   topicEl.innerHTML = "";
-
-  const keys = Object.keys(data[lang][subject]);
   keys.forEach(k => {
     const opt = document.createElement("option");
-    opt.value    = k;
-    opt.innerText = k.charAt(0).toUpperCase() + k.slice(1);
+    opt.value = k;
+    opt.innerText = localizedTopicName(lang, k);
     topicEl.appendChild(opt);
   });
 
-  topicEl.value = keys[0];
+  if(keys.length) topicEl.value = keys[0];
 }
 
-/* ── CONTENT ── */
+/* ── SMART RESPONSE ENGINE ── */
+function detectQuestionType(q, lang){
+  const x = q.toLowerCase().trim();
+  if(!x) return "concept";
+  const words = {
+    en: {why:/\b(why|reason|cause|causes|how come)\b/, compare:/\b(compare|difference|different|versus|vs|distinguish|contrast)\b/, calc:/\b(calculate|solve|compute|find|determine|equation|formula|value)\b/, app:/\b(example|application|apply|practical|real life|real-world|use)\b/, conf:/\b(confused|confusing|don't understand|do not understand|stuck|lost|hard|difficult)\b/, def:/\b(what is|what are|define|definition|meaning|explain)\b/},
+    zh: {why:/(为什么|原因|怎么回事)/, compare:/(比较|区别|不同|差异|对比)/, calc:/(计算|求解|方程|公式|求|算)/, app:/(例子|应用|实际|怎么用|用途)/, conf:/(不懂|不理解|困惑|难|困难|不会)/, def:/(什么是|是什么|定义|意思|解释)/},
+    ja: {why:/(なぜ|どうして|理由|原因)/, compare:/(比較|違い|異なる|対比)/, calc:/(計算|解く|方程式|公式|求める)/, app:/(例|応用|実際|使い方|用途)/, conf:/(分からない|わからない|難しい|困った|理解できない)/, def:/(とは|何ですか|定義|意味|説明)/},
+    ko: {why:/(왜|이유|원인)/, compare:/(비교|차이|다른|대조)/, calc:/(계산|풀기|방정식|공식|구해)/, app:/(예|응용|실제|사용|용도)/, conf:/(모르겠|이해가 안|어려|헷갈|막혔)/, def:/(무엇|뭐야|정의|의미|설명)/},
+    th: {why:/(ทำไม|เหตุผล|สาเหตุ)/, compare:/(เปรียบเทียบ|แตกต่าง|ต่างกัน|ความแตกต่าง)/, calc:/(คำนวณ|แก้|สมการ|สูตร|หา)/, app:/(ตัวอย่าง|ประยุกต์|ใช้งาน|ใช้จริง|ใช้)/, conf:/(ไม่เข้าใจ|งง|ยาก|สับสน|ติด)/, def:/(คืออะไร|หมายถึง|นิยาม|อธิบาย)/},
+    vi: {why:/(tại sao|vì sao|lý do|nguyên nhân)/, compare:/(so sánh|khác nhau|khác biệt|đối chiếu)/, calc:/(tính|giải|phương trình|công thức|tìm)/, app:/(ví dụ|ứng dụng|thực tế|sử dụng|dùng)/, conf:/(không hiểu|khó|bối rối|mắc|không rõ)/, def:/(là gì|định nghĩa|ý nghĩa|giải thích)/},
+    fr: {why:/(pourquoi|raison|cause)/, compare:/(comparer|différence|différent|contraste)/, calc:/(calculer|résoudre|équation|formule|trouver)/, app:/(exemple|application|pratique|utiliser|usage)/, conf:/(ne comprends pas|difficile|confus|bloqué)/, def:/(qu'est-ce|définition|signification|expliquer)/},
+    es: {why:/(por qué|razón|causa)/, compare:/(comparar|diferencia|diferente|contrastar)/, calc:/(calcular|resolver|ecuación|fórmula|encontrar)/, app:/(ejemplo|aplicación|práctico|usar|uso)/, conf:/(no entiendo|difícil|confuso|atascado)/, def:/(qué es|definición|significado|explicar)/},
+    ar: {why:/(لماذا|سبب|أسباب)/, compare:/(قارن|مقارنة|الفرق|مختلف)/, calc:/(احسب|حل|معادلة|صيغة|أوجد)/, app:/(مثال|تطبيق|عملي|استخدام|يستخدم)/, conf:/(لا أفهم|صعب|مربك|عالِق|مش فاهم)/, def:/(ما هو|ما هي|تعريف|معنى|اشرح)/}
+  };
+  const w = words[lang] || words.en;
+  if(w.why.test(x)) return "why";
+  if(w.compare.test(x)) return "compare";
+  if(w.calc.test(x) || /\d+[+\-*/=]/.test(x)) return "calculation";
+  if(w.app.test(x)) return "application";
+  if(w.conf.test(x)) return "confusion";
+  if(w.def.test(x)) return "definition";
+  return "concept";
+}
+
+const subjectProfiles = {
+  math: {focus:"quantities, equations and the reasoning behind each step",check:"Check the operation and the final value."},
+  biology: {focus:"structure, function and biological processes",check:"Connect the structure or process to its biological function."},
+  chemistry: {focus:"particles, reactions, conditions and conservation of matter",check:"Check atoms, charges, units and reaction conditions."},
+  history: {focus:"events, chronology, causes, consequences and context",check:"Separate the event, its causes and its consequences."},
+  computer: {focus:"inputs, processes, outputs and how the system behaves",check:"Trace what goes in, what the system does and what comes out."},
+  biochemistry: {focus:"molecules, reactions, pathways and biological function",check:"Connect the molecule or reaction to its biological role."},
+  histology: {focus:"microscopic structure, tissue identification and function",check:"Use structure, location and function together rather than one visual clue."},
+  enzymology: {focus:"enzyme structure, mechanism, kinetics and regulation",check:"Track the substrate, active site, reaction rate and regulatory effect."},
+  purine_pyrimidine: {focus:"metabolic pathways, precursors, enzymes and regulation",check:"Track the pathway in order and identify the regulated steps."},
+  cholesterol: {focus:"biosynthetic pathway, intermediates, regulation and biological roles",check:"Track the pathway and distinguish synthesis from downstream functions."},
+  engineering: {focus:"physical assumptions, diagrams, equations, units and practical constraints",check:"Check the model, units and whether the result makes sense in the real system."},
+  physics: {focus:"measurable quantities, physical laws, units and cause-and-effect relationships",check:"Check units, direction and whether the result is physically reasonable."}
+};
+
+const localizedProfiles = {
+  en: {
+    math:["quantities, equations and the reasoning behind each step","Check the operation and the final value."], biology:["structure, function and biological processes","Connect the structure or process to its biological function."], chemistry:["particles, reactions, conditions and conservation of matter","Check atoms, charges, units and reaction conditions."], history:["events, chronology, causes, consequences and context","Separate the event, its causes and its consequences."], computer:["inputs, processes, outputs and how the system behaves","Trace what goes in, what the system does and what comes out."], biochemistry:["molecules, reactions, pathways and biological function","Connect the molecule or reaction to its biological role."], histology:["microscopic structure, tissue identification and function","Use structure, location and function together."], enzymology:["enzyme structure, mechanism, kinetics and regulation","Track the substrate, active site, reaction rate and regulatory effect."], purine_pyrimidine:["metabolic pathways, precursors, enzymes and regulation","Track the pathway in order and identify the regulated steps."], cholesterol:["biosynthetic pathways, intermediates, regulation and biological roles","Track the pathway and distinguish synthesis from downstream functions."], engineering:["physical assumptions, diagrams, equations, units and practical constraints","Check the model, units and whether the result makes sense."], physics:["measurable quantities, physical laws, units and cause-and-effect relationships","Check units, direction and physical reasonableness."]},
+  zh: {math:["数量、方程以及每一步背后的推理","检查运算过程和最终结果。"],biology:["结构、功能和生物过程","把结构或过程与它的生物学功能联系起来。"],chemistry:["粒子、反应、条件以及物质守恒","检查原子、化学式、电荷和单位。"],history:["事件、时间顺序、原因、结果和历史背景","区分事件本身、原因和后果。"],computer:["输入、处理、输出以及系统如何运行","跟踪输入、系统处理过程和输出。"],biochemistry:["分子、反应、代谢途径和生物功能","把分子或反应与生物作用联系起来。"],histology:["显微结构、组织识别和功能","结合结构、位置和功能判断。"],enzymology:["酶结构、机制、动力学和调控","跟踪底物、活性位点、反应速率和调控。"],purine_pyrimidine:["代谢途径、前体、酶和调控","按顺序跟踪途径并找出关键调控步骤。"],cholesterol:["生物合成途径、中间体、调控和生物作用","跟踪途径并区分合成过程和后续作用。"],engineering:["物理假设、图示、方程、单位和实际限制","检查模型、单位以及结果是否合理。"],physics:["可测量的量、物理定律、单位和因果关系","检查单位、方向以及结果是否合理。" ]},
+  ja: {math:["数量、方程式、そして各ステップの考え方","計算手順と最終結果を確認します。"],biology:["構造、機能、生物学的なプロセス","構造やプロセスを機能と結び付けます。"],chemistry:["粒子、反応、条件、物質保存","原子、電荷、単位、反応条件を確認します。"],history:["出来事、時系列、原因、結果、背景","出来事と原因・結果を分けて考えます。"],computer:["入力、処理、出力、システムの動き","入力から処理、出力まで追います。"],biochemistry:["分子、反応、経路、生物学的機能","分子や反応を生物学的役割と結び付けます。"],histology:["顕微鏡構造、組織の識別、機能","構造、位置、機能を一緒に見ます。"],enzymology:["酵素構造、反応機構、速度論、調節","基質、活性部位、反応速度、調節を追います。"],purine_pyrimidine:["代謝経路、前駆体、酵素、調節","経路を順番に追い、調節点を確認します。"],cholesterol:["生合成経路、中間体、調節、生物学的役割","経路とその後の機能を区別します。"],engineering:["物理的仮定、図、式、単位、実際の制約","モデル、単位、結果の妥当性を確認します。"],physics:["測定量、物理法則、単位、因果関係","単位、方向、結果の妥当性を確認します。" ]},
+  ko: {math:["양, 방정식, 그리고 각 단계의 이유","계산 과정과 최종 결과를 확인합니다."],biology:["구조, 기능, 생물학적 과정","구조나 과정을 기능과 연결합니다."],chemistry:["입자, 반응, 조건, 물질 보존","원자, 전하, 단위를 확인합니다."],history:["사건, 연대, 원인, 결과, 맥락","사건과 원인 및 결과를 구분합니다."],computer:["입력, 처리, 출력, 시스템의 작동 방식","입력에서 처리와 출력까지 추적합니다."],biochemistry:["분자, 반응, 경로, 생물학적 기능","분자나 반응을 생물학적 역할과 연결합니다."],histology:["현미경 구조, 조직 식별, 기능","구조, 위치, 기능을 함께 봅니다."],enzymology:["효소 구조, 작용 기전, 반응 속도, 조절","기질, 활성 부위, 반응 속도, 조절을 추적합니다."],purine_pyrimidine:["대사 경로, 전구체, 효소, 조절","경로 순서와 조절 단계를 확인합니다."],cholesterol:["생합성 경로, 중간체, 조절, 생물학적 역할","합성 과정과 이후 기능을 구분합니다."],engineering:["물리적 가정, 그림, 방정식, 단위, 실제 제약","모델과 단위, 결과의 타당성을 확인합니다."],physics:["측정량, 물리 법칙, 단위, 인과관계","단위와 방향, 결과가 물리적으로 타당한지 확인합니다." ]},
+  th: {math:["ปริมาณ สมการ และเหตุผลของแต่ละขั้นตอน","ตรวจสอบการคำนวณและคำตอบสุดท้าย"],biology:["โครงสร้าง หน้าที่ และกระบวนการทางชีววิทยา","เชื่อมโยงโครงสร้างหรือกระบวนการกับหน้าที่"],chemistry:["อนุภาค ปฏิกิริยา เงื่อนไข และการอนุรักษ์มวล","ตรวจสอบอะตอม ประจุ และหน่วย"],history:["เหตุการณ์ ลำดับเวลา สาเหตุ ผลลัพธ์ และบริบท","แยกเหตุการณ์ สาเหตุ และผลที่ตามมา"],computer:["ข้อมูลเข้า กระบวนการ ผลลัพธ์ และการทำงานของระบบ","ติดตามตั้งแต่ข้อมูลเข้าไปจนถึงผลลัพธ์"],biochemistry:["โมเลกุล ปฏิกิริยา เส้นทางเมแทบอลิซึม และหน้าที่ทางชีวภาพ","เชื่อมโยงโมเลกุลหรือปฏิกิริยากับหน้าที่"],histology:["โครงสร้างระดับจุลทรรศน์ การจำแนกเนื้อเยื่อ และหน้าที่","ใช้โครงสร้าง ตำแหน่ง และหน้าที่ร่วมกัน"],enzymology:["โครงสร้างเอนไซม์ กลไก จลนพลศาสตร์ และการควบคุม","ติดตามสารตั้งต้น ตำแหน่งออกฤทธิ์ อัตราปฏิกิริยา และการควบคุม"],purine_pyrimidine:["เส้นทางเมแทบอลิซึม สารตั้งต้น เอนไซม์ และการควบคุม","ติดตามเส้นทางตามลำดับและจุดควบคุม"],cholesterol:["เส้นทางการสังเคราะห์ชีวภาพ สารตัวกลาง การควบคุม และหน้าที่","ติดตามเส้นทางและแยกการสังเคราะห์จากหน้าที่ภายหลัง"],engineering:["สมมติฐานทางกายภาพ แผนภาพ สมการ หน่วย และข้อจำกัดจริง","ตรวจสอบแบบจำลอง หน่วย และความสมเหตุสมผลของผลลัพธ์"],physics:["ปริมาณที่วัดได้ กฎฟิสิกส์ หน่วย และความสัมพันธ์เหตุผล","ตรวจสอบหน่วย ทิศทาง และความสมเหตุสมผลทางฟิสิกส์" ]},
+  vi: {math:["đại lượng, phương trình và lý do của từng bước","Kiểm tra phép tính và kết quả cuối cùng."],biology:["cấu trúc, chức năng và quá trình sinh học","Liên hệ cấu trúc hoặc quá trình với chức năng."],chemistry:["hạt, phản ứng, điều kiện và bảo toàn vật chất","Kiểm tra nguyên tử, điện tích và đơn vị."],history:["sự kiện, trình tự thời gian, nguyên nhân, hậu quả và bối cảnh","Tách sự kiện, nguyên nhân và hậu quả."],computer:["đầu vào, xử lý, đầu ra và cách hệ thống hoạt động","Theo dõi từ đầu vào đến xử lý và đầu ra."],biochemistry:["phân tử, phản ứng, con đường và chức năng sinh học","Liên hệ phân tử hoặc phản ứng với vai trò sinh học."],histology:["cấu trúc vi thể, nhận diện mô và chức năng","Kết hợp cấu trúc, vị trí và chức năng."],enzymology:["cấu trúc enzyme, cơ chế, động học và điều hòa","Theo dõi cơ chất, vị trí hoạt động, tốc độ và điều hòa."],purine_pyrimidine:["con đường chuyển hóa, tiền chất, enzyme và điều hòa","Theo dõi con đường theo thứ tự và các bước điều hòa."],cholesterol:["con đường sinh tổng hợp, chất trung gian, điều hòa và vai trò sinh học","Theo dõi con đường và phân biệt tổng hợp với chức năng sau đó."],engineering:["giả định vật lý, sơ đồ, phương trình, đơn vị và giới hạn thực tế","Kiểm tra mô hình, đơn vị và tính hợp lý của kết quả."],physics:["đại lượng đo được, định luật vật lý, đơn vị và quan hệ nguyên nhân-kết quả","Kiểm tra đơn vị, hướng và tính hợp lý vật lý." ]},
+  fr: {math:["les quantités, les équations et le raisonnement de chaque étape","Vérifiez le calcul et le résultat final."],biology:["la structure, la fonction et les processus biologiques","Reliez la structure ou le processus à sa fonction."],chemistry:["les particules, les réactions, les conditions et la conservation de la matière","Vérifiez les atomes, les charges et les unités."],history:["les événements, la chronologie, les causes, les conséquences et le contexte","Séparez l'événement, ses causes et ses conséquences."],computer:["les entrées, les traitements, les sorties et le fonctionnement du système","Suivez ce qui entre, ce qui est traité et ce qui sort."],biochemistry:["les molécules, les réactions, les voies et les fonctions biologiques","Reliez la molécule ou la réaction à son rôle biologique."],histology:["la structure microscopique, l'identification des tissus et leur fonction","Utilisez ensemble structure, localisation et fonction."],enzymology:["la structure des enzymes, le mécanisme, la cinétique et la régulation","Suivez le substrat, le site actif, la vitesse et la régulation."],purine_pyrimidine:["les voies métaboliques, les précurseurs, les enzymes et la régulation","Suivez la voie dans l'ordre et les étapes régulées."],cholesterol:["la biosynthèse, les intermédiaires, la régulation et les rôles biologiques","Suivez la voie et distinguez synthèse et fonctions."],engineering:["les hypothèses physiques, les schémas, les équations, les unités et les contraintes réelles","Vérifiez le modèle, les unités et la cohérence du résultat."],physics:["les grandeurs mesurables, les lois physiques, les unités et les relations de cause à effet","Vérifiez les unités, la direction et la cohérence physique." ]},
+  es: {math:["cantidades, ecuaciones y el razonamiento de cada paso","Comprueba la operación y el resultado final."],biology:["estructura, función y procesos biológicos","Relaciona la estructura o el proceso con su función."],chemistry:["partículas, reacciones, condiciones y conservación de la materia","Comprueba átomos, cargas y unidades."],history:["eventos, cronología, causas, consecuencias y contexto","Separa el evento, sus causas y sus consecuencias."],computer:["entradas, procesos, salidas y funcionamiento del sistema","Sigue lo que entra, lo que hace el sistema y lo que sale."],biochemistry:["moléculas, reacciones, rutas y función biológica","Relaciona la molécula o reacción con su función."],histology:["estructura microscópica, identificación de tejidos y función","Usa estructura, ubicación y función juntas."],enzymology:["estructura enzimática, mecanismo, cinética y regulación","Sigue el sustrato, sitio activo, velocidad y regulación."],purine_pyrimidine:["rutas metabólicas, precursores, enzimas y regulación","Sigue la ruta y sus pasos regulados."],cholesterol:["ruta biosintética, intermediarios, regulación y funciones biológicas","Sigue la ruta y distingue síntesis de funciones posteriores."],engineering:["supuestos físicos, diagramas, ecuaciones, unidades y restricciones reales","Comprueba el modelo, las unidades y si el resultado tiene sentido."],physics:["magnitudes medibles, leyes físicas, unidades y relaciones causa-efecto","Comprueba unidades, dirección y coherencia física." ]},
+  ar: {math:["الكميات والمعادلات والمنطق وراء كل خطوة","تحقق من العملية والنتيجة النهائية."],biology:["التركيب والوظيفة والعمليات الحيوية","اربط التركيب أو العملية بوظيفتها الحيوية."],chemistry:["الجسيمات والتفاعلات والظروف وحفظ المادة","تحقق من الذرات والشحنات والوحدات."],history:["الأحداث والتسلسل الزمني والأسباب والنتائج والسياق","افصل بين الحدث وأسبابه ونتائجه."],computer:["المدخلات والمعالجة والمخرجات وكيف يعمل النظام","تتبع ما يدخل وما يعالجه النظام وما يخرج منه."],biochemistry:["الجزيئات والتفاعلات والمسارات والوظائف الحيوية","اربط الجزيء أو التفاعل بدوره الحيوي."],histology:["التركيب المجهري وتحديد الأنسجة والوظيفة","استخدم التركيب والموقع والوظيفة معًا."],enzymology:["تركيب الإنزيم وآليته وحركيته وتنظيمه","تتبع الركيزة والموقع النشط ومعدل التفاعل والتنظيم."],purine_pyrimidine:["المسارات الأيضية والسلائف والإنزيمات والتنظيم","تتبع المسار بالترتيب وحدد خطوات التنظيم."],cholesterol:["مسار التخليق الحيوي والوسائط والتنظيم والأدوار الحيوية","تتبع المسار وميّز التخليق عن الوظائف اللاحقة."],engineering:["الافتراضات الفيزيائية والرسومات والمعادلات والوحدات والقيود العملية","تحقق من النموذج والوحدات ومنطقية النتيجة."],physics:["الكميات القابلة للقياس والقوانين الفيزيائية والوحدات وعلاقات السبب والنتيجة","تحقق من الوحدات والاتجاه ومنطقية النتيجة فيزيائيًا." ]}
+};
+
+const responseCopy = {
+  en:{why:"Why it works",compare:"Compare",application:"How it is used",confusion:"Let's make it clearer",definition:"What it means",concept:"Let's understand it",calculation:"Let's solve it",start:"Start with the main idea",cause:"Follow the cause and effect",difference:"Look at what is the same and what changes",example:"Connect it to a real situation",focus:"Learning focus",check:"Quick check"},
+  zh:{why:"为什么这样",compare:"比较",application:"实际应用",confusion:"换一种方式理解",definition:"它是什么意思",concept:"先理解核心概念",calculation:"一起解决",start:"先看核心概念",cause:"跟随原因和结果",difference:"看看相同点和不同点",example:"联系实际情况",focus:"学习重点",check:"快速检查"},
+  ja:{why:"なぜそうなるのか",compare:"比較",application:"実際の使い方",confusion:"別の方法で理解する",definition:"意味を理解する",concept:"中心となる考え方",calculation:"一緒に解いてみる",start:"まず中心の考え方",cause:"原因と結果を追う",difference:"共通点と違いを見る",example:"実際の場面につなげる",focus:"学習のポイント",check:"確認"},
+  ko:{why:"왜 그런지",compare:"비교",application:"실제 활용",confusion:"다른 방식으로 이해하기",definition:"의미 이해하기",concept:"핵심 개념 이해하기",calculation:"함께 풀어보기",start:"먼저 핵심 개념",cause:"원인과 결과를 따라가기",difference:"공통점과 차이 보기",example:"실제 상황과 연결하기",focus:"학습 핵심",check:"확인"},
+  th:{why:"ทำไมจึงเป็นแบบนี้",compare:"เปรียบเทียบ",application:"การใช้งานจริง",confusion:"ลองทำความเข้าใจอีกแบบ",definition:"ความหมาย",concept:"ทำความเข้าใจแนวคิดหลัก",calculation:"ลองแก้ไปด้วยกัน",start:"เริ่มจากแนวคิดหลัก",cause:"ติดตามเหตุและผล",difference:"ดูสิ่งที่เหมือนและต่าง",example:"เชื่อมกับสถานการณ์จริง",focus:"จุดเน้นการเรียน",check:"ตรวจสอบ"},
+  vi:{why:"Vì sao",compare:"So sánh",application:"Ứng dụng thực tế",confusion:"Thử hiểu theo cách khác",definition:"Ý nghĩa",concept:"Hiểu ý chính",calculation:"Cùng giải bài",start:"Bắt đầu từ ý chính",cause:"Theo dõi nguyên nhân và kết quả",difference:"Xem điểm giống và khác",example:"Liên hệ tình huống thực tế",focus:"Trọng tâm học tập",check:"Kiểm tra"},
+  fr:{why:"Pourquoi",compare:"Comparer",application:"Application pratique",confusion:"Essayons autrement",definition:"Ce que cela signifie",concept:"Comprendre l'idée principale",calculation:"Résolvons-le ensemble",start:"Commencez par l'idée principale",cause:"Suivez la cause et l'effet",difference:"Voyez ce qui est pareil et ce qui change",example:"Reliez à une situation réelle",focus:"Point d'apprentissage",check:"Vérification"},
+  es:{why:"Por qué",compare:"Comparar",application:"Aplicación práctica",confusion:"Probemos otra forma de entenderlo",definition:"Qué significa",concept:"Entender la idea principal",calculation:"Vamos a resolverlo",start:"Empieza por la idea principal",cause:"Sigue la causa y el efecto",difference:"Mira qué es igual y qué cambia",example:"Conéctalo con una situación real",focus:"Enfoque de aprendizaje",check:"Comprobación"},
+  ar:{why:"لماذا يحدث ذلك",compare:"مقارنة",application:"التطبيق العملي",confusion:"لنشرحها بطريقة أخرى",definition:"المعنى",concept:"فهم الفكرة الأساسية",calculation:"لنحلها معًا",start:"ابدأ بالفكرة الأساسية",cause:"تتبع السبب والنتيجة",difference:"انظر إلى أوجه التشابه والاختلاف",example:"اربطها بموقف عملي",focus:"محور التعلم",check:"تحقق سريع"}
+};
+
+function localizedProfile(lang, subject){
+  const p = localizedProfiles[lang]?.[subject] || localizedProfiles.en[subject] || ["the key ideas and how they connect","Check the main idea against the question."];
+  return {focus:p[0], check:p[1]};
+}
+
+function makeSmartReply(lang, subject, topic, question, mode, base){
+  const p = localizedProfile(lang, subject);
+  const c = responseCopy[lang] || responseCopy.en;
+  const type = detectQuestionType(question, lang);
+  const topicName = localizedTopicName(lang, topic || subject);
+  const cleanBase = base || "";
+  const firstLine = cleanBase.split("\\n").find(x => x.trim()) || "";
+  const opening = {
+    calculation:c.calculation, why:c.why, compare:c.compare,
+    application:c.application, confusion:c.confusion,
+    definition:c.definition, concept:c.concept
+  }[type] || c.concept;
+
+  if(type === "calculation") {
+    return `${opening}: ${topicName}\n\n${c.start}.\n\n1. ${lang==='zh'?'找出已知量和单位':lang==='ja'?'既知の値と単位を確認します':lang==='ko'?'주어진 값과 단위를 확인합니다':lang==='th'?'ระบุค่าที่ให้มาและหน่วย':lang==='vi'?'Xác định các giá trị và đơn vị đã biết':lang==='fr'?'Identifiez les valeurs connues et leurs unités':lang==='es'?'Identifica los valores conocidos y sus unidades':lang==='ar'?'حدد القيم المعروفة ووحداتها':'Identify the known values and their units.'}\n2. ${lang==='zh'?'选择连接这些量的公式或原理':lang==='ja'?'関係する公式や原理を選びます':lang==='ko'?'연결되는 공식이나 원리를 선택합니다':lang==='th'?'เลือกสมการหรือหลักการที่เกี่ยวข้อง':lang==='vi'?'Chọn công thức hoặc nguyên lý phù hợp':lang==='fr'?'Choisissez l’équation ou le principe adapté':lang==='es'?'Elige la ecuación o principio adecuado':lang==='ar'?'اختر المعادلة أو المبدأ المناسب':'Choose the equation or principle that connects them.'}\n3. ${lang==='zh'?'代入数值并计算':lang==='ja'?'値を代入して計算します':lang==='ko'?'값을 대입하고 계산합니다':lang==='th'?'แทนค่าและคำนวณ':lang==='vi'?'Thay số và tính toán':lang==='fr'?'Remplacez les valeurs et calculez':lang==='es'?'Sustituye los valores y calcula':lang==='ar'?'عوّض القيم واحسب':'Substitute the values and calculate.'}\n4. ${p.check}\n\n${c.focus}: ${p.focus}${cleanBase ? `\n\n${firstLine}` : ''}`;
+  }
+
+  if(type === "why") return `${opening}: ${topicName}\n\n${c.cause}.\n\n1. ${c.start}.\n2. ${lang==='zh'?'找出导致变化的因素':lang==='ja'?'変化を起こす要因を確認します':lang==='ko'?'변화를 일으키는 원인을 찾습니다':lang==='th'?'หาสาเหตุของการเปลี่ยนแปลง':lang==='vi'?'Xác định nguyên nhân của sự thay đổi':lang==='fr'?'Identifiez ce qui provoque le changement':lang==='es'?'Identifica qué causa el cambio':lang==='ar'?'حدد ما الذي يسبب التغيير':'Identify what causes the change.'}\n3. ${lang==='zh'?'跟随过程直到结果':lang==='ja'?'結果までの流れを追います':lang==='ko'?'결과까지의 과정을 따라갑니다':lang==='th'?'ติดตามกระบวนการจนถึงผลลัพธ์':lang==='vi'?'Theo dõi quá trình đến kết quả':lang==='fr'?'Suivez le processus jusqu’au résultat':lang==='es'?'Sigue el proceso hasta el resultado':lang==='ar'?'تتبع العملية حتى النتيجة':'Follow the process to the result.'}\n\n${firstLine || topicName}\n\n${c.focus}: ${p.focus}`;
+
+  if(type === "compare") return `${opening}: ${topicName}\n\n${c.difference}.\n\n• ${lang==='zh'?'共同点':lang==='ja'?'共通点':lang==='ko'?'공통점':lang==='th'?'สิ่งที่เหมือนกัน':lang==='vi'?'Điểm giống nhau':lang==='fr'?'Points communs':lang==='es'?'Lo que tienen en común':lang==='ar'?'أوجه التشابه':'What they have in common'}\n• ${lang==='zh'?'不同点':lang==='ja'?'違い':lang==='ko'?'차이점':lang==='th'?'สิ่งที่แตกต่าง':lang==='vi'?'Điểm khác nhau':lang==='fr'?'Différences':lang==='es'?'Lo que cambia':lang==='ar'?'أوجه الاختلاف':'What is different'}\n• ${lang==='zh'?'为什么这个差异重要':lang==='ja'?'なぜその違いが重要か':lang==='ko'?'왜 그 차이가 중요한지':lang==='th'?'ทำไมความแตกต่างจึงสำคัญ':lang==='vi'?'Vì sao sự khác biệt quan trọng':lang==='fr'?'Pourquoi la différence compte':lang==='es'?'Por qué importa la diferencia':lang==='ar'?'لماذا يهم هذا الاختلاف':'Why the difference matters'}\n\n${c.focus}: ${p.focus}${cleanBase ? `\n\n${firstLine}` : ''}`;
+
+  if(type === "application") return `${opening}: ${topicName}\n\n${c.example}.\n\n1. ${c.start}.\n2. ${lang==='zh'?'找到它出现的实际场景':lang==='ja'?'実際に使われる場面を確認します':lang==='ko'?'실제로 나타나는 상황을 찾습니다':lang==='th'?'หาสถานการณ์จริงที่แนวคิดนี้ถูกใช้':lang==='vi'?'Tìm tình huống thực tế nơi khái niệm này xuất hiện':lang==='fr'?'Trouvez une situation réelle où le concept apparaît':lang==='es'?'Busca una situación real donde aparece el concepto':lang==='ar'?'حدد موقفًا عمليًا يظهر فيه المفهوم':'Find a real situation where the concept appears.'}\n3. ${lang==='zh'?'解释它在这个场景中的作用':lang==='ja'?'その場面での役割を説明します':lang==='ko'?'그 상황에서 어떤 역할을 하는지 설명합니다':lang==='th'?'อธิบายบทบาทของแนวคิดในสถานการณ์นั้น':lang==='vi'?'Giải thích vai trò của khái niệm trong tình huống đó':lang==='fr'?'Expliquez son rôle dans cette situation':lang==='es'?'Explica su función en esa situación':lang==='ar'?'اشرح دوره في هذا الموقف':'Explain its role in that situation.'}\n\n${firstLine || topicName}\n\n${c.focus}: ${p.focus}`;
+
+  if(type === "confusion") return `${opening}\n\n${c.start}.\n\n${firstLine || topicName}\n\n${lang==='zh'?'把概念拆成更小的部分，再把每一部分连接起来。':lang==='ja'?'概念を小さな部分に分け、それぞれをつなげます。':lang==='ko'?'개념을 작은 부분으로 나누고 서로 연결합니다.':lang==='th'?'แบ่งแนวคิดออกเป็นส่วนเล็ก ๆ แล้วเชื่อมโยงแต่ละส่วน':lang==='vi'?'Chia khái niệm thành các phần nhỏ rồi kết nối chúng.':lang==='fr'?'Divisez le concept en petites parties puis reliez-les.':lang==='es'?'Divide el concepto en partes pequeñas y conéctalas.':lang==='ar'?'قسّم المفهوم إلى أجزاء صغيرة ثم اربط بينها.':'Break the concept into smaller parts and connect them.'}\n\n${c.focus}: ${p.focus}\n${c.check}: ${p.check}`;
+
+  if(type === "definition") return `${opening}: ${topicName}\n\n${firstLine || topicName}\n\n${lang==='zh'?'然后理解它做什么、如何运作以及在哪里使用。':lang==='ja'?'次に、何をするのか、どう働くのか、どこで使うのかを見ます。':lang==='ko'?'그다음 무엇을 하는지, 어떻게 작동하는지, 어디에 쓰이는지 봅니다.':lang==='th'?'จากนั้นดูว่ามันทำอะไร ทำงานอย่างไร และใช้ที่ไหน':lang==='vi'?'Sau đó xem nó làm gì, hoạt động thế nào và được dùng ở đâu.':lang==='fr'?'Ensuite, voyez ce que cela fait, comment cela fonctionne et où on l’utilise.':lang==='es'?'Después mira qué hace, cómo funciona y dónde se usa.':lang==='ar'?'ثم انظر إلى ما يفعله وكيف يعمل وأين يُستخدم.':'Then look at what it does, how it works and where it is used.'}\n\n${c.focus}: ${p.focus}`;
+
+  return `${opening}: ${topicName}\n\n${firstLine || topicName}\n\n${c.focus}: ${p.focus}\n${c.check}: ${p.check}`;
+}
+
+let chatMessages = [];
+let lastAssistantReply = "";
+
+function renderChat(){
+  const box = document.getElementById("explanation");
+  box.innerHTML = "";
+  if(!chatMessages.length){
+    const welcome = document.createElement("div");
+    welcome.className = "chat-message baint";
+    welcome.innerHTML = 'Ask a question and I will explain the selected topic clearly';
+    box.appendChild(welcome);
+    return;
+  }
+  chatMessages.forEach(m => {
+    const el = document.createElement("div");
+    el.className = `chat-message ${m.role}`;
+    const label = m.role === "user" ? "You" : "";
+    el.innerHTML = label ? `<div class="chat-label">${label}</div>${escapeHtml(m.text)}` : escapeHtml(m.text);
+    box.appendChild(el);
+  });
+  box.scrollTop = box.scrollHeight;
+}
+
+function escapeHtml(text){
+  return String(text).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+}
+
 function updateContent(){
-  const lang  = document.getElementById("language").value;
-  const s     = document.getElementById("subject").value;
-  const t     = document.getElementById("topic").value;
-  const mode  = document.getElementById("mode").value;
-
-  if(!data[lang] || !data[lang][s] || !data[lang][s][t]) return;
-
-  const base = data[lang][s][t];
-  let output = "";
-
-  if(mode === "step")    output = ui[lang].modes[0] + ":\n\n" + base;
-  else if(mode === "simple")  output = ui[lang].modes[1] + ":\n\n" + base.split("\n")[0];
-  else if(mode === "logic")   output = ui[lang].modes[2] + ":\n\n" + base;
-  else if(mode === "context") output = ui[lang].modes[3] + ":\n\n" + base;
-  else if(mode === "human")   output = ui[lang].modes[4] + ":\n\n" + base;
-
-  document.getElementById("explanation").innerText =
-    ui[lang].assistant + "\n\n" + output;
+  chatMessages = [];
+  lastAssistantReply = "";
+  stopVoice();
+  renderChat();
 }
 
 /* ── VOICE ── */
 let utterance;
+let voicePlaying = false;
 
 function getVoice(lang){
   const voices = speechSynthesis.getVoices();
-  return voices.find(v => v.lang.toLowerCase().includes(lang)) ||
-         voices.find(v => v.lang.toLowerCase().includes("en"));
+  return voices.find(v => v.lang.toLowerCase().startsWith(lang.toLowerCase())) || null;
 }
 
-function speak(){
-  stopVoice();
-  const lang = document.getElementById("language").value;
-  const text = document.getElementById("explanation").innerText;
-  document.getElementById("subtitles").style.display  = "block";
-  document.getElementById("subtitles").innerText = text;
-  utterance       = new SpeechSynthesisUtterance(text);
-  utterance.voice = getVoice(voiceMap[lang]);
-  utterance.lang  = voiceMap[lang];
-  speechSynthesis.speak(utterance);
-}
+function toggleVoice(){
+  if(voicePlaying){
+    stopVoice();
+    return;
+  }
 
-function speakReply(){
-  stopVoice();
   const lang = document.getElementById("language").value;
-  const text = document.getElementById("teacherReply").innerText;
-  document.getElementById("subtitles").style.display  = "block";
-  document.getElementById("subtitles").innerText = text;
-  utterance       = new SpeechSynthesisUtterance(text);
-  utterance.voice = getVoice(voiceMap[lang]);
-  utterance.lang  = voiceMap[lang];
+  const text = lastAssistantReply.trim();
+  if(!text) return;
+
+  speechSynthesis.cancel();
+  const voice = getVoice(voiceMap[lang]);
+  if(!voice){
+    document.getElementById("btn-voice").innerText = ui[lang].speak;
+    return;
+  }
+  utterance = new SpeechSynthesisUtterance(text);
+  utterance.voice = voice;
+  utterance.lang = voiceMap[lang];
+  utterance.onstart = () => {
+    voicePlaying = true;
+    document.getElementById("btn-voice").innerText = "⏹ Stop";
+  };
+  utterance.onend = utterance.onerror = () => {
+    voicePlaying = false;
+    document.getElementById("btn-voice").innerText = ui[lang].speak;
+  };
   speechSynthesis.speak(utterance);
 }
 
 function stopVoice(){
   speechSynthesis.cancel();
-  document.getElementById("subtitles").style.display = "none";
+  voicePlaying = false;
+  const lang = document.getElementById("language").value;
+  document.getElementById("btn-voice").innerText = ui[lang].speak;
 }
 
 speechSynthesis.onvoiceschanged = () => { speechSynthesis.getVoices(); };
 
+renderChat();
+
 /* ── QUESTION ── */
 function answerQuestion(){
   const lang = document.getElementById("language").value;
-  const q    = document.getElementById("studentQuestion").value;
+  const q    = document.getElementById("studentQuestion").value.trim();
   const s    = document.getElementById("subject").value;
   const t    = document.getElementById("topic").value;
   const mode = document.getElementById("mode").value;
+  const subjectData = getSubjectData(lang, s);
+  const base = subjectData[t] || data.en[s]?.[t] || `This question is about ${prettyTopic(t || s)}.`;
 
-  const base = data[lang][s][t];
-  let reply  = "";
+  if(!q) return;
 
-  if(mode === "step")    reply = ui[lang].modes[0] + ":\n\n" + base;
-  else if(mode === "simple")  reply = ui[lang].modes[1] + ":\n\n" + base.split("\n")[0];
-  else if(mode === "logic")   reply = ui[lang].modes[2] + ":\n\n" + base;
-  else if(mode === "context") reply = ui[lang].modes[3] + ":\n\n" + base;
-  else if(mode === "human")   reply = ui[lang].modes[4] + ":\n\n" + base;
-
-  document.getElementById("teacherReply").innerText =
-    ui[lang].assistant + "\n\n" + q + "\n\n" + reply;
+  stopVoice();
+  const reply = makeSmartReply(lang, s, t, q, mode, base);
+  chatMessages.push({role:"user", text:q});
+  chatMessages.push({role:"baint", text:reply});
+  lastAssistantReply = reply;
+  renderChat();
+  document.getElementById("studentQuestion").value = "";
 }
 
-/* ── FEEDBACK ── */
-function submitFeedback(){
-  const f    = document.getElementById("feedbackInput").value;
-  let list   = JSON.parse(localStorage.getItem("baint_feedback")) || [];
-  list.push(f);
-  localStorage.setItem("baint_feedback", JSON.stringify(list));
-  document.getElementById("feedbackList").innerHTML = list.map(x => "• " + x).join("<br>");
-}
-
-/* ── WAITLIST ── */
-function joinWaitlist(){
-  const lang  = document.getElementById("language").value;
-  const email = document.getElementById("waitlistEmail").value;
-  let list    = JSON.parse(localStorage.getItem("baint_waitlist")) || [];
-  list.push(email);
-  localStorage.setItem("baint_waitlist", JSON.stringify(list));
-  window.location.href = `mailto:baintcomputer@gmail.com?subject=BAINT Waitlist&body=New signup: ${email}`;
-  document.getElementById("waitlistMessage").innerText = ui[lang].waitlistOk;
-}
 
 </script>
 </body>
