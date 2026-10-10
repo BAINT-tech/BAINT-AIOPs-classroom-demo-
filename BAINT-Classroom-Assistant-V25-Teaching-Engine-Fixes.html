@@ -1,0 +1,1781 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>BAINT OS – Classroom Assistant Demo V24</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body {
+  margin: 0;
+  background: #f3f3f3;
+  font-family: Arial, sans-serif;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+.laptop {
+  width: 960px;
+  height: 650px;
+  background: #000;
+  border-radius: 28px;
+  padding: 16px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+  display: flex;
+  flex-direction: column;
+}
+
+.top-bar {
+  height: 36px;
+  background: #1c1c1c;
+  border-radius: 18px 18px 0 0;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  font-size: 14px;
+  font-weight: bold;
+}
+
+.screen-shell {
+  flex: 1;
+  background: #f9fafb;
+  border-radius: 0 0 28px 28px;
+  margin-top: 6px;
+  padding: 22px;
+  overflow-y: auto;
+}
+
+.section { margin-bottom: 20px; }
+.section h4 { margin: 0 0 8px; font-size: 15px; }
+
+select, input {
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid #d1d5db;
+  font-size: 14px;
+  margin-right: 8px;
+}
+
+input[type="text"], input[type="email"] { width: 60%; }
+
+.card {
+  background: #fff;
+  border-radius: 14px;
+  padding: 16px;
+  border: 1px solid #e5e7eb;
+  font-size: 14px;
+  line-height: 1.6;
+  min-height: 60px;
+  white-space: pre-wrap;
+}
+
+button {
+  background: #2563eb;
+  border: none;
+  padding: 10px 18px;
+  border-radius: 10px;
+  color: #fff;
+  cursor: pointer;
+  font-size: 14px;
+  margin-top: 6px;
+}
+
+.waitlist {
+  background: #eef2ff;
+  border: 1px dashed #6366f1;
+  border-radius: 14px;
+  padding: 16px;
+}
+
+.success { color: #047857; font-size: 13px; margin-top: 8px; }
+
+
+.disclaimer { font-size: 12px; color: #6b7280; margin-top: 6px; }
+
+.chat-window {
+  position:relative;
+  background:#f3f4f6;
+  border:1px solid #e5e7eb;
+  border-radius:16px;
+  padding:14px;
+  min-height:180px;
+  max-height:360px;
+  overflow-y:auto;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+.chat-message {
+  max-width:82%;
+  padding:11px 13px;
+  border-radius:14px;
+  font-size:14px;
+  line-height:1.55;
+  white-space:pre-wrap;
+}
+.chat-message.user {
+  align-self:flex-end;
+  background:#2563eb;
+  color:#fff;
+  border-bottom-right-radius:5px;
+}
+.chat-message.baint {
+  align-self:flex-start;
+  background:#fff;
+  color:#111827;
+  border:1px solid #e5e7eb;
+  border-bottom-left-radius:5px;
+}
+.chat-label {
+  font-size:11px;
+  font-weight:700;
+  margin-bottom:4px;
+  opacity:.7;
+}
+.question-row { display:flex; align-items:center; gap:8px; width:100%; }
+.question-row input { flex:1; margin-right:0; }
+.send-button { width:42px; height:42px; padding:0; margin-top:0; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:22px; line-height:1; }
+.voice-toggle { min-width:42px; }
+.copy-answer { display:block; margin-top:9px; padding:5px 9px; border-radius:7px; font-size:12px; background:#eef2ff; color:#1d4ed8; border:1px solid #c7d2fe; }
+.down-arrow-row { position:sticky; bottom:0; z-index:2; display:flex; justify-content:center; align-self:center; margin-top:-42px; height:34px; pointer-events:none; }
+.down-arrow { pointer-events:auto; width:38px; height:38px; padding:0; margin:0; border-radius:50%; background:#374151; color:#fff; font-size:21px; line-height:1; box-shadow:0 2px 8px rgba(0,0,0,.18); }
+.mic-button { width:42px; height:42px; flex:0 0 42px; padding:0; margin:0; border-radius:50%; background:#374151; color:#fff; font-size:19px; display:flex; align-items:center; justify-content:center; }
+.mic-button.listening { background:#dc2626; }
+@media (max-width:600px) { .question-row { gap:6px; } .question-row input { min-width:0; width:100%; } }
+
+</style>
+</head>
+
+<body>
+
+<div class="laptop">
+  <div class="top-bar">BAINT OS — Classroom Assistant Demo</div>
+  <div class="screen-shell">
+
+    <!-- LAUNCH -->
+    <div id="app-launcher" class="section">
+      <img src="logo.png" alt="Baint OS Logo" style="width:120px;height:120px;margin-bottom:12px;">
+      <h3 style="cursor:pointer;" onclick="launchDemo()">Click to Launch BAINT Classroom Demo</h3>
+      <div class="disclaimer">Prototype for testing. Answers come from a built-in lesson library, so some questions may not be covered yet. Human supervision encouraged.</div>
+    </div>
+
+    <!-- BOOT -->
+    <div class="section" id="boot" style="display:none;">
+      <div style="background:#111;color:#0f0;font-family:monospace;padding:20px;">
+        <div id="boot-log"></div>
+      </div>
+    </div>
+
+    <!-- DEMO -->
+    <div id="demo" style="display:none;">
+
+      <div class="section">
+        <h4 id="label-setup">Learning Setup</h4>
+
+        <select id="language" onchange="switchLanguage()">
+          <option value="en">🇺🇸 English</option>
+          <option value="zh">🇨🇳 Chinese</option>
+          <option value="fr">🇫🇷 French</option>
+          <option value="es">🇪🇸 Spanish</option>
+          <option value="th">🇹🇭 Thai</option>
+          <option value="ko">🇰🇷 Korean</option>
+          <option value="vi">🇻🇳 Vietnamese</option>
+          <option value="ja">🇯🇵 Japanese</option>
+          <option value="ar">🇦🇪 Arabic (UAE)</option>
+        </select>
+
+        <select id="mode" onchange="updateContent()">
+          <option value="step">Step-by-step</option>
+          <option value="simple">Simple</option>
+          <option value="logic">Logical</option>
+          <option value="context">Context</option>
+          <option value="human">Human</option>
+        </select>
+
+        <select id="subject" onchange="updateTopics(); updateContent();">
+          <option value="math">Mathematics</option>
+          <option value="biology">Biology</option>
+          <option value="chemistry">Chemistry</option>
+          <option value="history">History</option>
+          <option value="computer">Computer Science</option>
+          <option value="biochemistry">Biochemistry</option>
+          <option value="histology">Histology</option>
+          <option value="enzymology">Advanced Enzymology</option>
+          <option value="purine_pyrimidine">Biosynthesis of Purine and Pyrimidine</option>
+          <option value="cholesterol">Biosynthesis of Cholesterol</option>
+          <option value="engineering">Engineering / Practical Problem-Solving</option>
+          <option value="physics">Physics</option>
+        </select>
+
+        <select id="topic" onchange="updateContent()"></select>
+      </div>
+
+      <div class="section">
+        <h4 id="label-assistant">BAINT AI Classroom Assistant</h4>
+        <div class="chat-window" id="explanation"></div>
+        <button id="btn-voice" class="voice-toggle" onclick="toggleVoice()">🔊 Listen</button>
+      </div>
+
+      <div class="section">
+        <div class="question-row">
+          <input type="text" id="studentQuestion" placeholder="Ask BAINT AI..." onkeydown="if(event.key==='Enter') answerQuestion()" />
+          <button id="btn-mic" class="mic-button" type="button" onclick="toggleMic()" aria-label="Speak your question" title="Speak your question">🎙️</button>
+          <button id="btn-ask" class="send-button" onclick="answerQuestion()" aria-label="Send question" title="Send question">➤</button>
+        </div>
+      </div>
+
+      </div>
+
+    </div>
+  </div>
+
+
+
+<script>
+
+const appLauncher = document.getElementById("app-launcher");
+const bootScreen  = document.getElementById("boot");
+const demoScreen  = document.getElementById("demo");
+const bootLog     = document.getElementById("boot-log");
+
+/* ── UI TRANSLATIONS ── */
+const ui = {
+  en: {
+    setup:       "Learning Setup",
+    assistant:   "BAINT AI Classroom Assistant",
+    speak:       "🎙️ BAINT Voice Explainer",
+    stop:        "⏹ Stop Voice",
+    ask:         "Ask",
+    placeholder: "Ask BAINT AI...",
+    listen:      "🔊 Listen Answer",
+    feedback:    "Feedback",
+    submit:      "Submit",
+    waitlist:    "Join BAINT Waitlist",
+    join:        "Join",
+    replyDefault:"BAINT AI will respond here...",
+    waitlistOk:  "You're on the waitlist!",
+    boot: ["Booting BAINT AI...","Loading Classroom Engine...","Activating Voice System...","Ready."],
+    modes: ["Step-by-step","Simple","Logical","Context","Human"],
+    subjects: ["Mathematics","Biology","Chemistry","History","Computer Science","Biochemistry","Histology","Advanced Enzymology","Biosynthesis of Purine and Pyrimidine","Biosynthesis of Cholesterol","Engineering / Practical Problem-Solving","Physics"]
+  },
+  zh: {
+    setup:       "学习设置",
+    assistant:   "BAINT AI 课堂助手",
+    speak:       "🎙️ 语音讲解",
+    stop:        "⏹ 停止语音",
+    ask:         "提问",
+    placeholder: "向 BAINT AI 提问...",
+    listen:      "🔊 收听答案",
+    feedback:    "反馈",
+    submit:      "提交",
+    waitlist:    "加入候补名单",
+    join:        "加入",
+    replyDefault:"BAINT AI 将在此处回复...",
+    waitlistOk:  "您已加入候补名单！",
+    boot: ["正在启动 BAINT AI...","加载课堂引擎...","激活语音系统...","准备就绪。"],
+    modes: ["逐步讲解","简单","逻辑分析","情境联系","人性化"],
+    subjects: ["数学","生物学","化学","历史","计算机科学","生物化学","组织学","高级酶学","嘌呤与嘧啶的生物合成","胆固醇的生物合成","工程学 / 实际问题解决","物理学"]
+  },
+  fr: {
+    setup:       "Configuration d'apprentissage",
+    assistant:   "Assistant IA BAINT en classe",
+    speak:       "🎙️ Explication vocale BAINT",
+    stop:        "⏹ Arrêter la voix",
+    ask:         "Demander",
+    placeholder: "Posez une question à BAINT AI...",
+    listen:      "🔊 Écouter la réponse",
+    feedback:    "Retour d'information",
+    submit:      "Soumettre",
+    waitlist:    "Rejoindre la liste d'attente",
+    join:        "Rejoindre",
+    replyDefault:"BAINT AI répondra ici...",
+    waitlistOk:  "Vous êtes sur la liste d'attente !",
+    boot: ["Démarrage de BAINT AI...","Chargement du moteur de classe...","Activation du système vocal...","Prêt."],
+    modes: ["Étape par étape","Simple","Logique","Contexte","Humain"],
+    subjects: ["Mathématiques","Biologie","Chimie","Histoire","Informatique","Biochimie","Histologie","Enzymologie avancée","Biosynthèse des purines et pyrimidines","Biosynthèse du cholestérol","Ingénierie / résolution de problèmes pratiques","Physique"]
+  },
+  es: {
+    setup:       "Configuración de aprendizaje",
+    assistant:   "Asistente IA BAINT en el aula",
+    speak:       "🎙️ Explicador de voz BAINT",
+    stop:        "⏹ Detener voz",
+    ask:         "Preguntar",
+    placeholder: "Pregunta a BAINT AI...",
+    listen:      "🔊 Escuchar respuesta",
+    feedback:    "Comentarios",
+    submit:      "Enviar",
+    waitlist:    "Unirse a la lista de espera",
+    join:        "Unirse",
+    replyDefault:"BAINT AI responderá aquí...",
+    waitlistOk:  "¡Estás en la lista de espera!",
+    boot: ["Iniciando BAINT AI...","Cargando motor de clase...","Activando sistema de voz...","Listo."],
+    modes: ["Paso a paso","Simple","Lógico","Contexto","Humano"],
+    subjects: ["Matemáticas","Biología","Química","Historia","Ciencias de la Computación","Bioquímica","Histología","Enzimología avanzada","Biosíntesis de purinas y pirimidinas","Biosíntesis del colesterol","Ingeniería / resolución práctica de problemas","Física"]
+  },
+  th: {
+    setup:       "การตั้งค่าการเรียนรู้",
+    assistant:   "ผู้ช่วย AI BAINT ในห้องเรียน",
+    speak:       "🎙️ อธิบายด้วยเสียง BAINT",
+    stop:        "⏹ หยุดเสียง",
+    ask:         "ถาม",
+    placeholder: "ถาม BAINT AI...",
+    listen:      "🔊 ฟังคำตอบ",
+    feedback:    "ข้อเสนอแนะ",
+    submit:      "ส่ง",
+    waitlist:    "เข้าร่วมรายการรอ",
+    join:        "เข้าร่วม",
+    replyDefault:"BAINT AI จะตอบที่นี่...",
+    waitlistOk:  "คุณอยู่ในรายการรอแล้ว!",
+    boot: ["กำลังบู๊ต BAINT AI...","กำลังโหลดเครื่องมือห้องเรียน...","กำลังเปิดใช้งานระบบเสียง...","พร้อมแล้ว"],
+    modes: ["ทีละขั้นตอน","เรียบง่าย","เชิงตรรกะ","บริบท","แบบมนุษย์"],
+    subjects: ["คณิตศาสตร์","ชีววิทยา","เคมี","ประวัติศาสตร์","วิทยาการคอมพิวเตอร์","ชีวเคมี","จุลกายวิภาคศาสตร์","เอนไซม์วิทยาขั้นสูง","การสังเคราะห์ทางชีวภาพของพิวรีนและไพริมิดีน","การสังเคราะห์คอเลสเตอรอล","วิศวกรรม / การแก้ปัญหาเชิงปฏิบัติ","ฟิสิกส์"]
+  },
+  ko: {
+    setup:       "학습 설정",
+    assistant:   "BAINT AI 교실 어시스턴트",
+    speak:       "🎙️ BAINT 음성 설명",
+    stop:        "⏹ 음성 중지",
+    ask:         "질문하기",
+    placeholder: "BAINT AI에게 질문하세요...",
+    listen:      "🔊 답변 듣기",
+    feedback:    "피드백",
+    submit:      "제출",
+    waitlist:    "대기자 명단 등록",
+    join:        "등록",
+    replyDefault:"BAINT AI가 여기에 응답합니다...",
+    waitlistOk:  "대기자 명단에 등록되었습니다!",
+    boot: ["BAINT AI 부팅 중...","교실 엔진 로딩 중...","음성 시스템 활성화 중...","준비 완료."],
+    modes: ["단계별","간단히","논리적","맥락","인간적"],
+    subjects: ["수학","생물학","화학","역사","컴퓨터 과학","생화학","조직학","고급 효소학","퓨린 및 피리미딘 생합성","콜레스테롤 생합성","공학 / 실용 문제 해결","물리학"]
+  },
+  vi: {
+    setup:       "Cài đặt học tập",
+    assistant:   "Trợ lý AI BAINT trong lớp học",
+    speak:       "🎙️ Giải thích bằng giọng nói BAINT",
+    stop:        "⏹ Dừng giọng nói",
+    ask:         "Hỏi",
+    placeholder: "Hỏi BAINT AI...",
+    listen:      "🔊 Nghe câu trả lời",
+    feedback:    "Phản hồi",
+    submit:      "Gửi",
+    waitlist:    "Tham gia danh sách chờ",
+    join:        "Tham gia",
+    replyDefault:"BAINT AI sẽ trả lời ở đây...",
+    waitlistOk:  "Bạn đã có trong danh sách chờ!",
+    boot: ["Đang khởi động BAINT AI...","Đang tải công cụ lớp học...","Đang kích hoạt hệ thống giọng nói...","Sẵn sàng."],
+    modes: ["Từng bước","Đơn giản","Logic","Bối cảnh","Nhân văn"],
+    subjects: ["Toán học","Sinh học","Hóa học","Lịch sử","Khoa học máy tính","Hóa sinh","Mô học","Enzym học nâng cao","Sinh tổng hợp Purine và Pyrimidine","Sinh tổng hợp Cholesterol","Kỹ thuật / giải quyết vấn đề thực tế","Vật lý"]
+  },
+  ja: {
+    setup: "学習設定", assistant: "BAINT AI Classroom Assistant", speak: "🔊 聞く", stop: "⏹ 停止", ask: "", placeholder: "BAINT AIに質問...", listen: "", feedback: "", submit: "", waitlist: "", join: "", replyDefault: "ここにBAINT AIの回答が表示されます...", waitlistOk: "", boot: ["BAINT AIを起動中...","授業エンジンを読み込み中...","音声システムを有効化中...","準備完了。"], modes: ["ステップごと","シンプル","論理的","文脈","人間的"], subjects: ["数学","生物学","化学","歴史","コンピュータサイエンス","生化学","組織学","高度な酵素学","プリンとピリミジンの生合成","コレステロールの生合成","工学 / 実践的な問題解決","物理学"]
+  },
+  ar: {
+    setup: "إعداد التعلم", assistant: "مساعد BAINT AI للفصل الدراسي", speak: "🔊 استماع", stop: "⏹ إيقاف", ask: "", placeholder: "اسأل BAINT AI...", listen: "", feedback: "", submit: "", waitlist: "", join: "", replyDefault: "ستظهر إجابة BAINT AI هنا...", waitlistOk: "", boot: ["جارٍ تشغيل BAINT AI...","جارٍ تحميل محرك الفصل...","جارٍ تفعيل نظام الصوت...","جاهز."], modes: ["خطوة بخطوة","بسيط","منطقي","سياق","إنساني"], subjects: ["الرياضيات","الأحياء","الكيمياء","التاريخ","علوم الحاسوب","الكيمياء الحيوية","علم الأنسجة","علم الإنزيمات المتقدم","التخليق الحيوي للبيورين والبيريميدين","التخليق الحيوي للكوليسترول","الهندسة / حل المشكلات العملية","الفيزياء"]
+  }
+};
+
+/* ── CONTENT DATA (all 9 UI languages; subject fallbacks remain available) ── */
+const data = {
+
+  /* ═══════════ ENGLISH ═══════════ */
+  en: {
+    biology: {
+      photosynthesis: `Photosynthesis is the process plants use to make food.\n\nStep 1: Plants take in sunlight through leaves\nStep 2: They absorb carbon dioxide from air\nStep 3: Water is absorbed from roots\nStep 4: Chlorophyll converts energy into glucose\n\nExample: A tree uses sunlight to grow fruits and leaves.\n\nSummary: Plants "eat" sunlight to survive.`,
+      cell: `Cells are the basic building blocks of life.\n\nStep 1: All living things are made of cells\nStep 2: Cells have nucleus, membrane, cytoplasm\nStep 3: They perform life functions\n\nExample: Your skin is made of millions of cells.\n\nSummary: Cells = tiny units that form life.`,
+      digestion: `Digestion is how food is broken down in the body.\n\nStep 1: Food enters mouth\nStep 2: Stomach breaks it down\nStep 3: Nutrients are absorbed\n\nExample: Rice becomes energy in your body.\n\nSummary: Digestion = turning food into energy.`,
+      genetics: `Genetics is how traits are passed from parents.\n\nStep 1: DNA carries information\nStep 2: Genes control traits\nStep 3: Traits are inherited\n\nExample: Eye color comes from parents.\n\nSummary: Genes = biological information transfer.`
+    },
+    math: {
+      algebra: `Algebra is solving unknown values using symbols.\n\nStep 1: Identify unknown (x)\nStep 2: Form equation\nStep 3: Solve step-by-step\n\nExample: x + 5 = 10 → x = 5\n\nSummary: Algebra = solving missing numbers.`,
+      ratio: `Ratios compare two quantities.\n\nStep 1: Write values\nStep 2: Simplify\n\nExample: 2:4 = 1:2\n\nSummary: Ratio = comparison tool.`
+    },
+    science: {
+      gravity: `Gravity is a force that pulls objects down.\n\nStep 1: Earth has mass\nStep 2: Mass creates pull\nStep 3: Everything falls toward Earth\n\nExample: Apple falling from tree.\n\nSummary: Gravity = Earth's pulling force.`,
+      energy: `Energy is the ability to do work.\n\nStep 1: Exists in many forms\nStep 2: Can change form\nStep 3: Cannot be destroyed\n\nExample: Food → energy for movement\n\nSummary: Energy = power to do work.`
+    },
+    history: {
+      revolution: `A revolution is a major change in society.\n\nStep 1: People are dissatisfied\nStep 2: Conflict begins\nStep 3: Government changes\n\nExample: French Revolution changed France.\n\nSummary: Revolution = big political change.`,
+      ww1: `World War 1 was a global conflict.\n\nStep 1: Political tension\nStep 2: Alliances formed\nStep 3: War begins in 1914\n\nSummary: WW1 = global war between nations.`
+    },
+    computer: {
+      ai: `AI is machines simulating human intelligence.\n\nStep 1: Machines learn data\nStep 2: Patterns are recognized\nStep 3: Decisions are made\n\nExample: Chatbots answering questions.\n\nSummary: AI = machine thinking system.`,
+      internet: `Internet connects computers worldwide.\n\nStep 1: Devices connect\nStep 2: Data is shared\nStep 3: Communication happens\n\nSummary: Internet = global communication network.`
+    }
+  },
+
+  /* ═══════════ CHINESE ═══════════ */
+  zh: {
+    biology: {
+      photosynthesis: `光合作用是植物制造食物的过程。\n\n第1步：植物通过叶片吸收阳光\n第2步：吸收空气中的二氧化碳\n第3步：根部吸收水分\n第4步：叶绿素将能量转化为葡萄糖\n\n例子：一棵树利用阳光生长果实和叶子。\n\n总结：植物靠"吃"阳光生存。`,
+      cell: `细胞是生命的基本组成单位。\n\n第1步：所有生物都由细胞构成\n第2步：细胞具有细胞核、细胞膜、细胞质\n第3步：它们执行生命功能\n\n例子：你的皮肤由数百万个细胞组成。\n\n总结：细胞 = 构成生命的微小单位。`,
+      digestion: `消化是食物在体内被分解的过程。\n\n第1步：食物进入口腔\n第2步：胃将其分解\n第3步：营养物质被吸收\n\n例子：米饭在体内转化为能量。\n\n总结：消化 = 将食物转化为能量。`,
+      genetics: `遗传学研究特征如何从父母传给后代。\n\n第1步：DNA携带遗传信息\n第2步：基因控制特征\n第3步：特征被遗传\n\n例子：眼睛颜色来自父母。\n\n总结：基因 = 生物信息的传递。`
+    },
+    math: {
+      algebra: `代数是用符号求解未知值的数学。\n\n第1步：识别未知数（x）\n第2步：建立方程\n第3步：逐步求解\n\n例子：x + 5 = 10 → x = 5\n\n总结：代数 = 求解未知数。`,
+      ratio: `比率用于比较两个数量。\n\n第1步：写出数值\n第2步：化简\n\n例子：2:4 = 1:2\n\n总结：比率 = 比较工具。`
+    },
+    science: {
+      gravity: `重力是将物体向下拉的力。\n\n第1步：地球有质量\n第2步：质量产生引力\n第3步：一切都向地球坠落\n\n例子：苹果从树上落下。\n\n总结：重力 = 地球的吸引力。`,
+      energy: `能量是做功的能力。\n\n第1步：以多种形式存在\n第2步：可以改变形式\n第3步：不能被消灭\n\n例子：食物 → 运动所需能量\n\n总结：能量 = 做功的力量。`
+    },
+    history: {
+      revolution: `革命是社会的重大变革。\n\n第1步：人民不满\n第2步：冲突开始\n第3步：政府改变\n\n例子：法国大革命改变了法国。\n\n总结：革命 = 重大政治变革。`,
+      ww1: `第一次世界大战是一场全球性冲突。\n\n第1步：政治紧张局势\n第2步：联盟形成\n第3步：1914年战争爆发\n\n总结：一战 = 国家之间的全球战争。`
+    },
+    computer: {
+      ai: `人工智能是机器模拟人类智能的技术。\n\n第1步：机器学习数据\n第2步：识别模式\n第3步：做出决策\n\n例子：聊天机器人回答问题。\n\n总结：人工智能 = 机器思维系统。`,
+      internet: `互联网将全球计算机连接起来。\n\n第1步：设备连接\n第2步：数据共享\n第3步：通信实现\n\n总结：互联网 = 全球通信网络。`
+    }
+  },
+
+  /* ═══════════ FRENCH ═══════════ */
+  fr: {
+    biology: {
+      photosynthesis: `La photosynthèse est le processus par lequel les plantes fabriquent leur nourriture.\n\nÉtape 1 : Les plantes captent la lumière du soleil par leurs feuilles\nÉtape 2 : Elles absorbent le dioxyde de carbone de l'air\nÉtape 3 : L'eau est absorbée par les racines\nÉtape 4 : La chlorophylle convertit l'énergie en glucose\n\nExemple : Un arbre utilise la lumière du soleil pour faire pousser ses fruits et feuilles.\n\nRésumé : Les plantes "mangent" la lumière du soleil pour survivre.`,
+      cell: `Les cellules sont les unités de base de la vie.\n\nÉtape 1 : Tous les êtres vivants sont composés de cellules\nÉtape 2 : Les cellules ont un noyau, une membrane et un cytoplasme\nÉtape 3 : Elles accomplissent les fonctions vitales\n\nExemple : Ta peau est composée de millions de cellules.\n\nRésumé : Cellule = petite unité constituant la vie.`,
+      digestion: `La digestion est la façon dont la nourriture est décomposée dans le corps.\n\nÉtape 1 : La nourriture entre par la bouche\nÉtape 2 : L'estomac la décompose\nÉtape 3 : Les nutriments sont absorbés\n\nExemple : Le riz devient de l'énergie dans ton corps.\n\nRésumé : Digestion = transformer la nourriture en énergie.`,
+      genetics: `La génétique étudie comment les traits sont transmis des parents aux enfants.\n\nÉtape 1 : L'ADN porte l'information\nÉtape 2 : Les gènes contrôlent les traits\nÉtape 3 : Les traits sont hérités\n\nExemple : La couleur des yeux vient des parents.\n\nRésumé : Gènes = transfert d'information biologique.`
+    },
+    math: {
+      algebra: `L'algèbre consiste à résoudre des valeurs inconnues à l'aide de symboles.\n\nÉtape 1 : Identifier l'inconnu (x)\nÉtape 2 : Former l'équation\nÉtape 3 : Résoudre étape par étape\n\nExemple : x + 5 = 10 → x = 5\n\nRésumé : Algèbre = résoudre des nombres manquants.`,
+      ratio: `Les ratios comparent deux quantités.\n\nÉtape 1 : Écrire les valeurs\nÉtape 2 : Simplifier\n\nExemple : 2:4 = 1:2\n\nRésumé : Ratio = outil de comparaison.`
+    },
+    science: {
+      gravity: `La gravité est une force qui attire les objets vers le bas.\n\nÉtape 1 : La Terre a une masse\nÉtape 2 : La masse crée une attraction\nÉtape 3 : Tout tombe vers la Terre\n\nExemple : Une pomme tombe d'un arbre.\n\nRésumé : Gravité = force d'attraction de la Terre.`,
+      energy: `L'énergie est la capacité à effectuer un travail.\n\nÉtape 1 : Existe sous de nombreuses formes\nÉtape 2 : Peut changer de forme\nÉtape 3 : Ne peut pas être détruite\n\nExemple : Nourriture → énergie pour le mouvement\n\nRésumé : Énergie = puissance pour travailler.`
+    },
+    history: {
+      revolution: `Une révolution est un changement majeur dans la société.\n\nÉtape 1 : Le peuple est mécontent\nÉtape 2 : Un conflit commence\nÉtape 3 : Le gouvernement change\n\nExemple : La Révolution française a transformé la France.\n\nRésumé : Révolution = grand changement politique.`,
+      ww1: `La Première Guerre mondiale était un conflit mondial.\n\nÉtape 1 : Tensions politiques\nÉtape 2 : Formation d'alliances\nÉtape 3 : La guerre commence en 1914\n\nRésumé : WWI = guerre mondiale entre nations.`
+    },
+    computer: {
+      ai: `L'IA est la simulation de l'intelligence humaine par des machines.\n\nÉtape 1 : Les machines apprennent des données\nÉtape 2 : Les modèles sont reconnus\nÉtape 3 : Des décisions sont prises\n\nExemple : Des chatbots répondant à des questions.\n\nRésumé : IA = système de réflexion des machines.`,
+      internet: `Internet connecte les ordinateurs du monde entier.\n\nÉtape 1 : Les appareils se connectent\nÉtape 2 : Les données sont partagées\nÉtape 3 : La communication se produit\n\nRésumé : Internet = réseau de communication mondial.`
+    }
+  },
+
+  /* ═══════════ SPANISH ═══════════ */
+  es: {
+    biology: {
+      photosynthesis: `La fotosíntesis es el proceso mediante el cual las plantas producen su alimento.\n\nPaso 1: Las plantas absorben la luz solar a través de las hojas\nPaso 2: Absorben dióxido de carbono del aire\nPaso 3: El agua es absorbida por las raíces\nPaso 4: La clorofila convierte la energía en glucosa\n\nEjemplo: Un árbol usa la luz solar para hacer crecer sus frutos y hojas.\n\nResumen: Las plantas "comen" luz solar para sobrevivir.`,
+      cell: `Las células son los bloques fundamentales de la vida.\n\nPaso 1: Todos los seres vivos están formados por células\nPaso 2: Las células tienen núcleo, membrana y citoplasma\nPaso 3: Realizan las funciones vitales\n\nEjemplo: Tu piel está formada por millones de células.\n\nResumen: Célula = unidad pequeña que forma la vida.`,
+      digestion: `La digestión es cómo se descompone el alimento en el cuerpo.\n\nPaso 1: El alimento entra por la boca\nPaso 2: El estómago lo descompone\nPaso 3: Los nutrientes son absorbidos\n\nEjemplo: El arroz se convierte en energía en tu cuerpo.\n\nResumen: Digestión = convertir alimento en energía.`,
+      genetics: `La genética estudia cómo se transmiten los rasgos de padres a hijos.\n\nPaso 1: El ADN lleva la información\nPaso 2: Los genes controlan los rasgos\nPaso 3: Los rasgos son heredados\n\nEjemplo: El color de ojos viene de los padres.\n\nResumen: Genes = transferencia de información biológica.`
+    },
+    math: {
+      algebra: `El álgebra consiste en resolver valores desconocidos usando símbolos.\n\nPaso 1: Identificar el desconocido (x)\nPaso 2: Formar la ecuación\nPaso 3: Resolver paso a paso\n\nEjemplo: x + 5 = 10 → x = 5\n\nResumen: Álgebra = resolver números faltantes.`,
+      ratio: `Las razones comparan dos cantidades.\n\nPaso 1: Escribir los valores\nPaso 2: Simplificar\n\nEjemplo: 2:4 = 1:2\n\nResumen: Razón = herramienta de comparación.`
+    },
+    science: {
+      gravity: `La gravedad es una fuerza que atrae los objetos hacia abajo.\n\nPaso 1: La Tierra tiene masa\nPaso 2: La masa crea atracción\nPaso 3: Todo cae hacia la Tierra\n\nEjemplo: Una manzana cayendo de un árbol.\n\nResumen: Gravedad = fuerza de atracción de la Tierra.`,
+      energy: `La energía es la capacidad de realizar trabajo.\n\nPaso 1: Existe en muchas formas\nPaso 2: Puede cambiar de forma\nPaso 3: No puede ser destruida\n\nEjemplo: Alimento → energía para moverse\n\nResumen: Energía = poder para trabajar.`
+    },
+    history: {
+      revolution: `Una revolución es un cambio importante en la sociedad.\n\nPaso 1: El pueblo está insatisfecho\nPaso 2: Comienza el conflicto\nPaso 3: El gobierno cambia\n\nEjemplo: La Revolución Francesa transformó Francia.\n\nResumen: Revolución = gran cambio político.`,
+      ww1: `La Primera Guerra Mundial fue un conflicto global.\n\nPaso 1: Tensión política\nPaso 2: Se forman alianzas\nPaso 3: La guerra comienza en 1914\n\nResumen: WWI = guerra global entre naciones.`
+    },
+    computer: {
+      ai: `La IA es la simulación de la inteligencia humana por máquinas.\n\nPaso 1: Las máquinas aprenden datos\nPaso 2: Se reconocen patrones\nPaso 3: Se toman decisiones\n\nEjemplo: Chatbots respondiendo preguntas.\n\nResumen: IA = sistema de pensamiento de máquinas.`,
+      internet: `Internet conecta computadoras de todo el mundo.\n\nPaso 1: Los dispositivos se conectan\nPaso 2: Los datos se comparten\nPaso 3: La comunicación ocurre\n\nResumen: Internet = red de comunicación global.`
+    }
+  },
+
+  /* ═══════════ THAI ═══════════ */
+  th: {
+    biology: {
+      photosynthesis: `การสังเคราะห์แสงคือกระบวนการที่พืชใช้ในการสร้างอาหาร\n\nขั้นที่ 1: พืชรับแสงอาทิตย์ผ่านใบ\nขั้นที่ 2: ดูดซับคาร์บอนไดออกไซด์จากอากาศ\nขั้นที่ 3: รากดูดซับน้ำ\nขั้นที่ 4: คลอโรฟิลล์แปลงพลังงานเป็นกลูโคส\n\nตัวอย่าง: ต้นไม้ใช้แสงอาทิตย์เพื่อเจริญเติบโต\n\nสรุป: พืช "กิน" แสงอาทิตย์เพื่อความอยู่รอด`,
+      cell: `เซลล์คือหน่วยพื้นฐานของสิ่งมีชีวิต\n\nขั้นที่ 1: สิ่งมีชีวิตทุกชนิดประกอบด้วยเซลล์\nขั้นที่ 2: เซลล์มีนิวเคลียส เยื่อหุ้มเซลล์ และไซโตพลาสซึม\nขั้นที่ 3: เซลล์ทำหน้าที่ต่างๆ ของสิ่งมีชีวิต\n\nตัวอย่าง: ผิวหนังของคุณประกอบด้วยเซลล์หลายล้านเซลล์\n\nสรุป: เซลล์ = หน่วยเล็กๆ ที่ประกอบเป็นสิ่งมีชีวิต`,
+      digestion: `การย่อยอาหารคือกระบวนการที่ร่างกายย่อยสลายอาหาร\n\nขั้นที่ 1: อาหารเข้าสู่ปาก\nขั้นที่ 2: กระเพาะย่อยสลายอาหาร\nขั้นที่ 3: สารอาหารถูกดูดซึม\n\nตัวอย่าง: ข้าวกลายเป็นพลังงานในร่างกาย\n\nสรุป: การย่อยอาหาร = การเปลี่ยนอาหารเป็นพลังงาน`,
+      genetics: `พันธุศาสตร์คือการศึกษาการถ่ายทอดลักษณะจากพ่อแม่สู่ลูก\n\nขั้นที่ 1: DNA บรรจุข้อมูลทางพันธุกรรม\nขั้นที่ 2: ยีนควบคุมลักษณะต่างๆ\nขั้นที่ 3: ลักษณะถูกถ่ายทอดทางพันธุกรรม\n\nตัวอย่าง: สีตามาจากพ่อแม่\n\nสรุป: ยีน = การถ่ายทอดข้อมูลทางชีววิทยา`
+    },
+    math: {
+      algebra: `พีชคณิตคือการหาค่าที่ไม่รู้จักโดยใช้สัญลักษณ์\n\nขั้นที่ 1: ระบุค่าที่ไม่รู้จัก (x)\nขั้นที่ 2: สร้างสมการ\nขั้นที่ 3: แก้สมการทีละขั้น\n\nตัวอย่าง: x + 5 = 10 → x = 5\n\nสรุป: พีชคณิต = การหาตัวเลขที่หายไป`,
+      ratio: `อัตราส่วนใช้เปรียบเทียบปริมาณสองอย่าง\n\nขั้นที่ 1: เขียนค่า\nขั้นที่ 2: ลดรูป\n\nตัวอย่าง: 2:4 = 1:2\n\nสรุป: อัตราส่วน = เครื่องมือเปรียบเทียบ`
+    },
+    science: {
+      gravity: `แรงโน้มถ่วงคือแรงที่ดึงวัตถุลงสู่พื้น\n\nขั้นที่ 1: โลกมีมวล\nขั้นที่ 2: มวลสร้างแรงดึงดูด\nขั้นที่ 3: ทุกสิ่งตกสู่พื้นโลก\n\nตัวอย่าง: แอปเปิ้ลหล่นจากต้นไม้\n\nสรุป: แรงโน้มถ่วง = แรงดึงดูดของโลก`,
+      energy: `พลังงานคือความสามารถในการทำงาน\n\nขั้นที่ 1: มีอยู่ในหลายรูปแบบ\nขั้นที่ 2: สามารถเปลี่ยนรูปแบบได้\nขั้นที่ 3: ไม่สามารถถูกทำลายได้\n\nตัวอย่าง: อาหาร → พลังงานสำหรับการเคลื่อนไหว\n\nสรุป: พลังงาน = กำลังในการทำงาน`
+    },
+    history: {
+      revolution: `การปฏิวัติคือการเปลี่ยนแปลงครั้งใหญ่ในสังคม\n\nขั้นที่ 1: ประชาชนไม่พอใจ\nขั้นที่ 2: ความขัดแย้งเริ่มต้น\nขั้นที่ 3: รัฐบาลเปลี่ยนแปลง\n\nตัวอย่าง: การปฏิวัติฝรั่งเศสเปลี่ยนแปลงฝรั่งเศส\n\nสรุป: การปฏิวัติ = การเปลี่ยนแปลงทางการเมืองครั้งใหญ่`,
+      ww1: `สงครามโลกครั้งที่ 1 เป็นความขัดแย้งระดับโลก\n\nขั้นที่ 1: ความตึงเครียดทางการเมือง\nขั้นที่ 2: การก่อตั้งพันธมิตร\nขั้นที่ 3: สงครามเริ่มต้นในปี 1914\n\nสรุป: สงครามโลกครั้งที่ 1 = สงครามระดับโลกระหว่างประเทศต่างๆ`
+    },
+    computer: {
+      ai: `ปัญญาประดิษฐ์คือเครื่องจักรที่จำลองสติปัญญาของมนุษย์\n\nขั้นที่ 1: เครื่องจักรเรียนรู้จากข้อมูล\nขั้นที่ 2: จดจำรูปแบบ\nขั้นที่ 3: ตัดสินใจ\n\nตัวอย่าง: แชทบอตตอบคำถาม\n\nสรุป: AI = ระบบการคิดของเครื่องจักร`,
+      internet: `อินเทอร์เน็ตเชื่อมต่อคอมพิวเตอร์ทั่วโลก\n\nขั้นที่ 1: อุปกรณ์เชื่อมต่อกัน\nขั้นที่ 2: ข้อมูลถูกแบ่งปัน\nขั้นที่ 3: การสื่อสารเกิดขึ้น\n\nสรุป: อินเทอร์เน็ต = เครือข่ายการสื่อสารระดับโลก`
+    }
+  },
+
+  /* ═══════════ KOREAN ═══════════ */
+  ko: {
+    biology: {
+      photosynthesis: `광합성은 식물이 음식을 만드는 과정입니다.\n\n1단계: 식물은 잎을 통해 햇빛을 흡수합니다\n2단계: 공기 중의 이산화탄소를 흡수합니다\n3단계: 뿌리에서 물을 흡수합니다\n4단계: 엽록소가 에너지를 포도당으로 변환합니다\n\n예시: 나무는 햇빛을 이용해 열매와 잎을 키웁니다.\n\n요약: 식물은 햇빛을 "먹고" 생존합니다.`,
+      cell: `세포는 생명의 기본 구성 단위입니다.\n\n1단계: 모든 생물은 세포로 이루어져 있습니다\n2단계: 세포에는 핵, 세포막, 세포질이 있습니다\n3단계: 생명 기능을 수행합니다\n\n예시: 피부는 수백만 개의 세포로 이루어져 있습니다.\n\n요약: 세포 = 생명을 구성하는 작은 단위.`,
+      digestion: `소화는 음식이 몸에서 분해되는 방식입니다.\n\n1단계: 음식이 입으로 들어옵니다\n2단계: 위에서 분해됩니다\n3단계: 영양분이 흡수됩니다\n\n예시: 밥이 몸에서 에너지로 변환됩니다.\n\n요약: 소화 = 음식을 에너지로 전환.`,
+      genetics: `유전학은 형질이 부모로부터 전달되는 방식을 연구합니다.\n\n1단계: DNA가 정보를 운반합니다\n2단계: 유전자가 형질을 제어합니다\n3단계: 형질이 유전됩니다\n\n예시: 눈 색깔은 부모로부터 옵니다.\n\n요약: 유전자 = 생물학적 정보 전달.`
+    },
+    math: {
+      algebra: `대수학은 기호를 사용하여 미지수를 구하는 것입니다.\n\n1단계: 미지수(x) 파악\n2단계: 방정식 만들기\n3단계: 단계별 풀기\n\n예시: x + 5 = 10 → x = 5\n\n요약: 대수학 = 모르는 수 구하기.`,
+      ratio: `비율은 두 양을 비교합니다.\n\n1단계: 값 쓰기\n2단계: 단순화\n\n예시: 2:4 = 1:2\n\n요약: 비율 = 비교 도구.`
+    },
+    science: {
+      gravity: `중력은 물체를 아래로 당기는 힘입니다.\n\n1단계: 지구는 질량을 가집니다\n2단계: 질량은 당기는 힘을 만듭니다\n3단계: 모든 것이 지구를 향해 떨어집니다\n\n예시: 나무에서 사과가 떨어짐.\n\n요약: 중력 = 지구의 당기는 힘.`,
+      energy: `에너지는 일을 할 수 있는 능력입니다.\n\n1단계: 여러 형태로 존재합니다\n2단계: 형태가 바뀔 수 있습니다\n3단계: 파괴될 수 없습니다\n\n예시: 음식 → 운동을 위한 에너지\n\n요약: 에너지 = 일을 하는 힘.`
+    },
+    history: {
+      revolution: `혁명은 사회의 큰 변화입니다.\n\n1단계: 사람들이 불만을 가집니다\n2단계: 갈등이 시작됩니다\n3단계: 정부가 바뀝니다\n\n예시: 프랑스 혁명이 프랑스를 바꿨습니다.\n\n요약: 혁명 = 큰 정치적 변화.`,
+      ww1: `제1차 세계대전은 전 세계적인 분쟁이었습니다.\n\n1단계: 정치적 긴장\n2단계: 동맹 형성\n3단계: 1914년 전쟁 시작\n\n요약: 1차 세계대전 = 국가 간 세계 전쟁.`
+    },
+    computer: {
+      ai: `AI는 기계가 인간의 지능을 모방하는 것입니다.\n\n1단계: 기계가 데이터를 학습합니다\n2단계: 패턴을 인식합니다\n3단계: 결정을 내립니다\n\n예시: 질문에 답하는 챗봇.\n\n요약: AI = 기계 사고 시스템.`,
+      internet: `인터넷은 전 세계 컴퓨터를 연결합니다.\n\n1단계: 장치들이 연결됩니다\n2단계: 데이터가 공유됩니다\n3단계: 통신이 이루어집니다\n\n요약: 인터넷 = 글로벌 통신 네트워크.`
+    }
+  },
+
+  /* ═══════════ VIETNAMESE ═══════════ */
+  vi: {
+    biology: {
+      photosynthesis: `Quang hợp là quá trình thực vật tạo ra thức ăn.\n\nBước 1: Thực vật hấp thụ ánh sáng mặt trời qua lá\nBước 2: Hấp thụ khí CO2 từ không khí\nBước 3: Rễ hút nước\nBước 4: Chất diệp lục chuyển đổi năng lượng thành glucose\n\nVí dụ: Cây dùng ánh sáng mặt trời để phát triển quả và lá.\n\nTóm tắt: Thực vật "ăn" ánh sáng mặt trời để tồn tại.`,
+      cell: `Tế bào là đơn vị cơ bản cấu tạo nên sự sống.\n\nBước 1: Mọi sinh vật đều được tạo thành từ tế bào\nBước 2: Tế bào có nhân, màng tế bào và tế bào chất\nBước 3: Chúng thực hiện các chức năng sống\n\nVí dụ: Da của bạn được tạo thành từ hàng triệu tế bào.\n\nTóm tắt: Tế bào = đơn vị nhỏ tạo nên sự sống.`,
+      digestion: `Tiêu hóa là cách thức ăn được phân giải trong cơ thể.\n\nBước 1: Thức ăn vào miệng\nBước 2: Dạ dày phân giải thức ăn\nBước 3: Các chất dinh dưỡng được hấp thụ\n\nVí dụ: Cơm trở thành năng lượng trong cơ thể bạn.\n\nTóm tắt: Tiêu hóa = biến thức ăn thành năng lượng.`,
+      genetics: `Di truyền học nghiên cứu cách các đặc điểm được truyền từ cha mẹ sang con.\n\nBước 1: ADN mang thông tin di truyền\nBước 2: Gen kiểm soát các đặc điểm\nBước 3: Các đặc điểm được di truyền\n\nVí dụ: Màu mắt đến từ bố mẹ.\n\nTóm tắt: Gen = truyền thông tin sinh học.`
+    },
+    math: {
+      algebra: `Đại số là giải các giá trị ẩn bằng ký hiệu.\n\nBước 1: Xác định ẩn số (x)\nBước 2: Lập phương trình\nBước 3: Giải từng bước\n\nVí dụ: x + 5 = 10 → x = 5\n\nTóm tắt: Đại số = tìm số còn thiếu.`,
+      ratio: `Tỉ lệ so sánh hai đại lượng.\n\nBước 1: Viết các giá trị\nBước 2: Rút gọn\n\nVí dụ: 2:4 = 1:2\n\nTóm tắt: Tỉ lệ = công cụ so sánh.`
+    },
+    science: {
+      gravity: `Trọng lực là lực kéo các vật xuống phía dưới.\n\nBước 1: Trái Đất có khối lượng\nBước 2: Khối lượng tạo ra lực hút\nBước 3: Mọi thứ đều rơi về phía Trái Đất\n\nVí dụ: Quả táo rơi từ cây.\n\nTóm tắt: Trọng lực = lực hút của Trái Đất.`,
+      energy: `Năng lượng là khả năng thực hiện công việc.\n\nBước 1: Tồn tại dưới nhiều dạng\nBước 2: Có thể chuyển đổi dạng\nBước 3: Không thể bị tiêu hủy\n\nVí dụ: Thức ăn → năng lượng để di chuyển\n\nTóm tắt: Năng lượng = sức mạnh để làm việc.`
+    },
+    history: {
+      revolution: `Cách mạng là sự thay đổi lớn trong xã hội.\n\nBước 1: Người dân không hài lòng\nBước 2: Xung đột bắt đầu\nBước 3: Chính phủ thay đổi\n\nVí dụ: Cách mạng Pháp đã thay đổi nước Pháp.\n\nTóm tắt: Cách mạng = thay đổi chính trị lớn.`,
+      ww1: `Chiến tranh Thế giới thứ nhất là một cuộc xung đột toàn cầu.\n\nBước 1: Căng thẳng chính trị\nBước 2: Các liên minh hình thành\nBước 3: Chiến tranh bắt đầu năm 1914\n\nTóm tắt: WWI = chiến tranh toàn cầu giữa các quốc gia.`
+    },
+    computer: {
+      ai: `AI là máy móc mô phỏng trí tuệ con người.\n\nBước 1: Máy móc học từ dữ liệu\nBước 2: Nhận dạng các mẫu\nBước 3: Đưa ra quyết định\n\nVí dụ: Chatbot trả lời câu hỏi.\n\nTóm tắt: AI = hệ thống tư duy của máy móc.`,
+      internet: `Internet kết nối máy tính trên toàn thế giới.\n\nBước 1: Các thiết bị kết nối\nBước 2: Dữ liệu được chia sẻ\nBước 3: Giao tiếp diễn ra\n\nTóm tắt: Internet = mạng truyền thông toàn cầu.`
+    }
+  },
+
+  /* ═══════════ ADDITIONAL INVITE SUBJECTS ═══════════ */
+  chemistry: {
+    chemical_bonding: `Chemical bonding explains how atoms interact to become more stable.\n\nKey idea: atoms can transfer or share electrons.\nStep 1: Identify the atoms and their valence electrons\nStep 2: Decide whether electrons are transferred or shared\nStep 3: Identify the bond type\n\nExample: Sodium transfers an electron to chlorine, forming NaCl.\n\nSharp check: Do not memorize the bond name alone. Ask what happens to the electrons.`,
+    chemical_reactions: `A chemical reaction rearranges atoms to form new substances.\n\nStep 1: Identify the reactants\nStep 2: Identify the products\nStep 3: Check that atoms are conserved\nStep 4: Balance the equation\n\nExample: 2H₂ + O₂ → 2H₂O.\n\nSharp check: A balanced equation must have the same number of each type of atom on both sides.`,
+    organic_chemistry: `Organic chemistry focuses mainly on carbon-containing compounds.\n\nStart with structure rather than memorization.\nStep 1: Identify the carbon skeleton\nStep 2: Find the functional group\nStep 3: Check the bonds and formula\nStep 4: Predict the important reaction or property\n\nExample: An alcohol contains a hydroxyl (-OH) functional group.`
+  },
+  biochemistry: {
+    proteins_enzymes: `Proteins are chains of amino acids that fold into structures with specific functions. Enzymes are proteins or catalytic molecules that speed up biochemical reactions without being consumed.\n\nThink in three layers: structure → interaction → function.\nExample: An enzyme binds a substrate at its active site and helps a reaction occur more easily.`,
+    metabolism: `Metabolism is the network of chemical reactions that keeps cells functioning.\n\nSeparate the idea into pathways, inputs, outputs and regulation.\nStep 1: Identify the starting molecule\nStep 2: Follow the major pathway steps\nStep 3: Track energy or reducing equivalents\nStep 4: Identify where the pathway is regulated.`,
+    biomolecules: `The major biological macromolecules are carbohydrates, lipids, proteins and nucleic acids.\n\nDo not learn them as isolated lists. Compare their building blocks, bonds, structures and major functions.`
+  },
+  histology: {
+    epithelial_tissue: `Epithelial tissue covers surfaces, lines cavities and forms many glands.\n\nFor identification, use structure first. Check cell shape, number of layers, surface specializations and location.\n\nExample: Simple squamous epithelium is a single thin layer suited to exchange.`,
+    connective_tissue: `Connective tissue supports, connects and protects other tissues.\n\nLook for cells, extracellular matrix and fibres.\n\nSharp check: In histology, the appearance under the microscope should be connected to the tissue's function and location.`,
+    tissue_identification: `To identify a tissue, do not rely on one visual feature.\n\nStep 1: Count the layers\nStep 2: Identify cell shape\nStep 3: Look at the matrix or fibres\nStep 4: Check the location and function\nStep 5: Compare with the closest alternatives.`
+  },
+  enzymology: {
+    enzyme_kinetics: `Enzyme kinetics studies how reaction rate changes with substrate concentration and other conditions.\n\nStart by identifying the variables: enzyme concentration, substrate concentration, temperature, pH and inhibitors.\n\nA useful model is Michaelis-Menten kinetics, where Vmax describes the maximum rate and Km is the substrate concentration associated with half Vmax under the model assumptions.`,
+    enzyme_inhibition: `Enzyme inhibition describes how a molecule reduces enzyme activity.\n\nCompare the inhibitor with the substrate and ask where it binds.\n\nFor common models, distinguish competitive, noncompetitive and uncompetitive inhibition by how binding occurs and how apparent kinetic parameters change.`,
+    enzyme_mechanism: `An enzyme mechanism explains how an enzyme converts substrate into product.\n\nFollow the sequence: binding → catalytic steps → product formation → product release.\n\nThe active site provides interactions that help lower the activation barrier.`
+  },
+  purine_pyrimidine: {
+    purine_pathway: `Purine biosynthesis builds purine nucleotides through a regulated pathway.\n\nFor studying it, track the precursor, major intermediates, key enzymes and final nucleotide products.\n\nA good study method is to draw the pathway and mark the committed or strongly regulated steps instead of memorizing an isolated list.`,
+    pyrimidine_pathway: `Pyrimidine biosynthesis builds pyrimidine nucleotides through a sequence of reactions.\n\nTrack the pathway from its early precursors through the ring-building steps and nucleotide formation.\n\nFocus on what each enzyme changes and where regulation occurs.`,
+    pathway_comparison: `Purine and pyrimidine biosynthesis can be compared by asking how their rings are constructed and then attached to the ribose-phosphate framework.\n\nFor an exam question, compare precursors, major steps, regulation and final nucleotide products.`
+  },
+  cholesterol: {
+    cholesterol_synthesis: `Cholesterol biosynthesis is a multi-step pathway that begins with acetyl-CoA and proceeds through several intermediates to cholesterol.\n\nA useful study path is: precursor → major intermediate → rate-limiting step → downstream products → regulation.\n\nThe pathway is strongly associated with HMG-CoA reductase as a major regulatory enzyme.`,
+    cholesterol_regulation: `Cholesterol synthesis is regulated so cells can balance cholesterol production and availability.\n\nWhen studying regulation, connect enzyme activity with cellular cholesterol levels and hormonal or transcriptional control rather than memorizing disconnected facts.`,
+    clinical_context: `Cholesterol has structural and metabolic roles and is also a precursor for steroid hormones, bile acids and vitamin D.\n\nWhen studying clinical questions, separate normal biological function from what happens when cholesterol balance is disrupted.`
+  },
+  engineering: {
+    free_body_diagrams: `A free-body diagram isolates an object and shows the external forces acting on it.\n\nStep 1: Choose the object\nStep 2: Draw the force directions\nStep 3: Label known and unknown quantities\nStep 4: Choose axes\nStep 5: Apply the relevant equations.\n\nSharp check: Do not add forces just because they seem physically possible. Include forces actually acting on the chosen object.`,
+    engineering_calculations: `Engineering calculations should connect the physical situation to the equation instead of starting with numbers.\n\nUse this order: given values → required quantity → governing principle → units → substitution → result → reasonableness check.\n\nAlways check whether the final unit makes sense.`,
+    practical_problem_solving: `Practical engineering problems connect theory to a real system.\n\nStep 1: Describe the physical situation\nStep 2: Identify constraints and assumptions\nStep 3: Draw a useful diagram or model\nStep 4: Select the governing principle\nStep 5: Calculate or test\nStep 6: Compare the result with the real-world situation.`
+  },
+  physics: {
+    motion_forces: `Physics explains motion by connecting measurable quantities such as displacement, velocity, acceleration and force.\n\nStep 1: Identify what is known\nStep 2: Identify what is unknown\nStep 3: Choose the governing relationship\nStep 4: Keep units consistent\nStep 5: Check whether the result is physically reasonable.`,
+    energy: `Energy is a quantity that can be transferred or transformed between forms.\n\nFor a mechanics problem, identify the initial and final energy states, include relevant work or losses, then solve for the unknown.\n\nExample: gravitational potential energy can become kinetic energy as an object falls.`,
+    electricity: `Basic circuit analysis connects voltage, current and resistance.\n\nStart by identifying the circuit structure and the known quantities. Then choose the appropriate relationship, keep units consistent and check the direction or magnitude of the result.\n\nFor a simple resistor, Ohm's law relates voltage, current and resistance.`
+  }
+};
+
+/* Add the invite subjects to English data and safely fall back to English content for other interface languages. */
+["chemistry","biochemistry","histology","enzymology","purine_pyrimidine","cholesterol","engineering","physics"].forEach(subject => {
+  if(data[subject]) {
+    data.en[subject] = data[subject];
+    delete data[subject];
+  }
+});
+Object.keys(data).forEach(lang => {
+  if(lang === "en") return;
+  ["chemistry","biochemistry","histology","enzymology","purine_pyrimidine","cholesterol","engineering","physics"].forEach(subject => {
+    if(!data[lang][subject]) data[lang][subject] = data.en[subject];
+  });
+});
+
+/* ── VOICE LANG MAP ── */
+const voiceMap = { en:"en", zh:"zh", fr:"fr", es:"es", th:"th", ko:"ko", vi:"vi", ja:"ja", ar:"ar" };
+
+/* ── BOOT ── */
+function launchDemo(){
+  appLauncher.style.display = "none";
+  bootScreen.style.display  = "block";
+
+  const lang = document.getElementById("language").value;
+  const lines = ui[lang].boot;
+  let i = 0;
+
+  function run(){
+    if(i < lines.length){
+      bootLog.innerHTML += lines[i] + "<br>";
+      i++;
+      setTimeout(run, 500);
+    } else {
+      setTimeout(() => {
+        bootScreen.style.display = "none";
+        demoScreen.style.display = "block";
+        switchLanguage();
+      }, 500);
+    }
+  }
+  run();
+}
+
+/* ── SWITCH LANGUAGE ── */
+function switchLanguage(){
+  const lang = document.getElementById("language").value;
+  const t    = ui[lang];
+
+  // UI labels
+  document.getElementById("label-setup").innerText     = t.setup;
+  document.getElementById("label-assistant").innerText = t.assistant;
+  const voiceButton = document.getElementById("btn-voice");
+  voiceButton.innerText = t.speak;
+  document.getElementById("studentQuestion").placeholder = t.placeholder;
+
+
+  // Mode options
+  const modeEl = document.getElementById("mode");
+  const modeVals = ["step","simple","logic","context","human"];
+  modeVals.forEach((v,i) => { modeEl.options[i].text = t.modes[i]; });
+
+  // Subject options
+  const subjectEl  = document.getElementById("subject");
+  const subjectVals = ["math","biology","chemistry","history","computer","biochemistry","histology","enzymology","purine_pyrimidine","cholesterol","engineering","physics"];
+  subjectVals.forEach((v,i) => { subjectEl.options[i].text = t.subjects[i]; });
+
+  updateTopics();
+  updateContent();
+}
+
+/* ── TOPICS ── */
+function getSubjectData(lang, subject){
+  if(data[lang] && data[lang][subject]) return data[lang][subject];
+  // Never fall back to English inside a selected non-English language.
+  // Keep the topic structure, but let the response engine explain it in the selected language.
+  const english = data.en[subject] || {};
+  const synthetic = {};
+  Object.keys(english).forEach(k => {
+    synthetic[k] = "";
+  });
+  return synthetic;
+}
+
+function prettyTopic(topic){
+  return topic.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
+}
+
+const topicLabels = {
+  zh:{algebra:"代数",ratio:"比率",photosynthesis:"光合作用",cell:"细胞",digestion:"消化",genetics:"遗传学",gravity:"重力",energy:"能量",revolution:"革命",ww1:"第一次世界大战",ai:"人工智能",internet:"互联网"},
+  ja:{algebra:"代数",ratio:"比率",photosynthesis:"光合成",cell:"細胞",digestion:"消化",genetics:"遺伝学",gravity:"重力",energy:"エネルギー",revolution:"革命",ww1:"第一次世界大戦",ai:"人工知能",internet:"インターネット"},
+  ko:{algebra:"대수학",ratio:"비율",photosynthesis:"광합성",cell:"세포",digestion:"소화",genetics:"유전학",gravity:"중력",energy:"에너지",revolution:"혁명",ww1:"제1차 세계대전",ai:"인공지능",internet:"인터넷"},
+  th:{algebra:"พีชคณิต",ratio:"อัตราส่วน",photosynthesis:"การสังเคราะห์แสง",cell:"เซลล์",digestion:"การย่อยอาหาร",genetics:"พันธุศาสตร์",gravity:"แรงโน้มถ่วง",energy:"พลังงาน",revolution:"การปฏิวัติ",ww1:"สงครามโลกครั้งที่ 1",ai:"ปัญญาประดิษฐ์",internet:"อินเทอร์เน็ต"},
+  vi:{algebra:"Đại số",ratio:"Tỉ lệ",photosynthesis:"Quang hợp",cell:"Tế bào",digestion:"Tiêu hóa",genetics:"Di truyền học",gravity:"Trọng lực",energy:"Năng lượng",revolution:"Cách mạng",ww1:"Chiến tranh Thế giới thứ nhất",ai:"Trí tuệ nhân tạo",internet:"Internet"},
+  fr:{algebra:"Algèbre",ratio:"Rapport",photosynthesis:"Photosynthèse",cell:"Cellule",digestion:"Digestion",genetics:"Génétique",gravity:"Gravité",energy:"Énergie",revolution:"Révolution",ww1:"Première Guerre mondiale",ai:"Intelligence artificielle",internet:"Internet"},
+  es:{algebra:"Álgebra",ratio:"Razón",photosynthesis:"Fotosíntesis",cell:"Célula",digestion:"Digestión",genetics:"Genética",gravity:"Gravedad",energy:"Energía",revolution:"Revolución",ww1:"Primera Guerra Mundial",ai:"Inteligencia artificial",internet:"Internet"},
+  ar:{algebra:"الجبر",ratio:"النسبة",photosynthesis:"البناء الضوئي",cell:"الخلية",digestion:"الهضم",genetics:"علم الوراثة",gravity:"الجاذبية",energy:"الطاقة",revolution:"الثورة",ww1:"الحرب العالمية الأولى",ai:"الذكاء الاصطناعي",internet:"الإنترنت"}
+};
+
+function localizedTopicName(lang, topic){
+  return topicLabels[lang]?.[topic] || prettyTopic(topic);
+}
+
+function updateTopics(){
+  const lang    = document.getElementById("language").value;
+  const subject = document.getElementById("subject").value;
+  const topicEl = document.getElementById("topic");
+  const subjectData = getSubjectData(lang, subject);
+  // Mathematics is open-question mode: do not force students into Algebra or Ratio.
+  if(subject === "math"){
+    topicEl.innerHTML = "";
+    topicEl.style.display = "none";
+    topicEl.value = "";
+    return;
+  }
+  topicEl.style.display = "";
+  const keys = Object.keys(subjectData);
+  topicEl.innerHTML = "";
+  keys.forEach(k => {
+    const opt = document.createElement("option");
+    opt.value = k;
+    opt.innerText = localizedTopicName(lang, k);
+    topicEl.appendChild(opt);
+  });
+  if(keys.length) topicEl.value = keys[0];
+}
+
+/* ── SMART RESPONSE ENGINE ── */
+function detectQuestionType(q, lang){
+  const x = q.toLowerCase().trim();
+  if(!x) return "concept";
+  const words = {
+    en: {why:/\b(why|reason|cause|causes|how come)\b/, compare:/\b(compare|difference|different|versus|vs|distinguish|contrast)\b/, calc:/\b(calculate|solve|compute|find|determine|equation|formula|value)\b/, app:/\b(example|application|apply|practical|real life|real-world|use)\b/, conf:/\b(confused|confusing|don't understand|do not understand|stuck|lost|hard|difficult)\b/, def:/\b(what is|what are|define|definition|meaning|explain)\b/},
+    zh: {why:/(为什么|原因|怎么回事)/, compare:/(比较|区别|不同|差异|对比)/, calc:/(计算|求解|方程|公式|求|算)/, app:/(例子|应用|实际|怎么用|用途)/, conf:/(不懂|不理解|困惑|难|困难|不会)/, def:/(什么是|是什么|定义|意思|解释)/},
+    ja: {why:/(なぜ|どうして|理由|原因)/, compare:/(比較|違い|異なる|対比)/, calc:/(計算|解く|方程式|公式|求める)/, app:/(例|応用|実際|使い方|用途)/, conf:/(分からない|わからない|難しい|困った|理解できない)/, def:/(とは|何ですか|定義|意味|説明)/},
+    ko: {why:/(왜|이유|원인)/, compare:/(비교|차이|다른|대조)/, calc:/(계산|풀기|방정식|공식|구해)/, app:/(예|응용|실제|사용|용도)/, conf:/(모르겠|이해가 안|어려|헷갈|막혔)/, def:/(무엇|뭐야|정의|의미|설명)/},
+    th: {why:/(ทำไม|เหตุผล|สาเหตุ)/, compare:/(เปรียบเทียบ|แตกต่าง|ต่างกัน|ความแตกต่าง)/, calc:/(คำนวณ|แก้|สมการ|สูตร|หา)/, app:/(ตัวอย่าง|ประยุกต์|ใช้งาน|ใช้จริง|ใช้)/, conf:/(ไม่เข้าใจ|งง|ยาก|สับสน|ติด)/, def:/(คืออะไร|หมายถึง|นิยาม|อธิบาย)/},
+    vi: {why:/(tại sao|vì sao|lý do|nguyên nhân)/, compare:/(so sánh|khác nhau|khác biệt|đối chiếu)/, calc:/(tính|giải|phương trình|công thức|tìm)/, app:/(ví dụ|ứng dụng|thực tế|sử dụng|dùng)/, conf:/(không hiểu|khó|bối rối|mắc|không rõ)/, def:/(là gì|định nghĩa|ý nghĩa|giải thích)/},
+    fr: {why:/(pourquoi|raison|cause)/, compare:/(comparer|différence|différent|contraste)/, calc:/(calculer|résoudre|équation|formule|trouver)/, app:/(exemple|application|pratique|utiliser|usage)/, conf:/(ne comprends pas|difficile|confus|bloqué)/, def:/(qu'est-ce|définition|signification|expliquer)/},
+    es: {why:/(por qué|razón|causa)/, compare:/(comparar|diferencia|diferente|contrastar)/, calc:/(calcular|resolver|ecuación|fórmula|encontrar)/, app:/(ejemplo|aplicación|práctico|usar|uso)/, conf:/(no entiendo|difícil|confuso|atascado)/, def:/(qué es|definición|significado|explicar)/},
+    ar: {why:/(لماذا|سبب|أسباب)/, compare:/(قارن|مقارنة|الفرق|مختلف)/, calc:/(احسب|حل|معادلة|صيغة|أوجد)/, app:/(مثال|تطبيق|عملي|استخدام|يستخدم)/, conf:/(لا أفهم|صعب|مربك|عالِق|مش فاهم)/, def:/(ما هو|ما هي|تعريف|معنى|اشرح)/}
+  };
+  const w = words[lang] || words.en;
+  if(w.why.test(x)) return "why";
+  if(w.compare.test(x)) return "compare";
+  if(w.calc.test(x) || /\d+[+\-*/=]/.test(x)) return "calculation";
+  if(w.app.test(x)) return "application";
+  if(w.conf.test(x)) return "confusion";
+  if(w.def.test(x)) return "definition";
+  return "concept";
+}
+
+const subjectProfiles = {
+  math: {focus:"quantities, equations and the reasoning behind each step",check:"Check the operation and the final value."},
+  biology: {focus:"structure, function and biological processes",check:"Connect the structure or process to its biological function."},
+  chemistry: {focus:"particles, reactions, conditions and conservation of matter",check:"Check atoms, charges, units and reaction conditions."},
+  history: {focus:"events, chronology, causes, consequences and context",check:"Separate the event, its causes and its consequences."},
+  computer: {focus:"inputs, processes, outputs and how the system behaves",check:"Trace what goes in, what the system does and what comes out."},
+  biochemistry: {focus:"molecules, reactions, pathways and biological function",check:"Connect the molecule or reaction to its biological role."},
+  histology: {focus:"microscopic structure, tissue identification and function",check:"Use structure, location and function together rather than one visual clue."},
+  enzymology: {focus:"enzyme structure, mechanism, kinetics and regulation",check:"Track the substrate, active site, reaction rate and regulatory effect."},
+  purine_pyrimidine: {focus:"metabolic pathways, precursors, enzymes and regulation",check:"Track the pathway in order and identify the regulated steps."},
+  cholesterol: {focus:"biosynthetic pathway, intermediates, regulation and biological roles",check:"Track the pathway and distinguish synthesis from downstream functions."},
+  engineering: {focus:"physical assumptions, diagrams, equations, units and practical constraints",check:"Check the model, units and whether the result makes sense in the real system."},
+  physics: {focus:"measurable quantities, physical laws, units and cause-and-effect relationships",check:"Check units, direction and whether the result is physically reasonable."}
+};
+
+const localizedProfiles = {
+  en: {
+    math:["quantities, equations and the reasoning behind each step","Check the operation and the final value."], biology:["structure, function and biological processes","Connect the structure or process to its biological function."], chemistry:["particles, reactions, conditions and conservation of matter","Check atoms, charges, units and reaction conditions."], history:["events, chronology, causes, consequences and context","Separate the event, its causes and its consequences."], computer:["inputs, processes, outputs and how the system behaves","Trace what goes in, what the system does and what comes out."], biochemistry:["molecules, reactions, pathways and biological function","Connect the molecule or reaction to its biological role."], histology:["microscopic structure, tissue identification and function","Use structure, location and function together."], enzymology:["enzyme structure, mechanism, kinetics and regulation","Track the substrate, active site, reaction rate and regulatory effect."], purine_pyrimidine:["metabolic pathways, precursors, enzymes and regulation","Track the pathway in order and identify the regulated steps."], cholesterol:["biosynthetic pathways, intermediates, regulation and biological roles","Track the pathway and distinguish synthesis from downstream functions."], engineering:["physical assumptions, diagrams, equations, units and practical constraints","Check the model, units and whether the result makes sense."], physics:["measurable quantities, physical laws, units and cause-and-effect relationships","Check units, direction and physical reasonableness."]},
+  zh: {math:["数量、方程以及每一步背后的推理","检查运算过程和最终结果。"],biology:["结构、功能和生物过程","把结构或过程与它的生物学功能联系起来。"],chemistry:["粒子、反应、条件以及物质守恒","检查原子、化学式、电荷和单位。"],history:["事件、时间顺序、原因、结果和历史背景","区分事件本身、原因和后果。"],computer:["输入、处理、输出以及系统如何运行","跟踪输入、系统处理过程和输出。"],biochemistry:["分子、反应、代谢途径和生物功能","把分子或反应与生物作用联系起来。"],histology:["显微结构、组织识别和功能","结合结构、位置和功能判断。"],enzymology:["酶结构、机制、动力学和调控","跟踪底物、活性位点、反应速率和调控。"],purine_pyrimidine:["代谢途径、前体、酶和调控","按顺序跟踪途径并找出关键调控步骤。"],cholesterol:["生物合成途径、中间体、调控和生物作用","跟踪途径并区分合成过程和后续作用。"],engineering:["物理假设、图示、方程、单位和实际限制","检查模型、单位以及结果是否合理。"],physics:["可测量的量、物理定律、单位和因果关系","检查单位、方向以及结果是否合理。" ]},
+  ja: {math:["数量、方程式、そして各ステップの考え方","計算手順と最終結果を確認します。"],biology:["構造、機能、生物学的なプロセス","構造やプロセスを機能と結び付けます。"],chemistry:["粒子、反応、条件、物質保存","原子、電荷、単位、反応条件を確認します。"],history:["出来事、時系列、原因、結果、背景","出来事と原因・結果を分けて考えます。"],computer:["入力、処理、出力、システムの動き","入力から処理、出力まで追います。"],biochemistry:["分子、反応、経路、生物学的機能","分子や反応を生物学的役割と結び付けます。"],histology:["顕微鏡構造、組織の識別、機能","構造、位置、機能を一緒に見ます。"],enzymology:["酵素構造、反応機構、速度論、調節","基質、活性部位、反応速度、調節を追います。"],purine_pyrimidine:["代謝経路、前駆体、酵素、調節","経路を順番に追い、調節点を確認します。"],cholesterol:["生合成経路、中間体、調節、生物学的役割","経路とその後の機能を区別します。"],engineering:["物理的仮定、図、式、単位、実際の制約","モデル、単位、結果の妥当性を確認します。"],physics:["測定量、物理法則、単位、因果関係","単位、方向、結果の妥当性を確認します。" ]},
+  ko: {math:["양, 방정식, 그리고 각 단계의 이유","계산 과정과 최종 결과를 확인합니다."],biology:["구조, 기능, 생물학적 과정","구조나 과정을 기능과 연결합니다."],chemistry:["입자, 반응, 조건, 물질 보존","원자, 전하, 단위를 확인합니다."],history:["사건, 연대, 원인, 결과, 맥락","사건과 원인 및 결과를 구분합니다."],computer:["입력, 처리, 출력, 시스템의 작동 방식","입력에서 처리와 출력까지 추적합니다."],biochemistry:["분자, 반응, 경로, 생물학적 기능","분자나 반응을 생물학적 역할과 연결합니다."],histology:["현미경 구조, 조직 식별, 기능","구조, 위치, 기능을 함께 봅니다."],enzymology:["효소 구조, 작용 기전, 반응 속도, 조절","기질, 활성 부위, 반응 속도, 조절을 추적합니다."],purine_pyrimidine:["대사 경로, 전구체, 효소, 조절","경로 순서와 조절 단계를 확인합니다."],cholesterol:["생합성 경로, 중간체, 조절, 생물학적 역할","합성 과정과 이후 기능을 구분합니다."],engineering:["물리적 가정, 그림, 방정식, 단위, 실제 제약","모델과 단위, 결과의 타당성을 확인합니다."],physics:["측정량, 물리 법칙, 단위, 인과관계","단위와 방향, 결과가 물리적으로 타당한지 확인합니다." ]},
+  th: {math:["ปริมาณ สมการ และเหตุผลของแต่ละขั้นตอน","ตรวจสอบการคำนวณและคำตอบสุดท้าย"],biology:["โครงสร้าง หน้าที่ และกระบวนการทางชีววิทยา","เชื่อมโยงโครงสร้างหรือกระบวนการกับหน้าที่"],chemistry:["อนุภาค ปฏิกิริยา เงื่อนไข และการอนุรักษ์มวล","ตรวจสอบอะตอม ประจุ และหน่วย"],history:["เหตุการณ์ ลำดับเวลา สาเหตุ ผลลัพธ์ และบริบท","แยกเหตุการณ์ สาเหตุ และผลที่ตามมา"],computer:["ข้อมูลเข้า กระบวนการ ผลลัพธ์ และการทำงานของระบบ","ติดตามตั้งแต่ข้อมูลเข้าไปจนถึงผลลัพธ์"],biochemistry:["โมเลกุล ปฏิกิริยา เส้นทางเมแทบอลิซึม และหน้าที่ทางชีวภาพ","เชื่อมโยงโมเลกุลหรือปฏิกิริยากับหน้าที่"],histology:["โครงสร้างระดับจุลทรรศน์ การจำแนกเนื้อเยื่อ และหน้าที่","ใช้โครงสร้าง ตำแหน่ง และหน้าที่ร่วมกัน"],enzymology:["โครงสร้างเอนไซม์ กลไก จลนพลศาสตร์ และการควบคุม","ติดตามสารตั้งต้น ตำแหน่งออกฤทธิ์ อัตราปฏิกิริยา และการควบคุม"],purine_pyrimidine:["เส้นทางเมแทบอลิซึม สารตั้งต้น เอนไซม์ และการควบคุม","ติดตามเส้นทางตามลำดับและจุดควบคุม"],cholesterol:["เส้นทางการสังเคราะห์ชีวภาพ สารตัวกลาง การควบคุม และหน้าที่","ติดตามเส้นทางและแยกการสังเคราะห์จากหน้าที่ภายหลัง"],engineering:["สมมติฐานทางกายภาพ แผนภาพ สมการ หน่วย และข้อจำกัดจริง","ตรวจสอบแบบจำลอง หน่วย และความสมเหตุสมผลของผลลัพธ์"],physics:["ปริมาณที่วัดได้ กฎฟิสิกส์ หน่วย และความสัมพันธ์เหตุผล","ตรวจสอบหน่วย ทิศทาง และความสมเหตุสมผลทางฟิสิกส์" ]},
+  vi: {math:["đại lượng, phương trình và lý do của từng bước","Kiểm tra phép tính và kết quả cuối cùng."],biology:["cấu trúc, chức năng và quá trình sinh học","Liên hệ cấu trúc hoặc quá trình với chức năng."],chemistry:["hạt, phản ứng, điều kiện và bảo toàn vật chất","Kiểm tra nguyên tử, điện tích và đơn vị."],history:["sự kiện, trình tự thời gian, nguyên nhân, hậu quả và bối cảnh","Tách sự kiện, nguyên nhân và hậu quả."],computer:["đầu vào, xử lý, đầu ra và cách hệ thống hoạt động","Theo dõi từ đầu vào đến xử lý và đầu ra."],biochemistry:["phân tử, phản ứng, con đường và chức năng sinh học","Liên hệ phân tử hoặc phản ứng với vai trò sinh học."],histology:["cấu trúc vi thể, nhận diện mô và chức năng","Kết hợp cấu trúc, vị trí và chức năng."],enzymology:["cấu trúc enzyme, cơ chế, động học và điều hòa","Theo dõi cơ chất, vị trí hoạt động, tốc độ và điều hòa."],purine_pyrimidine:["con đường chuyển hóa, tiền chất, enzyme và điều hòa","Theo dõi con đường theo thứ tự và các bước điều hòa."],cholesterol:["con đường sinh tổng hợp, chất trung gian, điều hòa và vai trò sinh học","Theo dõi con đường và phân biệt tổng hợp với chức năng sau đó."],engineering:["giả định vật lý, sơ đồ, phương trình, đơn vị và giới hạn thực tế","Kiểm tra mô hình, đơn vị và tính hợp lý của kết quả."],physics:["đại lượng đo được, định luật vật lý, đơn vị và quan hệ nguyên nhân-kết quả","Kiểm tra đơn vị, hướng và tính hợp lý vật lý." ]},
+  fr: {math:["les quantités, les équations et le raisonnement de chaque étape","Vérifiez le calcul et le résultat final."],biology:["la structure, la fonction et les processus biologiques","Reliez la structure ou le processus à sa fonction."],chemistry:["les particules, les réactions, les conditions et la conservation de la matière","Vérifiez les atomes, les charges et les unités."],history:["les événements, la chronologie, les causes, les conséquences et le contexte","Séparez l'événement, ses causes et ses conséquences."],computer:["les entrées, les traitements, les sorties et le fonctionnement du système","Suivez ce qui entre, ce qui est traité et ce qui sort."],biochemistry:["les molécules, les réactions, les voies et les fonctions biologiques","Reliez la molécule ou la réaction à son rôle biologique."],histology:["la structure microscopique, l'identification des tissus et leur fonction","Utilisez ensemble structure, localisation et fonction."],enzymology:["la structure des enzymes, le mécanisme, la cinétique et la régulation","Suivez le substrat, le site actif, la vitesse et la régulation."],purine_pyrimidine:["les voies métaboliques, les précurseurs, les enzymes et la régulation","Suivez la voie dans l'ordre et les étapes régulées."],cholesterol:["la biosynthèse, les intermédiaires, la régulation et les rôles biologiques","Suivez la voie et distinguez synthèse et fonctions."],engineering:["les hypothèses physiques, les schémas, les équations, les unités et les contraintes réelles","Vérifiez le modèle, les unités et la cohérence du résultat."],physics:["les grandeurs mesurables, les lois physiques, les unités et les relations de cause à effet","Vérifiez les unités, la direction et la cohérence physique." ]},
+  es: {math:["cantidades, ecuaciones y el razonamiento de cada paso","Comprueba la operación y el resultado final."],biology:["estructura, función y procesos biológicos","Relaciona la estructura o el proceso con su función."],chemistry:["partículas, reacciones, condiciones y conservación de la materia","Comprueba átomos, cargas y unidades."],history:["eventos, cronología, causas, consecuencias y contexto","Separa el evento, sus causas y sus consecuencias."],computer:["entradas, procesos, salidas y funcionamiento del sistema","Sigue lo que entra, lo que hace el sistema y lo que sale."],biochemistry:["moléculas, reacciones, rutas y función biológica","Relaciona la molécula o reacción con su función."],histology:["estructura microscópica, identificación de tejidos y función","Usa estructura, ubicación y función juntas."],enzymology:["estructura enzimática, mecanismo, cinética y regulación","Sigue el sustrato, sitio activo, velocidad y regulación."],purine_pyrimidine:["rutas metabólicas, precursores, enzimas y regulación","Sigue la ruta y sus pasos regulados."],cholesterol:["ruta biosintética, intermediarios, regulación y funciones biológicas","Sigue la ruta y distingue síntesis de funciones posteriores."],engineering:["supuestos físicos, diagramas, ecuaciones, unidades y restricciones reales","Comprueba el modelo, las unidades y si el resultado tiene sentido."],physics:["magnitudes medibles, leyes físicas, unidades y relaciones causa-efecto","Comprueba unidades, dirección y coherencia física." ]},
+  ar: {math:["الكميات والمعادلات والمنطق وراء كل خطوة","تحقق من العملية والنتيجة النهائية."],biology:["التركيب والوظيفة والعمليات الحيوية","اربط التركيب أو العملية بوظيفتها الحيوية."],chemistry:["الجسيمات والتفاعلات والظروف وحفظ المادة","تحقق من الذرات والشحنات والوحدات."],history:["الأحداث والتسلسل الزمني والأسباب والنتائج والسياق","افصل بين الحدث وأسبابه ونتائجه."],computer:["المدخلات والمعالجة والمخرجات وكيف يعمل النظام","تتبع ما يدخل وما يعالجه النظام وما يخرج منه."],biochemistry:["الجزيئات والتفاعلات والمسارات والوظائف الحيوية","اربط الجزيء أو التفاعل بدوره الحيوي."],histology:["التركيب المجهري وتحديد الأنسجة والوظيفة","استخدم التركيب والموقع والوظيفة معًا."],enzymology:["تركيب الإنزيم وآليته وحركيته وتنظيمه","تتبع الركيزة والموقع النشط ومعدل التفاعل والتنظيم."],purine_pyrimidine:["المسارات الأيضية والسلائف والإنزيمات والتنظيم","تتبع المسار بالترتيب وحدد خطوات التنظيم."],cholesterol:["مسار التخليق الحيوي والوسائط والتنظيم والأدوار الحيوية","تتبع المسار وميّز التخليق عن الوظائف اللاحقة."],engineering:["الافتراضات الفيزيائية والرسومات والمعادلات والوحدات والقيود العملية","تحقق من النموذج والوحدات ومنطقية النتيجة."],physics:["الكميات القابلة للقياس والقوانين الفيزيائية والوحدات وعلاقات السبب والنتيجة","تحقق من الوحدات والاتجاه ومنطقية النتيجة فيزيائيًا." ]}
+};
+
+const responseCopy = {
+  en:{why:"Why it works",compare:"Compare",application:"How it is used",confusion:"Let's make it clearer",definition:"What it means",concept:"Let's understand it",calculation:"Let's solve it",start:"Start with the main idea",cause:"Follow the cause and effect",difference:"Look at what is the same and what changes",example:"Connect it to a real situation",focus:"Learning focus",check:"Quick check"},
+  zh:{why:"为什么这样",compare:"比较",application:"实际应用",confusion:"换一种方式理解",definition:"它是什么意思",concept:"先理解核心概念",calculation:"一起解决",start:"先看核心概念",cause:"跟随原因和结果",difference:"看看相同点和不同点",example:"联系实际情况",focus:"学习重点",check:"快速检查"},
+  ja:{why:"なぜそうなるのか",compare:"比較",application:"実際の使い方",confusion:"別の方法で理解する",definition:"意味を理解する",concept:"中心となる考え方",calculation:"一緒に解いてみる",start:"まず中心の考え方",cause:"原因と結果を追う",difference:"共通点と違いを見る",example:"実際の場面につなげる",focus:"学習のポイント",check:"確認"},
+  ko:{why:"왜 그런지",compare:"비교",application:"실제 활용",confusion:"다른 방식으로 이해하기",definition:"의미 이해하기",concept:"핵심 개념 이해하기",calculation:"함께 풀어보기",start:"먼저 핵심 개념",cause:"원인과 결과를 따라가기",difference:"공통점과 차이 보기",example:"실제 상황과 연결하기",focus:"학습 핵심",check:"확인"},
+  th:{why:"ทำไมจึงเป็นแบบนี้",compare:"เปรียบเทียบ",application:"การใช้งานจริง",confusion:"ลองทำความเข้าใจอีกแบบ",definition:"ความหมาย",concept:"ทำความเข้าใจแนวคิดหลัก",calculation:"ลองแก้ไปด้วยกัน",start:"เริ่มจากแนวคิดหลัก",cause:"ติดตามเหตุและผล",difference:"ดูสิ่งที่เหมือนและต่าง",example:"เชื่อมกับสถานการณ์จริง",focus:"จุดเน้นการเรียน",check:"ตรวจสอบ"},
+  vi:{why:"Vì sao",compare:"So sánh",application:"Ứng dụng thực tế",confusion:"Thử hiểu theo cách khác",definition:"Ý nghĩa",concept:"Hiểu ý chính",calculation:"Cùng giải bài",start:"Bắt đầu từ ý chính",cause:"Theo dõi nguyên nhân và kết quả",difference:"Xem điểm giống và khác",example:"Liên hệ tình huống thực tế",focus:"Trọng tâm học tập",check:"Kiểm tra"},
+  fr:{why:"Pourquoi",compare:"Comparer",application:"Application pratique",confusion:"Essayons autrement",definition:"Ce que cela signifie",concept:"Comprendre l'idée principale",calculation:"Résolvons-le ensemble",start:"Commencez par l'idée principale",cause:"Suivez la cause et l'effet",difference:"Voyez ce qui est pareil et ce qui change",example:"Reliez à une situation réelle",focus:"Point d'apprentissage",check:"Vérification"},
+  es:{why:"Por qué",compare:"Comparar",application:"Aplicación práctica",confusion:"Probemos otra forma de entenderlo",definition:"Qué significa",concept:"Entender la idea principal",calculation:"Vamos a resolverlo",start:"Empieza por la idea principal",cause:"Sigue la causa y el efecto",difference:"Mira qué es igual y qué cambia",example:"Conéctalo con una situación real",focus:"Enfoque de aprendizaje",check:"Comprobación"},
+  ar:{why:"لماذا يحدث ذلك",compare:"مقارنة",application:"التطبيق العملي",confusion:"لنشرحها بطريقة أخرى",definition:"المعنى",concept:"فهم الفكرة الأساسية",calculation:"لنحلها معًا",start:"ابدأ بالفكرة الأساسية",cause:"تتبع السبب والنتيجة",difference:"انظر إلى أوجه التشابه والاختلاف",example:"اربطها بموقف عملي",focus:"محور التعلم",check:"تحقق سريع"}
+};
+
+function localizedProfile(lang, subject){
+  const p = localizedProfiles[lang]?.[subject] || localizedProfiles.en[subject] || ["the key ideas and how they connect","Check the main idea against the question."];
+  return {focus:p[0], check:p[1]};
+}
+
+/* ── QUESTION-FOCUSED RESPONSE ENGINE ── */
+let sessionFocus = { subject:"", topic:"", covered:[], lastFocus:"", concept:"", seen:{}, lastIntent:"" };
+
+function resetSession(){
+  sessionFocus = { subject:"", topic:"", covered:[], lastFocus:"", concept:"", seen:{}, lastIntent:"" };
+}
+
+function normalizeQuestion(q){
+  return String(q || "").toLowerCase().replace(/[^\p{L}\p{N}\s_-]/gu," ").replace(/\s+/g," ").trim();
+}
+
+function questionHas(q, terms){
+  const x = normalizeQuestion(q);
+  return terms.some(t => x.includes(t));
+}
+
+function extractExample(base, lang){
+  const lines = String(base || "").split(/\n+/).map(x=>x.trim()).filter(Boolean);
+  const hit = lines.find(x => /example|examples|例子|例|例え|예시|ตัวอย่าง|ví dụ|exemple|ejemplo|مثال/i.test(x));
+  return hit || lines.find(x => /→|=/.test(x)) || lines[lines.length-2] || lines[0] || "";
+}
+
+function extractCore(base){
+  const blocks = String(base || "").split(/\n\s*\n/).map(x=>x.trim()).filter(Boolean);
+  return blocks[0] || String(base || "").split(/\n+/).filter(Boolean)[0] || "";
+}
+
+function pickQuestionFocus(question, subjectData, topic){
+  const q = normalizeQuestion(question);
+
+  // Follow-up questions often omit the subject they refer to. Use the
+  // previous focus before falling back to the selected topic.
+  const followUp = sessionFocus.lastFocus || sessionFocus.topic || topic || "";
+
+  const aliases = [
+    {terms:["carbohydrate","carbohydrates","carbs"], key:"__carbohydrates"},
+    {terms:["lipid","lipids","fat","fats"], key:"__lipids"},
+    {terms:["nucleic acid","nucleic acids","dna","rna"], key:"__nucleic_acids"},
+    {terms:["protein","proteins","amino acid","amino acids"], key:"proteins_enzymes"},
+    {terms:["enzyme","enzymes","active site","substrate"], key:"__enzymes"},
+    {terms:["types of algebra","type of algebra","kinds of algebra"], key:"__algebra_types"},
+    {terms:["example","examples"], key:"__examples"}
+  ];
+
+  // Semantic follow-ups should beat the generic topic.
+  if(questionHas(q,["building block","building blocks","monomer","monomers","made of","made from","subunit","subunits"])) return "__building_blocks";
+  if(questionHas(q,["structure","structures","structural"])){
+    if(followUp === "proteins_enzymes") return "__protein_structure";
+    if(followUp === "__carbohydrates") return "__carbohydrate_structure";
+  }
+  if(questionHas(q,["function","functions","role","roles","what does it do","what do they do"])) return "__function";
+  if(questionHas(q,["relationship","related","relation","connection","how are they connected"])) return "__relationship";
+
+  for(const a of aliases){
+    if(a.terms.some(t=>q.includes(t))) return a.key;
+  }
+
+  const keys = Object.keys(subjectData || {});
+  for(const k of keys){
+    const label = localizedTopicName("en", k).toLowerCase();
+    const pretty = prettyTopic(k).toLowerCase();
+    if(q.includes(k.toLowerCase()) || q.includes(label) || q.includes(pretty)) return k;
+  }
+
+  // Pronouns such as “their”, “it” and “that” refer to the last concept.
+  if(questionHas(q,["their","them","it","that","those","this"])) return followUp;
+
+  return topic || "";
+}
+
+function focusedKnowledge(lang, focus, base, question){
+  const c = responseCopy[lang] || responseCopy.en;
+  const example = extractExample(base, lang);
+  const core = extractCore(base);
+  const q = normalizeQuestion(question);
+
+  const text = {
+    __building_blocks: {
+      en:`The building blocks depend on which biomolecule you mean.
+
+• Carbohydrates → monosaccharides such as glucose
+• Proteins → amino acids
+• Nucleic acids → nucleotides
+• Lipids → not one single repeating monomer in the same way; many common lipids are built from glycerol and fatty acids
+
+So “building block” means the smaller molecular units used to make or assemble a larger biological molecule.`
+    },
+    __protein_structure: {
+      en:`Proteins are made from amino acids linked into polypeptide chains.
+
+Their structure is commonly described at four levels: primary, secondary, tertiary and quaternary.
+
+The final three-dimensional shape matters because structure influences how the protein interacts with other molecules and performs its function.`
+    },
+    __carbohydrate_structure: {
+      en:`Carbohydrate structure starts with sugar units.
+
+Monosaccharides are single sugar units. These can join to form disaccharides and longer polysaccharides.
+
+The type and arrangement of the sugar units and their bonds affect the properties and functions of the carbohydrate.`
+    },
+    __function: {
+      en:`Let's connect the current concept to its biological role.
+
+For biomolecules, ask three things: what is it made of, what structure does it form, and what does that structure allow it to do?
+
+That structure → function link is often more useful than memorizing a list.`
+    },
+    __relationship: {
+      en:`Proteins and enzymes are closely related, but they are not identical ideas.
+
+A protein is a type of biological molecule with a specific structure and function. An enzyme is a biological catalyst, and many enzymes are proteins.
+
+The important connection is structure → active site → interaction with a substrate → faster reaction.`
+    },
+    __proteins_enzymes_followup: {
+      en:`Proteins and enzymes are connected, but the terms are not interchangeable.
+
+Proteins are polymers made from amino acids and can perform many different functions. Enzymes are biological catalysts that speed up reactions. Many enzymes are proteins, and their amino-acid sequence folds into a shape that creates an active site.
+
+Think of the relationship as: amino acids → protein structure → active site → substrate interaction → catalysis.`
+    },
+    __carbohydrates: {
+      en:`Carbohydrates are one of the four major biological macromolecule groups.\n\nBuilding blocks: many carbohydrates are built from monosaccharides such as glucose.\n\nMain types:\n• Monosaccharides: single sugar units\n• Disaccharides: two sugar units joined together\n• Polysaccharides: long chains of sugar units\n\nMain functions include providing energy and, in some forms, storing energy or providing structural support.\n\nExamples include glucose, sucrose and starch.`
+    },
+    __lipids:{en:`Lipids are a group of mostly water-insoluble biological molecules.\n\nThey include fats, oils, phospholipids and steroids.\n\nImportant roles include long-term energy storage, forming cell membranes and acting as signaling molecules.`},
+    __nucleic_acids:{en:`Nucleic acids include DNA and RNA.\n\nTheir building blocks are nucleotides.\n\nDNA stores genetic information, while different types of RNA help use that information to make proteins and regulate cellular processes.`},
+    __enzymes:{en:`Enzymes are biological catalysts. They help reactions happen faster without being consumed by the reaction.\n\nA substrate interacts with an enzyme's active site. The shape and chemical environment of the active site help the reaction occur.\n\nTemperature, pH, substrate concentration and inhibitors can affect enzyme activity.`},
+    __algebra_types:{en:`There are several common ways algebra is studied.\n\n• Elementary algebra: variables, expressions and basic equations\n• Linear algebra: linear equations, vectors and matrices\n• Abstract algebra: structures such as groups, rings and fields\n• Boolean algebra: algebra based on true/false values and logical operations\n\nThe exact classification depends on the course, but the key idea is that different branches use algebraic reasoning for different kinds of problems.`},
+    __examples:{en:`Here are a few examples related to the current topic:\n\n${example}\n\nIf you tell me the specific part you want examples for, I can narrow them down further.`}
+  };
+
+  if(focus === "proteins_enzymes" && sessionFocus.lastFocus === "__building_blocks") return text.__proteins_enzymes_followup.en;
+  if(text[focus]?.[lang]) return text[focus][lang];
+  if(text[focus]?.en) return text[focus].en;
+
+  if(questionHas(q,["example","examples","例子","例","예시","ตัวอย่าง","ví dụ","exemple","ejemplo","مثال"])){
+    return `${c.example}.\n\n${example}\n\n${c.check}: ${localizedProfile(lang, sessionFocus.subject).check}`;
+  }
+
+  if(questionHas(q,["continue","go on","next","more","keep going","继续","繼續","続け","계속","ต่อ","tiếp","continuer","continuar","تابع"])){
+    const paragraphs = String(base || "").split(/\n\s*\n/).map(x=>x.trim()).filter(Boolean);
+    const nextIndex = paragraphs.findIndex((p,i)=>!sessionFocus.covered.includes(i) && p !== core);
+    if(nextIndex >= 0){
+      sessionFocus.covered.push(nextIndex);
+      return `${c.start}.\n\n${paragraphs[nextIndex]}`;
+    }
+    return `${c.start}.\n\nHere is a deeper point about ${localizedTopicName(lang, sessionFocus.topic || focus)}:\n${core}\n\n${c.focus}: ${localizedProfile(lang, sessionFocus.subject).focus}`;
+  }
+
+  return "";
+}
+
+/* ── CONTEXT ENGINE (lightweight, local, no API) ──
+   Tracks the current concept, which aspects were already covered, and resolves
+   follow-ups such as "examples", "why?", "what about them?", "explain it again". */
+const conceptPacks = {
+  biomolecules: { label:"Biomolecules", subjects:["biochemistry","biology"],
+    overview:`The major biological macromolecules are carbohydrates, lipids, proteins and nucleic acids.\n\nCells use them to store energy, build structures, carry out reactions and store genetic information.`,
+    blocks:`The building blocks depend on which biomolecule you mean.\n\n• Carbohydrates → monosaccharides such as glucose\n• Proteins → amino acids\n• Nucleic acids → nucleotides\n• Lipids → not one single repeating monomer in the same way; many common lipids are built from glycerol and fatty acids\n\nSo “building block” means the smaller molecular units used to make or assemble a larger biological molecule.`,
+    types:`There are four major groups: carbohydrates, lipids, proteins and nucleic acids. Ask about any one of them and I'll go into its types, building blocks and roles.`,
+    function:`Each group has a different main job:\n\n• Carbohydrates: quick and stored energy, plus structure in plants\n• Lipids: long-term energy storage, membranes and signalling\n• Proteins: enzymes, transport, structure and defence\n• Nucleic acids: storing and using genetic information`,
+    why:`They matter because every cell process depends on them: energy supply, membrane structure, catalysis and heredity.\n\nThe link to hold on to is structure → function: how each molecule is built decides what it can do, which is why the building blocks matter.`,
+    practical:`Practical links: nutrition labels (carbohydrate, fat, protein), blood tests for glucose and cholesterol, enzyme-based diagnostics and DNA testing. Medicine, nutrition and biotechnology all start from these four groups.`,
+    examples:[
+      `One familiar example from each group:\n\n• Carbohydrates: glucose, starch\n• Lipids: triglycerides, phospholipids, cholesterol\n• Proteins: hemoglobin, collagen, insulin\n• Nucleic acids: DNA, RNA`,
+      `A second set that shows how structure fits function:\n\n• Glycogen (carbohydrate): stores glucose in animals\n• Phospholipids (lipid): form the cell membrane bilayer\n• Amylase (protein): breaks down starch\n• mRNA (nucleic acid): carries instructions for building proteins`],
+    simple:[
+      `Cells are built and run by four kinds of molecules: sugars for energy, fats for storage and membranes, proteins for doing the work, and DNA/RNA for the instructions.`,
+      `Think of a cell as a kitchen: carbohydrates are the fuel, lipids are the pantry and the walls, proteins are the workers and tools, and nucleic acids are the recipe book.`],
+    deeper:`Going deeper: carbohydrates, proteins and nucleic acids are polymers built by condensation (dehydration) reactions and broken down by hydrolysis. Lipids are the exception, grouped by solubility rather than by a repeating monomer. Compare the bond types (glycosidic, peptide, phosphodiester, ester) and ask how each explains the molecule's properties.` },
+
+  carbohydrates: { label:"Carbohydrates", subjects:["biochemistry","biology"],
+    overview:`Carbohydrates are one of the four major biological macromolecule groups.\n\nBuilding blocks: many carbohydrates are built from monosaccharides such as glucose.\n\nMain types:\n• Monosaccharides: single sugar units\n• Disaccharides: two sugar units joined together\n• Polysaccharides: long chains of sugar units\n\nMain functions: quick energy, energy storage and structural support.`,
+    blocks:`Carbohydrate building blocks are monosaccharides (single sugars) such as glucose, fructose and galactose.\n\nTwo monosaccharides joined by a glycosidic bond make a disaccharide; many joined together make a polysaccharide.`,
+    types:`Carbohydrates are grouped by size:\n\n• Monosaccharides: glucose, fructose, galactose\n• Disaccharides: sucrose, lactose, maltose\n• Polysaccharides: starch, glycogen, cellulose, chitin`,
+    function:`Carbohydrates provide quick energy (glucose), store energy (starch in plants, glycogen in animals) and give structure (cellulose in plant cell walls). Some also help cells recognise each other at the membrane.`,
+    why:`Carbohydrates matter because glucose is the main fuel for many cells and for the brain, and because storage and structural polysaccharides let organisms save energy and build tough tissues such as plant cell walls.`,
+    practical:`Practical links: blood glucose testing in diabetes, dietary fibre (cellulose), carbohydrate loading in sport, and lactose intolerance (lactose is a disaccharide).`,
+    examples:[
+      `Common carbohydrate examples:\n\n• Glucose: a monosaccharide, the main energy sugar\n• Sucrose: a disaccharide (glucose + fructose), table sugar\n• Starch: a plant storage polysaccharide\n• Glycogen: an animal storage polysaccharide\n• Cellulose: a structural polysaccharide in plant cell walls`,
+      `More examples, grouped by what they do:\n\n• Fructose and galactose: other monosaccharides (fruit sugar; part of lactose)\n• Lactose (glucose + galactose) and maltose (glucose + glucose): disaccharides\n• Ribose and deoxyribose: the sugars inside RNA and DNA\n• Chitin: a structural polysaccharide in fungal cell walls and insect exoskeletons\n\nPattern: storage uses branched chains that are easy to break down; structure uses straight chains packed into strong fibres.`],
+    simple:[
+      `Carbohydrates are sugars and chains of sugars. Cells burn them for energy, store the extra, and plants also use them to build cell walls.`,
+      `Picture sugar units as beads: one bead is a single sugar, two joined beads is a double sugar, and a long necklace is starch, glycogen or cellulose.`],
+    deeper:`Going deeper: starch, glycogen and cellulose are all chains of glucose, but the linkage differs. Starch and glycogen use α-1,4 links (with α-1,6 branches), which enzymes break down easily. Cellulose uses β-1,4 links, giving straight chains that pack into strong fibres that most animals cannot digest.` },
+
+  lipids: { label:"Lipids", subjects:["biochemistry","biology"],
+    overview:`Lipids are a group of mostly water-insoluble biological molecules.\n\nThey include fats and oils, phospholipids and steroids.\n\nImportant roles: long-term energy storage, forming cell membranes and acting as signalling molecules.`,
+    blocks:`Lipids do not have one single repeating monomer. Many common lipids are built from glycerol and fatty acids:\n\n• Triglycerides: glycerol + three fatty acids\n• Phospholipids: glycerol + two fatty acids + a phosphate group\n• Steroids: four fused carbon rings, not built from fatty acids`,
+    types:`Main lipid groups:\n\n• Triglycerides (fats and oils)\n• Phospholipids\n• Steroids (such as cholesterol)\n• Waxes`,
+    function:`Triglycerides store energy compactly, phospholipids form the membrane bilayer, and steroids act as hormones or membrane components (cholesterol, estrogen, testosterone).`,
+    why:`Lipids matter because membranes define every cell, fat stores a lot of energy per gram, and steroid hormones help coordinate the body.`,
+    practical:`Practical links: cholesterol and cardiovascular health, fat-soluble vitamins, dietary fats, and the way soaps and detergents work with fats and oils.`,
+    examples:[
+      `Common lipid examples:\n\n• Triglycerides: fats and oils used for energy storage\n• Phospholipids: the main molecules of cell membranes\n• Cholesterol: a steroid in animal membranes and a hormone precursor\n• Waxes: protective coatings on leaves and skin`,
+      `More examples:\n\n• Estrogen, testosterone and cortisol: steroid hormones\n• Omega-3 and omega-6: unsaturated fatty acids\n• Butter vs olive oil: mostly saturated vs unsaturated fatty acids, which changes how the fat packs and whether it is solid at room temperature`],
+    simple:[
+      `Lipids are the fatty, oily molecules. They store energy, build the walls around cells and carry some chemical messages.`,
+      `Think of lipids as the cell's fuel tank and its walls: fats are the stored fuel, and phospholipids make the flexible barrier around every cell.`],
+    deeper:`Going deeper: phospholipids are amphipathic (a polar head and non-polar tails), so in water they self-assemble into bilayers. Saturated fatty acids pack tightly; cis double bonds in unsaturated ones create kinks that increase membrane fluidity.` },
+
+  nucleic_acids: { label:"Nucleic acids", subjects:["biochemistry","biology"],
+    overview:`Nucleic acids include DNA and RNA.\n\nTheir building blocks are nucleotides.\n\nDNA stores genetic information, while different types of RNA help use that information to make proteins and regulate cell processes.`,
+    blocks:`Nucleic acids are built from nucleotides. Each nucleotide has three parts: a sugar (deoxyribose in DNA, ribose in RNA), a phosphate group and a nitrogen-containing base.\n\nNucleotides are joined by phosphodiester bonds into a strand.`,
+    types:`The two types are DNA (deoxyribonucleic acid) and RNA (ribonucleic acid). RNA has several forms, including mRNA, tRNA and rRNA.`,
+    function:`DNA stores genetic information. RNA helps copy and use it: mRNA carries the instructions, tRNA brings amino acids, and rRNA is part of the ribosome that builds proteins.`,
+    why:`Nucleic acids matter because they carry the instructions for building every protein, and copying them accurately is how traits are inherited.`,
+    practical:`Practical links: DNA testing and forensics, genetic screening, PCR, and mRNA vaccines.`,
+    examples:[
+      `Common nucleic acid examples:\n\n• DNA: the genetic material in chromosomes\n• mRNA: carries a gene's instructions to the ribosome\n• tRNA: delivers amino acids during protein synthesis\n• rRNA: a structural and catalytic part of ribosomes`,
+      `Related examples worth knowing:\n\n• ATP: a nucleotide that carries energy\n• Mitochondrial DNA: a small circular genome in mitochondria\n• Ribozymes: RNA molecules that act as catalysts`],
+    simple:[
+      `Nucleic acids are the information molecules: DNA stores the instructions and RNA carries them out.`,
+      `Think of DNA as the master recipe book kept safe in the library, and mRNA as a photocopy of one recipe taken to the kitchen.`],
+    deeper:`Going deeper: base pairing (A–T or A–U, and G–C) lets DNA be copied and transcribed accurately. The two DNA strands run antiparallel, and the sugar–phosphate backbone is built by 5′→3′ phosphodiester bonds.` },
+
+  proteins: { label:"Proteins", subjects:["biochemistry","biology"],
+    overview:`Proteins are chains of amino acids that fold into three-dimensional structures with specific functions.\n\nTheir structure is described at four levels: primary (amino acid sequence), secondary (helices and sheets), tertiary (overall 3D fold) and quaternary (several chains together).`,
+    blocks:`Proteins are built from amino acids joined by peptide bonds into polypeptide chains. There are 20 standard amino acids, and their sequence decides how the chain folds.`,
+    types:`Proteins can be grouped by role: enzymes, structural proteins, transport proteins, antibodies, hormones and receptors. They can also be grouped by shape: fibrous or globular.`,
+    function:`Proteins work as enzymes, transporters, structural fibres, antibodies, hormones and receptors. The job a protein can do depends on its shape.`,
+    why:`Proteins matter because nearly every cell process runs through them: reactions (enzymes), oxygen transport (hemoglobin), defence (antibodies) and structure (collagen).\n\nOne changed amino acid can change the shape and the function, as in sickle-cell disease.`,
+    practical:`Practical links: protein in nutrition, insulin therapy, antibody tests and treatments, and protein denaturation when cooking an egg.`,
+    examples:[
+      `Common protein examples:\n\n• Hemoglobin: carries oxygen in blood\n• Collagen: gives strength to skin, bone and tendon\n• Insulin: a hormone that regulates blood glucose\n• Antibodies: recognise pathogens\n• Amylase: an enzyme that digests starch`,
+      `More examples:\n\n• Actin and myosin: produce muscle contraction\n• Keratin: the protein in hair and nails\n• Albumin: a major blood protein that carries molecules and helps keep fluid balance\n• Membrane receptors: detect signals at the cell surface`],
+    simple:[
+      `Proteins are the cell's workers. Each is a chain of amino acids folded into a shape, and the shape decides the job.`,
+      `Think of amino acids as letters and a protein as a word: the order of the letters matters, and the folded word has a meaning, which is its function.`],
+    deeper:`Going deeper: folding is driven by hydrophobic effects, hydrogen bonds, ionic interactions and disulfide bridges. Heat or pH changes can denature a protein, breaking those interactions so the shape and the function are lost.` },
+
+  enzymes: { label:"Enzymes", subjects:["biochemistry","biology"],
+    overview:`Enzymes are biological catalysts. They help reactions happen faster without being consumed by the reaction.\n\nA substrate binds the enzyme's active site, and the shape and chemistry of that site help the reaction occur.`,
+    blocks:`Most enzymes are proteins, so their building blocks are amino acids. Some RNA molecules (ribozymes) also act as catalysts, and many enzymes need helpers called cofactors, such as metal ions or coenzymes.`,
+    types:`Enzymes are often grouped by the reaction they catalyse: oxidoreductases, transferases, hydrolases, lyases, isomerases and ligases.`,
+    function:`Enzymes lower the activation energy of a reaction, so it proceeds quickly at body temperature. Each enzyme is specific: its active site fits particular substrates. Cells also regulate enzyme activity to control metabolism.`,
+    why:`Enzymes matter because without them most cell reactions would be far too slow to sustain life. Digestion, DNA copying and energy release all depend on them, and many drugs work by inhibiting a specific enzyme.`,
+    practical:`Practical uses: lactase supplements, blood enzyme tests for heart or liver damage, enzymes in detergents, and drugs such as statins (which inhibit HMG-CoA reductase).`,
+    examples:[
+      `Common enzyme examples:\n\n• Amylase: breaks starch into sugars\n• Lipase: breaks down fats\n• Protease (e.g. pepsin, trypsin): breaks down proteins\n• Catalase: breaks down hydrogen peroxide\n• DNA polymerase: copies DNA`,
+      `More examples:\n\n• Lactase: digests lactose\n• ATP synthase: makes ATP in mitochondria\n• RuBisCO: fixes carbon dioxide in photosynthesis\n• Hexokinase: the first step of glycolysis\n• HMG-CoA reductase: a key step in cholesterol synthesis`],
+    simple:[
+      `Enzymes are the cell's speed-up helpers. They don't get used up; they just let reactions run fast enough for life.`,
+      `Think of an enzyme as a lock and the substrate as the key: only the right key fits the active site, and once it fits, the reaction happens quickly.`],
+    deeper:`Going deeper: enzymes stabilise the transition state, lowering activation energy without changing the equilibrium. Rate depends on substrate concentration, temperature and pH, and inhibitors can be competitive (compete for the active site) or non-competitive (bind elsewhere).` },
+
+  proteins_enzymes: { label:"Proteins and enzymes", subjects:["biochemistry","biology"],
+    overview:`Proteins and enzymes are connected, but the terms are not interchangeable.\n\nProteins are polymers made from amino acids and can perform many different functions. Enzymes are biological catalysts that speed up reactions. Many enzymes are proteins, and their amino-acid sequence folds into a shape that creates an active site.\n\nThink of the relationship as: amino acids → protein structure → active site → substrate interaction → catalysis.`,
+    blocks:`Both are built from amino acids. A protein is a chain of amino acids joined by peptide bonds; an enzyme that is a protein is simply a protein whose folded shape forms an active site.`,
+    types:`Not all proteins are enzymes: hemoglobin, collagen and antibodies are proteins with other jobs. Not all enzymes are proteins either: ribozymes are catalytic RNA.`,
+    function:`Proteins do many jobs (transport, structure, defence, signalling, catalysis). Enzymes do one: they speed up specific reactions by binding substrates at the active site.`,
+    why:`The connection matters because it shows structure → function: the amino-acid sequence decides the fold, the fold decides the active site, and the active site decides which reaction is sped up.`,
+    practical:`Practical links: digestive enzymes, enzyme deficiencies, enzyme-inhibitor drugs, and denaturation (heat or pH changes unfold the protein and stop the enzyme working).`,
+    examples:[
+      `Examples that show the difference:\n\n• Enzyme proteins: amylase, lipase, catalase\n• Proteins that are not enzymes: hemoglobin, collagen, antibodies\n• Enzymes that are not proteins: ribozymes (catalytic RNA)`,
+      `Examples of structure deciding the enzyme's job:\n\n• Pepsin: works in the acidic stomach, so its shape is stable at low pH\n• Trypsin: cuts proteins after specific amino acids\n• Lysozyme: its active site fits bacterial cell-wall sugars`],
+    simple:[
+      `Proteins are the cell's workers. Enzymes are the workers whose job is speeding up reactions, and most of them are proteins.`,
+      `Think of "protein" as the job category "worker" and "enzyme" as one specific job, "speed-up helper". Most speed-up helpers belong to the worker category.`],
+    deeper:`Going deeper: enzyme activity depends on tertiary structure. Change the pH or temperature and the active site distorts, which is why most enzymes have an optimum range.` },
+
+  algebra: { label:"Algebra", subjects:["math"],
+    overview:`Algebra is solving unknown values using symbols.\n\nA letter such as x stands for a number we don't know yet, and an equation shows how quantities are related. Solving means doing the same operation to both sides until the unknown stands alone.`,
+    blocks:`Algebra is built from variables (letters standing for unknowns), constants, operations (+, −, ×, ÷) and the equals sign, which says both sides have the same value.`,
+    types:`There are several common ways algebra is studied.\n\n• Elementary algebra: variables, expressions and basic equations\n• Linear algebra: linear equations, vectors and matrices\n• Abstract algebra: structures such as groups, rings and fields\n• Boolean algebra: logic with true/false values`,
+    why:`Algebra matters because it lets you describe a pattern once and use it for any numbers, from budgets and speed calculations to science formulas and computer programs.`,
+    practical:`Practical uses: working out discounts and loan costs, converting units, using physics and chemistry formulas, and writing code that works for any input.`,
+    examples:[
+      `Worked examples:\n\n• x + 5 = 10 → subtract 5 from both sides → x = 5\n• 2x + 3 = 11 → subtract 3 → 2x = 8 → divide by 2 → x = 4`,
+      `Two more, slightly harder:\n\n• 3(x − 2) = 12 → expand: 3x − 6 = 12 → add 6: 3x = 18 → x = 6\n• x² = 16 → x = 4 or x = −4, because both square to 16`],
+    simple:[
+      `Algebra is a puzzle with a missing number. The letter x is the missing number, and you keep both sides of the equals sign balanced while you work out what it is.`,
+      `Think of a balance scale: whatever you do to one side you must do to the other. x + 5 = 10 says "something plus 5 weighs the same as 10", so take 5 off each side and x = 5 is left.`],
+    deeper:`Going deeper: solving is applying inverse operations in reverse order. Linear equations have one solution, quadratics can have two, and systems of equations look for values that satisfy several equations at once.` },
+
+  ratio: { label:"Ratio", subjects:["math"],
+    overview:`A ratio compares two quantities of the same kind. It tells you how much of one thing there is compared with another.\n\nIt can be written as 2:3, as "2 to 3", or as the fraction 2/3. Simplifying works like fractions: 4:6 and 2:3 describe the same relationship.`,
+    blocks:`A ratio has two parts: the quantities being compared (either side of the colon) and the order they are written in. The order matters: 3:1 (boys to girls) is not the same as 1:3.`,
+    types:`Common kinds of ratio:\n\n• Part-to-part: boys : girls = 3:2\n• Part-to-whole: boys : whole class = 3:5\n• Rates, which compare different units: 60 km in 1 hour`,
+    function:`Ratios compare sizes and let you scale quantities up or down while keeping the relationship the same.`,
+    why:`Ratios matter because they let you compare amounts fairly and scale things up or down without changing the balance, from recipes and maps to prices and speed.`,
+    practical:[
+      `Real-life ratios:\n\n• Recipes: 2 cups of rice to 4 cups of water is 1:2, so 3 cups of rice needs 6 cups of water\n• Maps: a scale of 1:50,000 means 1 cm on the map is 50,000 cm (500 m) in real life\n• Mixing paint or cement: 1 part cement to 4 parts sand\n• Speed: 120 km in 2 hours is the rate 60 km per hour`,
+      `More everyday uses:\n\n• Sharing money: splitting 12,000 in the ratio 1:3 gives 3,000 and 9,000\n• Screens: a 16:9 screen is 16 units wide for every 9 tall\n• Prices: 5 kg for 20 is the same ratio as 1 kg for 4, so you can compare which shop is cheaper per kg\n• Mixing a solution: a fixed ratio of concentrate to water`],
+    examples:[
+      `Worked examples:\n\n• Simplify 2:4 → divide both sides by 2 → 1:2\n• Simplify 12:18 → divide both sides by 6 → 2:3`,
+      `Two more, using a ratio to find an amount:\n\n• A class has 3 boys for every 2 girls. With 10 girls: 10 ÷ 2 × 3 = 15 boys\n• Share 20 sweets in the ratio 1:3. There are 1 + 3 = 4 parts, so one part is 5. The shares are 5 and 15`,
+      `Checking whether two ratios are equal:\n\n• Is 3:4 the same as 9:12? Multiply 3:4 by 3 to get 9:12, so yes\n• Is 2:5 the same as 4:9? Doubling 2:5 gives 4:10, so no`],
+    simple:[
+      `A ratio is a way to compare two amounts. 2:3 means "for every 2 of the first thing, there are 3 of the second."`,
+      `Picture a fruit bowl with 2 apples and 3 bananas. The ratio of apples to bananas is 2:3, whatever the size of the bowl: 4 apples and 6 bananas is still 2:3.`],
+    deeper:`Going deeper: ratios behave like fractions, so equivalent ratios come from multiplying or dividing both parts by the same number. Two ratios are in proportion when a:b = c:d, which is the same as a×d = b×c. That cross-multiplying test solves many scaling problems, and a rate such as speed is just a ratio of different units.` }
+};
+
+const conceptDetectors = [
+  {key:"biomolecules",  re:/\bbiomolecules?\b|\bmacromolecules?\b/},
+  {key:"carbohydrates", re:/\bcarbohydrates?\b|\bcarbs?\b|\bsaccharides?\b/},
+  {key:"lipids",        re:/\blipids?\b|\bfats?\b/},
+  {key:"nucleic_acids", re:/\bnucleic acids?\b|\bdna\b|\brna\b/},
+  {key:"proteins",      re:/\bproteins?\b|\bamino acids?\b/},
+  {key:"enzymes",       re:/\benzymes?\b|\bactive site\b/},
+  {key:"algebra",       re:/\balgebra\b/},
+  {key:"ratio",         re:/\bratios?\b/}
+];
+const topicConcept = { biomolecules:"biomolecules", proteins_enzymes:"proteins_enzymes", algebra:"algebra", ratio:"ratio" };
+const aspectOrder = ["overview","blocks","function","why","examples","practical"];
+
+function detectIntent(q){
+  if(/\b(don t|dont|do not) (understand|get)\b|\bconfus|\blost\b|not clear|unclear|\bstuck\b/.test(q)) return "confusion";
+  if(/\bsimpl|\beasier\b|\beli5\b|\bplain\b/.test(q)) return "simplify";
+  if(/\b(real[ -]?life|real[ -]?world|everyday|day[ -]to[ -]day|daily life|practical)\b/.test(q) && /\bexamples?\b|\buses\b|\bapplications?\b|\bsituations?\b/.test(q)) return "practical";
+  if(/\bagain\b|another way|different way|\brephrase\b|\breword\b|differently/.test(q)) return "again";
+  if(/\bexamples?\b|\binstances?\b|for instance/.test(q)) return "examples";
+  if(/\bbuilding blocks?\b|\bmonomers?\b|\bsubunits?\b|made (of|from|up of)/.test(q)) return "blocks";
+  if(/\btypes?\b|\bkinds?\b|\bcategories\b|\bclassif/.test(q)) return "types";
+  if(/\bwhy\b|\bimportan|\bmatters?\b|\bsignifican/.test(q)) return "why";
+  if(/\bfunctions?\b|\brole\b|\bpurpose\b|what (do|does) \w+ do\b/.test(q)) return "function";
+  if(/\bapplications?\b|\bapply\b|real life|real world|practical|used for|used in|\buses\b/.test(q)) return "practical";
+  if(/\bdeeper\b|more detail|\badvanced\b|go further|in depth|more about/.test(q)) return "deeper";
+  return "";
+}
+
+function findConcept(q, subject){
+  const hits = [];
+  conceptDetectors.forEach(d=>{
+    const m = q.match(d.re);
+    if(m && conceptPacks[d.key].subjects.includes(subject)) hits.push({key:d.key, index:m.index});
+  });
+  if(!hits.length) return "";
+  const keys = hits.map(h=>h.key);
+  if(keys.includes("proteins") && keys.includes("enzymes")) return "proteins_enzymes";
+  hits.sort((a,b)=>a.index-b.index);
+  return hits[0].key;
+}
+
+function ctxChallenge(label){
+  return `You've now covered the main points on ${label}. Try explaining it back in your own words, in a sentence or two, and I'll point out what's missing or where to push further.`;
+}
+
+function ctxNudge(label, pack, seen, lead){
+  const names = {blocks:"its building blocks", function:"what it does", why:"why it matters", examples:"examples", practical:"where it is used in real life", deeper:"a deeper look"};
+  const left = Object.keys(names).filter(k => pack[k] && !seen[k]);
+  if(left.length >= 2){
+    const shown = left.slice(0,3).map(k => names[k]);
+    const list = shown.length === 1 ? shown[0] : shown.slice(0,-1).join(", ") + " or " + shown[shown.length-1];
+    return `${lead}\n\nFrom here you could ask about ${list}.`;
+  }
+  return ctxChallenge(label);
+}
+
+function genericAspect(aspect, n, label, base, subject){
+  const p = localizedProfile("en", subject);
+  const lines = String(base || "").split(/\n+/).map(x=>x.trim()).filter(Boolean);
+  if(aspect === "examples"){
+    const ex = lines.filter(x=>/^example|e\.g\.|→/i.test(x));
+    if(!ex.length) return "";   // nothing stored for this topic: let the existing logic answer
+    return n < ex.length ? `Here is an example for ${label}:\n\n${ex[n]}` : `I only have one worked example for ${label} in this prototype, and you have already seen it. You asking for more tells us what to add next.`;
+  }
+  const core = extractCore(base);
+  const first = core.split(/(?<=[.!?])\s+/)[0] || core;
+  if(n === 0) return `In one sentence: ${first}\n\nHold on to this: ${p.focus}.`;
+  if(n === 1) return `Try three questions: what is ${label} about, what does it do, and how would you check it?\n\n${core}\n\nQuick check: ${p.check}`;
+  return `I have put it a few ways now. Tell me which word or step lost you and I will break just that part down.`;
+}
+
+function contextReply(lang, subject, topic, question, base){
+  if(lang !== "en") return "";
+  const q = normalizeQuestion(question);
+  if(!q) return "";
+  const st = sessionFocus;
+  st.seen = st.seen || {};
+
+  const mention = findConcept(q, subject);
+  const intent = detectIntent(q);
+  const pronounAbout = /\b(what|how) about (them|it|that|this|those|these)\b/.test(q) ||
+                       (/^(and )?(what|how) about\b/.test(q) && !mention);
+  if(!intent && !mention && !pronounAbout) return "";
+  if(!intent && /\d/.test(question)) return "";   // numbers and no follow-up word: leave to the existing solver
+
+  const concept = mention || st.concept || topicConcept[topic] || topic;
+  const switched = !!mention && mention !== st.concept;
+  const pack = conceptPacks[concept] && conceptPacks[concept].subjects.includes(subject) ? conceptPacks[concept] : null;
+  const label = pack ? pack.label : localizedTopicName("en", concept);
+  const seen = st.seen[concept] = st.seen[concept] || {};
+  const bump = k => { seen[k] = (seen[k] || 0) + 1; };
+
+  let aspect = intent || (pronounAbout ? "__next" : "overview");
+  if(aspect === "overview" && seen.overview && !switched) aspect = "again";
+
+  let reply = "";
+  if(!pack){
+    // Generic concepts: only the follow-ups that are safe to answer from the topic text.
+    if(aspect === "practical" && /examples?/.test(q)) aspect = "examples";
+    if(!["examples","simplify","again","confusion"].includes(aspect)) return "";
+    const kind = aspect === "examples" ? "examples" : "simple";
+    let text = genericAspect(kind, seen[kind] || 0, label, getSubjectData("en", subject)[concept] || base, subject);
+    if(!text){
+      const asked = seen[kind] || 0;
+      bump(kind);
+      if(asked === 0) return "";   // first ask: let the existing logic answer once
+      text = `I don't have more examples for ${label} in this prototype yet. You asking for more tells us what to add next.`;
+    } else { bump(kind); }
+    st.concept = concept; st.lastIntent = aspect;
+    return text;
+  }
+
+  if(["simplify","again","confusion"].includes(aspect)){
+    const n = seen.simple || 0;
+    const opener = aspect === "confusion" ? "No problem, let's come at it from a different angle.\n\n"
+                 : aspect === "again" ? "Here's another way to see it.\n\n" : "Here's the simple version.\n\n";
+    if(n < pack.simple.length){
+      reply = opener + pack.simple[n];
+    } else if(aspect === "again" && !seen.deeper){
+      reply = "Let's go a level deeper instead of repeating myself.\n\n" + pack.deeper;
+      bump("deeper");
+    } else if(aspect === "again"){
+      reply = ctxNudge(label, pack, seen, "We've been over this from a few angles.");
+    } else {
+      reply = "I've put it a few different ways now. Tell me which word or step lost you and I'll break just that part down.";
+    }
+    bump("simple");
+  } else if(aspect === "examples"){
+    const n = seen.examples || 0;
+    reply = n < pack.examples.length ? pack.examples[n]
+          : ctxNudge(label, pack, seen, `That's every example set I have for ${label.toLowerCase()}.`);
+    bump("examples");
+  } else if(aspect === "__next"){
+    const next = aspectOrder.find(a => pack[a] && !seen[a]);
+    if(next){ reply = Array.isArray(pack[next]) ? pack[next][0] : pack[next]; bump(next); }
+    else if(!seen.deeper){ reply = pack.deeper; bump("deeper"); }
+    else reply = ctxChallenge(label);
+  } else {
+    const key = aspect === "types" && !pack.types ? "overview" : aspect;
+    if(!pack[key]) return "";
+    if(Array.isArray(pack[key])){
+      const k = seen[key] || 0;
+      reply = k < pack[key].length ? pack[key][k] : ctxNudge(label, pack, seen, `That's every ${key === "practical" ? "real-life set" : "set"} I have for ${label.toLowerCase()}.`);
+      bump(key);
+    } else if(seen[key] && key !== "deeper"){
+      reply = !seen.deeper ? pack.deeper : ctxNudge(label, pack, seen, "We've covered that from a couple of angles.");
+      bump("deeper");
+    } else { reply = pack[key]; bump(key); }
+  }
+
+  st.concept = concept; st.lastIntent = aspect;
+  return reply;
+}
+
+function makeSmartReply(lang, subject, topic, question, mode, base){
+  const ctxReply = contextReply(lang, subject, topic, question, base);
+  if(ctxReply){ sessionFocus.subject = subject; sessionFocus.topic = topic; return ctxReply; }
+  const p = localizedProfile(lang, subject);
+  const c = responseCopy[lang] || responseCopy.en;
+  const type = detectQuestionType(question, lang);
+  const previousFocus = sessionFocus.lastFocus;
+  const focus = pickQuestionFocus(question, getSubjectData(lang, subject), topic);
+  sessionFocus.subject = subject;
+  sessionFocus.topic = topic;
+
+  const targeted = focusedKnowledge(lang, focus, base, question);
+  sessionFocus.lastFocus = focus;
+  if(targeted){
+    return `${targeted}\n\n${c.focus}: ${p.focus}`;
+  }
+
+  const topicName = localizedTopicName(lang, focus || topic || subject);
+  const cleanBase = base || "";
+  const firstLine = extractCore(cleanBase);
+  const opening = {
+    calculation:c.calculation, why:c.why, compare:c.compare,
+    application:c.application, confusion:c.confusion,
+    definition:c.definition, concept:c.concept
+  }[type] || c.concept;
+
+  if(type === "calculation") {
+    return `${opening}: ${topicName}\n\n${c.start}.\n\n1. ${lang==='zh'?'找出已知量和单位':lang==='ja'?'既知の値と単位を確認します':lang==='ko'?'주어진 값과 단위를 확인합니다':lang==='th'?'ระบุค่าที่ให้มาและหน่วย':lang==='vi'?'Xác định các giá trị và đơn vị đã biết':lang==='fr'?'Identifiez les valeurs connues et leurs unités':lang==='es'?'Identifica los valores conocidos y sus unidades':lang==='ar'?'حدد القيم المعروفة ووحداتها':'Identify the known values and their units.'}\n2. ${lang==='zh'?'选择连接这些量的公式或原理':lang==='ja'?'関係する公式や原理を選びます':lang==='ko'?'연결되는 공식이나 원리를 선택합니다':lang==='th'?'เลือกสมการหรือหลักการที่เกี่ยวข้อง':lang==='vi'?'Chọn công thức hoặc nguyên lý phù hợp':lang==='fr'?'Choisissez l’équation ou le principe adapté':lang==='es'?'Elige la ecuación o principio adecuado':lang==='ar'?'اختر المعادلة أو المبدأ المناسب':'Choose the equation or principle that connects them.'}\n3. ${lang==='zh'?'代入数值并计算':lang==='ja'?'値を代入して計算します':lang==='ko'?'값을 대입하고 계산합니다':lang==='th'?'แทนค่าและคำนวณ':lang==='vi'?'Thay số và tính toán':lang==='fr'?'Remplacez les valeurs et calculez':lang==='es'?'Sustituye los valores y calcula':lang==='ar'?'عوّض القيم واحسب':'Substitute the values and calculate.'}\n4. ${p.check}\n\n${c.focus}: ${p.focus}${cleanBase ? `\n\n${firstLine}` : ''}`;
+  }
+
+  if(type === "definition") return `${opening}: ${topicName}\n\n${firstLine || topicName}\n\n${lang==='zh'?'然后理解它做什么、如何运作以及在哪里使用。':lang==='ja'?'次に、何をするのか、どう働くのか、どこで使うのかを見ます。':lang==='ko'?'그다음 무엇을 하는지, 어떻게 작동하는지, 어디에 쓰이는지 봅니다.':lang==='th'?'จากนั้นดูว่ามันทำอะไร ทำงานอย่างไร และใช้ที่ไหน':lang==='vi'?'Sau đó xem nó làm gì, hoạt động thế nào và được dùng ở đâu.':lang==='fr'?'Ensuite, voyez ce que cela fait, comment cela fonctionne et où on l’utilise.':lang==='es'?'Después mira qué hace, cómo funciona y dónde se usa.':lang==='ar'?'ثم انظر إلى ما يفعله وكيف يعمل وأين يُستخدم.':'Then look at what it does, how it works and where it is used.'}\n\n${c.focus}: ${p.focus}`;
+
+  return `${opening}: ${topicName}\n\n${firstLine || topicName}\n\n${c.focus}: ${p.focus}\n${c.check}: ${p.check}`;
+}
+
+let chatMessages = [];
+let lastAssistantReply = "";
+let mathExplanationAttempts = 0;
+
+function renderChat(){
+  const box = document.getElementById("explanation");
+  box.innerHTML = "";
+  if(!chatMessages.length){
+    const welcome = document.createElement("div");
+    welcome.className = "chat-message baint";
+    welcome.textContent = 'Ask a question and I will explain the selected topic clearly';
+    box.appendChild(welcome);
+    const arrowRow = document.createElement("div");
+    arrowRow.className = "down-arrow-row";
+    arrowRow.innerHTML = '<button type="button" class="down-arrow" aria-label="Go to question input" title="Ask another question">↓</button>';
+    arrowRow.querySelector("button").onclick = focusQuestion;
+    box.appendChild(arrowRow);
+    return;
+  }
+  chatMessages.forEach(m => {
+    const el = document.createElement("div");
+    el.className = `chat-message ${m.role}`;
+    const label = m.role === "user" ? "You" : "";
+    if(label){
+      const labelEl = document.createElement("div");
+      labelEl.className = "chat-label";
+      labelEl.textContent = label;
+      el.appendChild(labelEl);
+    }
+    const textEl = document.createElement("div");
+    textEl.className = "message-text";
+    textEl.textContent = m.text;
+    el.appendChild(textEl);
+    if(m.role === "baint"){
+      const copyBtn = document.createElement("button");
+      copyBtn.className = "copy-answer";
+      copyBtn.type = "button";
+      copyBtn.textContent = "📋 Copy answer";
+      copyBtn.onclick = () => copyAnswer(m.text, copyBtn);
+      el.appendChild(copyBtn);
+    }
+    box.appendChild(el);
+  });
+  const arrowRow = document.createElement("div");
+  arrowRow.className = "down-arrow-row";
+  const arrow = document.createElement("button");
+  arrow.type = "button";
+  arrow.className = "down-arrow";
+  arrow.textContent = "↓";
+  arrow.setAttribute("aria-label", "Go to question input");
+  arrow.title = "Ask another question";
+  arrow.onclick = focusQuestion;
+  arrowRow.appendChild(arrow);
+  box.appendChild(arrowRow);
+  box.scrollTop = box.scrollHeight;
+}
+
+async function copyAnswer(text, button){
+  try{
+    if(navigator.clipboard && window.isSecureContext){
+      await navigator.clipboard.writeText(text);
+    } else {
+      const area = document.createElement("textarea");
+      area.value = text; area.style.position = "fixed"; area.style.opacity = "0";
+      document.body.appendChild(area); area.select();
+      const ok = document.execCommand("copy"); area.remove();
+      if(!ok) throw new Error("copy failed");
+    }
+    const old = button.textContent; button.textContent = "✓ Copied";
+    setTimeout(() => { button.textContent = old; }, 1400);
+  } catch(e){
+    button.textContent = "Select and copy the answer";
+    setTimeout(() => { button.textContent = "📋 Copy answer"; }, 1800);
+  }
+}
+
+function focusQuestion(){
+  const input = document.getElementById("studentQuestion");
+  input.focus();
+  input.scrollIntoView({behavior:"smooth", block:"center"});
+}
+
+function isMathQuestion(q){
+  const x = String(q || "").toLowerCase().trim();
+  if(/[0-9]\s*[+×*÷/=^%-]\s*[0-9]/.test(x)) return true;
+  return /\b(?:mathematics|maths?|arithmetic|fraction|fractions|prime number|prime factor|factorization|factorisation|percentage|percent|ratio|equation|algebra|square root|cube root|perimeter|area of a|area|volume|probability|average|mean|median|multiply|multiplication|divide|division|subtract|subtraction|addition|calculate|compute|solve for x|number line|decimal|integer|geometry|times table)\b/.test(x);
+}
+
+function localMathFollowup(previousQuestion, followupQuestion, attempt=1){
+  const original = String(previousQuestion || "").trim();
+  const expr = original.replace(/^(?:what is|calculate|compute|evaluate|work out|solve)\s+/i, "").replace(/^(?:the answer to)\s+/i, "").replace(/[?=]$/, "").trim();
+  const m = expr.match(/^(\d+(?:\.\d+)?)\s*([+\-×*÷/])\s*(\d+(?:\.\d+)?)$/);
+  if(m){
+    const a=Number(m[1]), op=m[2], b=Number(m[3]);
+    const symbol = op === "*" ? "×" : op === "/" ? "÷" : op;
+    const value = op === "+" ? a+b : (op === "-" || op === "−") ? a-b : (op === "×" || op === "*") ? a*b : (b!==0 ? a/b : NaN);
+    if(Number.isFinite(value)){
+      if(op === "+") {
+        if(attempt <= 1) return `Let's keep working on ${a} + ${b}.\n\nImagine you have ${a} apples, then someone gives you ${b} more. Count them together: ${a} + ${b} = ${formatNum(value)}.\n\nAnswer: ${formatNum(value)}. Does the apple example help?`;
+        if(attempt === 2) return `Let's try a different method without apples.\n\nStart at ${a} and count forward ${b} steps: ${Array.from({length:Math.min(b,20)},(_,i)=>formatNum(a+i+1)).join(", ")}${b>20?", …":""}. You land on ${formatNum(value)}.\n\nSo ${a} + ${b} = ${formatNum(value)}.`;
+        return `Let's use two groups.\n\nGroup one has ${a} dots. Group two has ${b} dots. Adding means putting both groups together: ${a} + ${b} = ${formatNum(value)}.\n\nYou can also split it: ${a} + ${b} = ${a} + ${Math.floor(b/2)} + ${b-Math.floor(b/2)} = ${formatNum(value)}. Which part feels unclear?`;
+      }
+      if(op === "-") return `Let's picture ${a} objects in front of you. If you take away ${b}, count what remains.\n\n${a} − ${b} = ${formatNum(value)}.\n\nThe minus sign means we are taking away. Does that explanation help?`;
+      if(op === "×" || op === "*") return `Think of ${a} × ${b} as ${a} equal groups with ${b} objects in each group. Add the groups together: ${Array.from({length:Math.min(a,10)},()=>b).join(" + ")}${a>10?" + …":""} = ${formatNum(value)}.\n\nSo ${a} × ${b} = ${formatNum(value)}. Multiplication is a quicker way to add equal groups.`;
+      return `Imagine sharing ${a} objects equally among ${b} people. Each person gets ${formatNum(value)}.\n\nSo ${a} ÷ ${b} = ${formatNum(value)}. Division means sharing into equal groups.`;
+    }
+  }
+  return `Let's stay with your original question: “${original}”.\n\nI will not repeat the same explanation or jump to an unrelated topic. Let's split the problem into smaller pieces: first, identify what the question gives us; next, decide what operation or idea connects those pieces; finally, check whether the result makes sense.\n\nWhich part is confusing you most: understanding the question, choosing the method, or following a step?`;
+}
+
+function escapeHtml(text){
+  return String(text).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+}
+
+function updateContent(){
+  resetSession();
+  chatMessages = [];
+  lastAssistantReply = "";
+  stopVoice();
+  renderChat();
+}
+
+/* ── VOICE INPUT ── */
+let recognition = null;
+let micListening = false;
+function toggleMic(){
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  const button = document.getElementById("btn-mic");
+  if(micListening && recognition){ recognition.stop(); return; }
+  if(!SpeechRecognition){
+    alert("Voice input is not supported in this browser. Try a recent version of Chrome, or type your question.");
+    return;
+  }
+  recognition = new SpeechRecognition();
+  const lang = document.getElementById("language").value;
+  const speechLang = {en:"en-US",zh:"zh-CN",fr:"fr-FR",es:"es-ES",th:"th-TH",ko:"ko-KR",vi:"vi-VN",ja:"ja-JP",ar:"ar-AE"};
+  recognition.lang = speechLang[lang] || "en-US";
+  recognition.interimResults = false;
+  recognition.maxAlternatives = 1;
+  recognition.onstart = () => { micListening = true; button.classList.add("listening"); button.textContent = "⏹"; button.title = "Stop recording"; };
+  recognition.onresult = event => {
+    const spoken = event.results && event.results[0] && event.results[0][0] ? event.results[0][0].transcript : "";
+    if(spoken) document.getElementById("studentQuestion").value = spoken;
+    document.getElementById("studentQuestion").focus();
+  };
+  recognition.onerror = event => {
+    if(event.error !== "no-speech" && event.error !== "aborted") alert("Voice input couldn't start: " + event.error + ". You can type your question instead.");
+  };
+  recognition.onend = () => { micListening = false; button.classList.remove("listening"); button.textContent = "🎙️"; button.title = "Speak your question"; };
+  try { recognition.start(); } catch(e) { alert("Voice input couldn't start. Please try again or type your question."); }
+}
+
+/* ── VOICE ── */
+let utterance;
+let voicePlaying = false;
+
+function getVoice(lang){
+  const voices = speechSynthesis.getVoices();
+  return voices.find(v => v.lang.toLowerCase().startsWith(lang.toLowerCase())) || null;
+}
+
+function toggleVoice(){
+  if(voicePlaying){
+    stopVoice();
+    return;
+  }
+
+  const lang = document.getElementById("language").value;
+  const text = lastAssistantReply.trim();
+  if(!text) return;
+
+  speechSynthesis.cancel();
+  const voice = getVoice(voiceMap[lang]);
+  if(!voice){
+    document.getElementById("btn-voice").innerText = ui[lang].speak;
+    return;
+  }
+  utterance = new SpeechSynthesisUtterance(text);
+  utterance.voice = voice;
+  utterance.lang = voiceMap[lang];
+  utterance.onstart = () => {
+    voicePlaying = true;
+    document.getElementById("btn-voice").innerText = "⏹ Stop";
+  };
+  utterance.onend = utterance.onerror = () => {
+    voicePlaying = false;
+    document.getElementById("btn-voice").innerText = ui[lang].speak;
+  };
+  speechSynthesis.speak(utterance);
+}
+
+function stopVoice(){
+  speechSynthesis.cancel();
+  voicePlaying = false;
+  const lang = document.getElementById("language").value;
+  document.getElementById("btn-voice").innerText = ui[lang].speak;
+}
+
+speechSynthesis.onvoiceschanged = () => { speechSynthesis.getVoices(); };
+
+renderChat();
+
+
+/* ── LOCAL MATHEMATICS ENGINE: no network or API required ── */
+function gcdInt(a,b){
+  a = Math.abs(Math.trunc(a)); b = Math.abs(Math.trunc(b));
+  while(b){ const r = a % b; a = b; b = r; }
+  return a || 1;
+}
+function formatNum(n){
+  if(!Number.isFinite(n)) return String(n);
+  if(Math.abs(n) < 1e-10) n = 0;
+  return Number(n.toFixed(8)).toString();
+}
+function evalArithmetic(expr){
+  const x = expr.replace(/[×x]/g,"*").replace(/÷/g,"/").replace(/−/g,"-").replace(/,/g,"").trim();
+  if(!x || x.length > 120 || !/^[\d\s.+\-*/()%^]+$/.test(x)) throw Error("unsupported");
+  let i=0;
+  function exprAdd(){
+    let v=exprMul();
+    while(true){ skip(); if(x[i]==="+"){i++;v+=exprMul();} else if(x[i]==="-"){i++;v-=exprMul();} else break; }
+    return v;
+  }
+  function exprMul(){
+    let v=exprPow();
+    while(true){ skip(); if(x[i]==="*" ){i++;v*=exprPow();} else if(x[i]==="/"){i++;const d=exprPow();if(d===0)throw Error("zero");v/=d;} else break; }
+    return v;
+  }
+  function exprPow(){
+    let v=exprUnary(); skip();
+    if(x[i]==="^" || x.slice(i,i+2)==="**"){ if(x[i]==="*")i+=2;else i++; v=Math.pow(v,exprPow()); }
+    return v;
+  }
+  function exprUnary(){ skip(); if(x[i]==="+"){i++;return exprUnary();} if(x[i]==="-"){i++;return -exprUnary();} return exprAtom(); }
+  function exprAtom(){
+    skip();
+    if(x[i]==="("){i++;const v=exprAdd();skip();if(x[i]!==")")throw Error("paren");i++;return v;}
+    const m=x.slice(i).match(/^(?:\d+\.?\d*|\.\d+)/);
+    if(!m)throw Error("number");
+    i+=m[0].length; const v=Number(m[0]); if(!Number.isFinite(v))throw Error("number"); return v;
+  }
+  function skip(){while(/\s/.test(x[i]||"") && i<x.length)i++;}
+  const out=exprAdd();skip();
+  if(i!==x.length || !Number.isFinite(out) || Math.abs(out)>1e15)throw Error("invalid");
+  return out;
+}
+function localMathReply(question){
+  const q = question.toLowerCase().replace(/[?]/g," ").trim();
+  let m;
+
+  // Concept questions should be answered directly instead of falling back to the selected topic.
+  // Targeted misconception, re-explanation, and concept questions. These must run
+  // before the generic topic fallback so students get an answer to what they asked.
+  if (/\b(?:is\s+1\s+(?:a\s+)?prime|1\s+is\s+prime)\b/i.test(q) && /\b(?:because|since|divide|divisible|itself|factor)\b/i.test(q)) {
+    return "Not quite. You're right that 1 divides itself, but that alone does not make a number prime.\n\nA prime number must have exactly two different positive factors: 1 and the number itself.\n\nThe number 1 has only one positive factor: 1. So 1 is not prime.\n\nCompare: 2 has two different positive factors, 1 and 2, so 2 is prime.";
+  }
+  if (/\b(?:i\s+)?(?:don't|do not|dont)\s+understand\b/i.test(q) && /2\s*[×x*]\s*2\s*[×x*]\s*3/i.test(q) && /\b12\b/.test(q)) {
+    return "Let's build it one step at a time.\n\nFirst, 2 × 2 = 4. That means two groups of 2 make 4.\n\nNext, multiply that result by 3: 4 × 3 = 12. You can think of it as 3 groups of 4: 4 + 4 + 4 = 12.\n\nSo 2 × 2 × 3 = 12 because we multiply from left to right: 2 × 2 = 4, then 4 × 3 = 12.";
+  }
+  if (/\b(?:i\s+)?(?:still\s+)?(?:don't|do not|dont)\s+understand\b/i.test(q) && /\bfraction/i.test(q) && /\bpizza\b/i.test(q)) {
+    return "Imagine one whole pizza cut into 4 equal slices. The bottom number in a fraction tells you how many equal slices make the whole: 4.\n\nIf you take 1 slice, you have 1/4 of the pizza. If you take 3 slices, you have 3/4.\n\nThe top number tells how many slices you have. The bottom number tells how many equal slices the whole pizza was divided into.\n\nQuick check: if a pizza is cut into 8 equal slices and you take 3, your fraction is 3/8.";
+  }
+  if (/\b(?:why\s+does|why\s+do|why\s+is|what\s+happens\s+when).{0,45}\bdivide\w*\s+by\s+zero\b|\bdividing\s+by\s+zero\b/i.test(q) || /\bdivide\s+by\s+zero\b/i.test(q)) {
+    return "Dividing by zero does not give infinity. In ordinary arithmetic, division by zero is undefined.\n\nFor example, 6 ÷ 2 = 3 because 2 × 3 = 6. So 6 ÷ 0 would require a number that, when multiplied by 0, equals 6. But 0 multiplied by any number is 0, never 6.\n\nYou may hear that some expressions grow without bound as a denominator gets closer to zero. That is a limit idea, not the same as saying a number divided by zero equals infinity.";
+  }
+  if (/\b(?:prime\s+factorization|prime\s+factorisation)\s+of\s+18\b/i.test(q) && /\b2\s*[×x*]\s*9\b/i.test(q)) {
+    return "You're partway there: 2 × 9 does equal 18, but prime factorization must use only prime numbers.\n\nThe number 9 is not prime because 9 = 3 × 3. Break it down one more step:\n\n18 = 2 × 9 = 2 × 3 × 3\n\nAnswer: 2 × 3 × 3. Each factor is prime: 2 and 3.";
+  }
+
+  if (/\bwhat are prime factors\b(?!\s+of\s+\d+)|\bwhat is a prime factor\b(?!\s+of\s+\d+)|\bdefine prime factors?\b|\bmeaning of prime factors\b/i.test(q)) {
+    return "Prime factors are the prime numbers that multiply together to make a number. A prime number has exactly two positive factors: 1 and itself.\n\nExample: 12 = 2 × 2 × 3\nThe prime factors of 12 are 2 and 3. In its prime factorization, 2 appears twice.\n\nRemember: 1 is not a prime number.";
+  }
+  if (/\bwhy (?:is|isn't|is not) 1 (?:not a prime|not prime|a prime number)\b|\bwhy isn't 1 prime\b/i.test(q)) {
+    return "The number 1 is not prime because a prime number must have exactly two different positive factors: 1 and itself. The number 1 has only one positive factor, which is 1.\n\nExamples: 2 is prime because its factors are 1 and 2. But 1 has only the factor 1.";
+  }
+  if (/\bwhat is a fraction\b|\bdefine a fraction\b|\bmeaning of a fraction\b/i.test(q)) {
+    return "A fraction represents part of a whole or a division. It is written as one number over another, such as 3/4.\n\nThe top number (3) is the numerator. It tells how many parts are being counted. The bottom number (4) is the denominator. It tells how many equal parts make the whole.\n\nExample: If a pizza is divided into 4 equal slices and you take 3, you have 3/4 of the pizza.";
+  }
+  if (/\bwhat is a ratio\b|\bdefine a ratio\b|\bmeaning of a ratio\b/i.test(q)) {
+    return "A ratio compares two or more quantities by division. It can be written with a colon, like 2:3.\n\nExample: If there are 2 red balls and 3 blue balls, the ratio of red balls to blue balls is 2:3.\n\nThe order matters: red to blue is 2:3, while blue to red is 3:2.";
+  }
+  if (/\bwhat is an equation\b|\bdefine an equation\b|\bmeaning of an equation\b/i.test(q)) {
+    return "An equation is a mathematical statement that says two expressions are equal. The equals sign (=) connects the two sides.\n\nExample: x + 3 = 8 is an equation. It is true when x = 5, because 5 + 3 = 8.\n\nSolving an equation means finding the value that makes both sides equal.";
+  }
+  if (/\bwhat is a percentage\b|\bwhat does percent mean\b|\bdefine percentage\b/i.test(q)) {
+    return "A percentage means a number out of 100. The symbol is %.\n\nExample: 25% means 25 out of 100, or 25/100 = 1/4. So 25% of 80 is 20.\n\nTo find p% of a number, divide p by 100 and multiply by the number.";
+  }
+
+  // Broad offline math coverage: number properties, fractions, roots, statistics and geometry.
+  // Keep specific patterns before generic arithmetic so explanations match the question.
+  m=q.match(/(?:simplify|reduce)\s+(?:the\s+)?fraction\s+(\d+)\s*\/\s*(\d+)/i);
+  if(m){const a=+m[1],b=+m[2];if(!b)return "A fraction cannot have zero as its denominator";const g=gcdInt(a,b);return `Let's simplify ${a}/${b}\n\nStep 1: Find the greatest common divisor of ${a} and ${b}\nGCD = ${g}\n\nStep 2: Divide numerator and denominator by ${g}\n${a} ÷ ${g} = ${a/g}\n${b} ÷ ${g} = ${b/g}\n\nAnswer: ${a/g}/${b/g}`;}
+  m=q.match(/(?:add|sum\s+of|calculate)\s+(?:the\s+)?fractions?\s+(\d+)\s*\/\s*(\d+)\s+(?:and|\+)\s+(\d+)\s*\/\s*(\d+)/i) || q.match(/(\d+)\s*\/\s*(\d+)\s*\+\s*(\d+)\s*\/\s*(\d+)/);
+  if(m){const a=+m[1],b=+m[2],c=+m[3],d=+m[4];if(!b||!d)return "A fraction cannot have zero as its denominator";const num=a*d+c*b,den=b*d,g=gcdInt(num,den);return `Let's add ${a}/${b} and ${c}/${d}\n\nStep 1: Use a common denominator\n${a}/${b} = ${a*d}/${den} and ${c}/${d} = ${c*b}/${den}\n\nStep 2: Add the numerators\n${a*d}/${den} + ${c*b}/${den} = ${num}/${den}\n\nAnswer: ${num/g}/${den/g}${g>1?` (simplified from ${num}/${den})`:""}`;}
+  m=q.match(/(?:square\s+root\s+of\s*|sqrt\s*\(?|√\s*)(\d+(?:\.\d+)?)/i);
+  if(m){const n=+m[1];if(n<0)return "A negative number has no real square root. In complex numbers, its square root can be expressed using i.";const r=Math.sqrt(n),lower=Math.floor(r),upper=lower+1;return `The square root of ${n} is the number that multiplied by itself gives ${n}.\n\n√${n} = ${formatNum(r)}${Number.isInteger(r)?"":" (approximately)"}\n\n${Number.isInteger(r)?`Check: ${r} × ${r} = ${n}`:`Because ${lower}² = ${lower*lower} and ${upper}² = ${upper*upper}, √${n} lies between ${lower} and ${upper}.`}\n\nAnswer: ${formatNum(r)}${Number.isInteger(r)?"":" (approximately)"}`;}
+  m=q.match(/(?:find\s+)?(?:the\s+)?(?:gcd|greatest\s+common\s+divisor|highest\s+common\s+factor|hcf)\s+(?:of\s+)?(\d+)\s*(?:and|,|&)\s*(\d+)/i);
+  if(m){const a=+m[1],b=+m[2],g=gcdInt(a,b);return `Let's find the greatest common divisor of ${a} and ${b}\n\nThe GCD is the largest whole number that divides both numbers exactly.\n\nAnswer: GCD(${a}, ${b}) = ${g}`;}
+  m=q.match(/(?:find\s+)?(?:the\s+)?(?:lcm|least\s+common\s+multiple)\s+(?:of\s+)?(\d+)\s*(?:and|,|&)\s*(\d+)/i);
+  if(m){const a=+m[1],b=+m[2],g=gcdInt(a,b),v=a===0||b===0?0:Math.abs(a*b)/g;return `Let's find the least common multiple of ${a} and ${b}\n\nStep 1: Find the GCD = ${g}\nStep 2: LCM = |${a} × ${b}| ÷ ${g} = ${v}\n\nAnswer: LCM(${a}, ${b}) = ${v}`;}
+  m=q.match(/(?:mean|average)\s+(?:of\s+)?([\d.,\s]+(?:,\s*\d+)+)/i);
+  if(m){const vals=m[1].split(/[ ,]+/).filter(Boolean).map(Number).filter(Number.isFinite);if(vals.length>=2){const sum=vals.reduce((a,b)=>a+b,0),avg=sum/vals.length;return `Let's find the mean (average)\n\nStep 1: Add the values\n${vals.join(" + ")} = ${formatNum(sum)}\n\nStep 2: Divide by the number of values (${vals.length})\n${formatNum(sum)} ÷ ${vals.length} = ${formatNum(avg)}\n\nAnswer: Mean = ${formatNum(avg)}`;}}
+  m=q.match(/(?:prime\s+factors?\s+(?:of\s+)?|prime\s+factor(?:ization|isation|ise|ize)\s+(?:of\s+)?|factorise\s+|factorize\s+)(\d+)/i);
+  if(m){let n=+m[1];if(n<2)return `${n} has no prime factorization into primes.`;const original=n,f=[];for(let d=2;d*d<=n;d++){while(n%d===0){f.push(d);n/=d;}}if(n>1)f.push(n);return `Let's find the prime factorization of ${original}\n\nDivide by prime numbers until only prime factors remain.\n\n${original} = ${f.join(" × ")}\n\nAnswer: ${f.join(" × ")}\n\nThe prime factors are the prime numbers in this product.`;}
+  m=q.match(/(?:area\s+of\s+(?:a\s+)?rectangle|rectangle)[^\d]*(\d+(?:\.\d+)?)(?:\s*(cm|mm|km|m|meters?|metres?|inches?|in|ft|feet))?\s*(?:by|and|,)\s*(\d+(?:\.\d+)?)/i);
+  if(m && /area|rectangle|length/i.test(q) && !/perimeter/i.test(q)){const a=+m[1],b=+m[3],v=a*b;const norm=u=>({cm:"cm",mm:"mm",km:"km",m:"m",meter:"m",meters:"m",metre:"m",metres:"m",inch:"in",inches:"in",in:"in",ft:"ft",feet:"ft"}[(u||"").toLowerCase()]||"");const u=norm(m[2]);const areaUnit=u?`${u}²`:"square units";const units=[...q.matchAll(/\b(cm|mm|km|m|meters?|metres?|inches?|in|ft|feet)\b/gi)].map(x=>norm(x[1]));const note=units.length>1&&units[1]&&units[1]!==u?"\n\nCheck that both measurements use the same unit before multiplying.":"";return `Area of a rectangle = length × width\n\nLength = ${a}${u?" "+u:""}, width = ${b}${u?" "+u:""}\nArea = ${a} × ${b} = ${formatNum(v)} ${areaUnit}${note}\n\nAnswer: ${formatNum(v)} ${areaUnit}`;}
+  m=q.match(/(?:perimeter\s+of\s+(?:a\s+)?rectangle|rectangle\s+perimeter)[^\d]*(\d+(?:\.\d+)?)[^\d]+(\d+(?:\.\d+)?)/i);
+  if(m){const a=+m[1],b=+m[2],v=2*(a+b);return `Perimeter of a rectangle = 2 × (length + width)\n\n= 2 × (${a} + ${b})\n= 2 × ${a+b} = ${formatNum(v)}\n\nAnswer: ${formatNum(v)} units`;}
+  m=q.match(/(?:area\s+of\s+(?:a\s+)?triangle)[^\d]*(\d+(?:\.\d+)?)[^\d]+(?:base[^\d]*)?(\d+(?:\.\d+)?)/i);
+  if(m){const a=+m[1],b=+m[2],v=.5*a*b;const units=[...q.matchAll(/\b(cm|mm|km|m|meters?|metres?|inches?|in|ft|feet)\b/gi)].map(x=>x[1].toLowerCase());const norm=u=>({cm:"cm",mm:"mm",km:"km",m:"m",meter:"m",meters:"m",metre:"m",metres:"m",inch:"in",inches:"in",in:"in",ft:"ft",feet:"ft"}[u]||u);const u=units.length?norm(units[0]):"";const areaUnit=u?`${u}²`:"square units";const note=units.length>1&&norm(units[1])!==u?"\n\nCheck that the base and height use the same unit before multiplying.":"";return `Area of a triangle = ½ × base × height\n\n= ½ × ${a} × ${b}\n= ${formatNum(v)} ${areaUnit}${note}\n\nAnswer: ${formatNum(v)} ${areaUnit}`;}
+  m=q.match(/(?:area\s+of\s+(?:a\s+)?circle)[^\d]*(?:radius\s*(?:of|=|is)?\s*)?(\d+(?:\.\d+)?)/i);
+  if(m){const r=+m[1],v=Math.PI*r*r;return `Area of a circle = πr²\n\nRadius r = ${r}\nArea = π × ${r}² ≈ ${formatNum(v)} square units\n\nAnswer: ${formatNum(v)} square units (using π ≈ 3.14159)`;}
+  m=q.match(/(?:circumference\s+of\s+(?:a\s+)?circle)[^\d]*(?:radius\s*(?:of|=|is)?\s*)?(\d+(?:\.\d+)?)/i);
+  if(m){const r=+m[1],v=2*Math.PI*r;return `Circumference of a circle = 2πr\n\n= 2 × π × ${r} ≈ ${formatNum(v)} units\n\nAnswer: ${formatNum(v)} units`;}
+  if(/\bspeed\b/i.test(q) && /\b(distance|time|calculate|find|what)\b/i.test(q)){const d=q.match(/distance[^\d]*(\d+(?:\.\d+)?)/i),t=q.match(/time[^\d]*(\d+(?:\.\d+)?)/i);if(d&&t&&+t[1]!==0){const v=+d[1]/+t[1];const dm=q.match(/distance[^\d]*\d+(?:\.\d+)?\s*(km|kilometers?|kilometres?|m|meters?|metres?|cm|miles?|mi)\b/i);const tm=q.match(/time[^\d]*\d+(?:\.\d+)?\s*(hours?|hrs?|minutes?|mins?|seconds?|secs?)\b/i);const du=dm?({km:"km",kilometer:"km",kilometers:"km",kilometre:"km",kilometres:"km",m:"m",meter:"m",meters:"m",metre:"m",metres:"m",cm:"cm",mile:"mi",miles:"mi",mi:"mi"}[dm[1].toLowerCase()]):"";const tu=tm?(/^h|hour/.test(tm[1].toLowerCase())?"h":/^m|min/.test(tm[1].toLowerCase())?"min":"s"):"";const speedUnit=du&&tu?`${du}/${tu}`:"distance-units per time-unit";return `Speed = distance ÷ time\n\nDistance = ${d[1]}${du?" "+du:""}, time = ${t[1]}${tu?" "+tu:""}\nSpeed = ${d[1]} ÷ ${t[1]} = ${formatNum(v)} ${speedUnit}\n\nAnswer: ${formatNum(v)} ${speedUnit}`;}}
+  m=q.match(/(?:convert\s+)?(\d+(?:\.\d+)?)\s*(?:as\s+a\s+)?fraction\s+to\s+decimal/i);
+  if(m){const n=+m[1];return `${m[1]} as a decimal is ${formatNum(n)}.`;}
+
+  // Word problems that ask to compare two stated quantities and simplify the ratio.
+  // Example: "A class has 12 boys and 18 girls. Find the ratio of boys to girls in its simplest form."
+  const quantities = q.match(/\b(\d+)\s+([a-z]+)\s+and\s+(\d+)\s+([a-z]+)\b/i);
+  const requestedRatio = q.match(/\bratio\s+of\s+([a-z]+)\s+to\s+([a-z]+)\b/i);
+  if(quantities && requestedRatio && /\b(simplest|simplify|simplest form|lowest terms|reduce)\b/i.test(q)){
+    const firstLabel=quantities[2].toLowerCase(), secondLabel=quantities[4].toLowerCase();
+    const firstValue=Number(quantities[1]), secondValue=Number(quantities[3]);
+    const wantedFirst=requestedRatio[1].toLowerCase(), wantedSecond=requestedRatio[2].toLowerCase();
+    let a, b;
+    if(wantedFirst===firstLabel && wantedSecond===secondLabel){ a=firstValue; b=secondValue; }
+    else if(wantedFirst===secondLabel && wantedSecond===firstLabel){ a=secondValue; b=firstValue; }
+    if(a!==undefined && b!==undefined){
+      if(a===0 && b===0) return "Both quantities are zero, so their ratio cannot be simplified into a meaningful comparison";
+      const g=gcdInt(a,b), reducedA=a/g, reducedB=b/g;
+      return `Let's find the ratio of ${wantedFirst} to ${wantedSecond} in simplest form\n\nStep 1: Write the quantities in the requested order\n${wantedFirst} = ${formatNum(a)} and ${wantedSecond} = ${formatNum(b)}\n\nStep 2: Write the ratio\n${formatNum(a)}:${formatNum(b)}\n\nStep 3: Find the greatest common divisor (GCD)\nGCD of ${formatNum(a)} and ${formatNum(b)} = ${g}\n\nStep 4: Divide both parts by ${g}\n${formatNum(a)} ÷ ${g} = ${formatNum(reducedA)}\n${formatNum(b)} ÷ ${g} = ${formatNum(reducedB)}\n\nAnswer: ${formatNum(reducedA)}:${formatNum(reducedB)}\n\nCheck: Both parts were divided by the same number, so the ratio stays equivalent`;
+    }
+  }
+
+  // Ratio word problems using named groups, e.g. "The ratio of red balls to blue balls is 2:5. If there are 35 blue balls, how many red balls are there?"
+  const namedRatio = q.match(/\bratio\s+of\s+([a-z]+(?:\s+[a-z]+)?)\s+to\s+([a-z]+(?:\s+[a-z]+)?)\s+(?:is|equals|=)\s*(\d+(?:\.\d+)?)\s*:\s*(\d+(?:\.\d+)?)/i);
+  if(namedRatio){
+    const firstLabel=namedRatio[1].trim().toLowerCase();
+    const secondLabel=namedRatio[2].trim().toLowerCase();
+    const a=Number(namedRatio[3]), b=Number(namedRatio[4]);
+    const quantityPattern=(label)=>new RegExp('\\b(\\d+(?:\\.\\d+)?)\\s+'+label.replace(/[.*+?^${}()|[\\]\\\\]/g,'\\$&')+'\\b','i');
+    const firstQuantity=q.match(quantityPattern(firstLabel));
+    const secondQuantity=q.match(quantityPattern(secondLabel));
+    const asksFirst=new RegExp('(?:how\\s+many|find|calculate|work\\s+out)[^?.]*\\b'+firstLabel.replace(/[.*+?^${}()|[\\]\\\\]/g,'\\$&')+'\\b','i').test(q);
+    const asksSecond=new RegExp('(?:how\\s+many|find|calculate|work\\s+out)[^?.]*\\b'+secondLabel.replace(/[.*+?^${}()|[\\]\\\\]/g,'\\$&')+'\\b','i').test(q);
+    if(asksFirst && secondQuantity && b!==0){
+      const known=Number(secondQuantity[1]), onePart=known/b, result=onePart*a;
+      return `Let's solve the ratio word problem\n\nThe ratio of ${firstLabel} to ${secondLabel} is ${formatNum(a)}:${formatNum(b)}\nWe know there are ${formatNum(known)} ${secondLabel}, and we need to find ${firstLabel}.\n\nStep 1: Find the value of one ratio part\n${formatNum(known)} ÷ ${formatNum(b)} = ${formatNum(onePart)}\n\nStep 2: Multiply by the first number in the ratio\n${formatNum(onePart)} × ${formatNum(a)} = ${formatNum(result)}\n\nAnswer: There are ${formatNum(result)} ${firstLabel}.\n\nCheck: ${formatNum(result)}:${formatNum(known)} simplifies to ${formatNum(a)}:${formatNum(b)}.`;
+    }
+    if(asksSecond && firstQuantity && a!==0){
+      const known=Number(firstQuantity[1]), onePart=known/a, result=onePart*b;
+      return `Let's solve the ratio word problem\n\nThe ratio of ${firstLabel} to ${secondLabel} is ${formatNum(a)}:${formatNum(b)}\nWe know there are ${formatNum(known)} ${firstLabel}, and we need to find ${secondLabel}.\n\nStep 1: Find the value of one ratio part\n${formatNum(known)} ÷ ${formatNum(a)} = ${formatNum(onePart)}\n\nStep 2: Multiply by the second number in the ratio\n${formatNum(onePart)} × ${formatNum(b)} = ${formatNum(result)}\n\nAnswer: There are ${formatNum(result)} ${secondLabel}.\n\nCheck: ${formatNum(known)}:${formatNum(result)} simplifies to ${formatNum(a)}:${formatNum(b)}.`;
+    }
+  }
+
+  // Ratio word problems: use a known quantity to scale the other part.
+  // Example: "A ratio is 3:5. If the second quantity is 20, find the first quantity."
+  const ratioWords = q.match(/\bratio(?:\s+is)?\s+(\d+(?:\.\d+)?)\s*:\s*(\d+(?:\.\d+)?)/i);
+  const firstKnown = q.match(/\bfirst\s+quantity\s+(?:is|equals|=)\s*(\d+(?:\.\d+)?)/i);
+  const secondKnown = q.match(/\bsecond\s+quantity\s+(?:is|equals|=)\s*(\d+(?:\.\d+)?)/i);
+  if(ratioWords && /\b(first|second)\s+quantity\b/.test(q)){
+    const a=Number(ratioWords[1]), b=Number(ratioWords[2]);
+    if(firstKnown && /\bfind\s+(?:the\s+)?second\s+quantity\b/.test(q)){
+      if(a===0) return "The first part of this ratio is zero, so I cannot use it to scale up to a second quantity";
+      const first=Number(firstKnown[1]), result=first*b/a;
+      return `Let's solve this ratio word problem\n\nThe ratio is ${formatNum(a)}:${formatNum(b)}\nThe first quantity is ${formatNum(first)}, and we need to find the second quantity\n\nStep 1: Find the value of one ratio part\n${formatNum(first)} ÷ ${formatNum(a)} = ${formatNum(first/a)}\n\nStep 2: Multiply by the second number in the ratio\n${formatNum(first/a)} × ${formatNum(b)} = ${formatNum(result)}\n\nAnswer: The second quantity is ${formatNum(result)}`;
+    }
+    if(secondKnown && /\bfind\s+(?:the\s+)?first\s+quantity\b/.test(q)){
+      if(b===0) return "The second part of this ratio is zero, so it cannot represent the given non-zero quantity";
+      const second=Number(secondKnown[1]), result=second*a/b;
+      return `Let's solve this ratio word problem\n\nThe ratio is ${formatNum(a)}:${formatNum(b)}\nThe second quantity is ${formatNum(second)}, and we need to find the first quantity\n\nStep 1: Find the value of one ratio part\n${formatNum(second)} ÷ ${formatNum(b)} = ${formatNum(second/b)}\n\nStep 2: Multiply by the first number in the ratio\n${formatNum(second/b)} × ${formatNum(a)} = ${formatNum(result)}\n\nAnswer: The first quantity is ${formatNum(result)}\n\nCheck: ${formatNum(result)}:${formatNum(second)} simplifies to ${formatNum(a)}:${formatNum(b)}`;
+    }
+  }
+
+  // Solve direct proportion: a:b = c:x or a:b = x:d
+  m=q.match(/(?:solve|find|calculate)?\s*(-?\d+(?:\.\d+)?)\s*[:：]\s*(-?\d+(?:\.\d+)?)\s*=\s*x\s*[:：]\s*(-?\d+(?:\.\d+)?)/i);
+  if(m){
+    const [a,b,d]=[+m[1],+m[2],+m[3]];
+    if(b===0) return "A ratio cannot use zero as the second term in this proportion";
+    const x=(a*d)/b;
+    return `Let's solve the proportion ${m[1]}:${m[2]} = x:${m[3]}\n\nStep 1: Cross-multiply\n${m[1]} × ${m[3]} = ${m[2]} × x\n\nStep 2: Multiply the known values\n${formatNum(a*d)} = ${formatNum(b)}x\n\nStep 3: Divide both sides by ${m[2]}\nx = ${formatNum(a*d)} ÷ ${m[2]} = ${formatNum(x)}\n\nAnswer: x = ${formatNum(x)}\n\nCheck: ${m[1]}:${m[2]} and ${formatNum(x)}:${m[3]} give equal cross-products`;
+  }
+  m=q.match(/(?:solve|find|calculate)?\s*(-?\d+(?:\.\d+)?)\s*[:]\s*(-?\d+(?:\.\d+)?)\s*=\s*(-?\d+(?:\.\d+)?)\s*[:]\s*(x|-?\d+(?:\.\d+)?)/i);
+  if(m && /x/.test(m[4])){
+    const [a,b,c]=[+m[1],+m[2],+m[3]];
+    if(b===0) return "A ratio cannot use zero as the second term in this proportion";
+    const x=a===0?0:(c*b)/a;
+    return `Let's solve the proportion ${m[1]}:${m[2]} = ${m[3]}:x\n\nStep 1: Write the cross-multiplication rule\n${m[1]} × x = ${m[2]} × ${m[3]}\n\nStep 2: Multiply the known numbers\n${m[1]}x = ${formatNum(b*c)}\n\nStep 3: Divide both sides by ${m[1]}\nx = (${formatNum(b*c)}) ÷ ${m[1]} = ${formatNum(x)}\n\nAnswer: x = ${formatNum(x)}\n\nCheck: ${m[1]}:${m[2]} and ${m[3]}:${formatNum(x)} are equivalent because the cross-products are equal`;
+  }
+  m=q.match(/(?:simplify|reduce)\s+(?:the\s+)?(?:ratio\s+)?(-?\d+(?:\.\d+)?)\s*[:/]\s*(-?\d+(?:\.\d+)?)/i);
+  if(m){
+    const a=+m[1],b=+m[2];
+    if(!Number.isInteger(a)||!Number.isInteger(b)||a<0||b<0) return "For this ratio simplifier, enter two non-negative whole numbers, such as simplify 12:18";
+    if(a===0&&b===0) return "Both parts cannot be zero because that ratio has no defined comparison";
+    const g=gcdInt(a,b);
+    return `Let's simplify ${formatNum(a)}:${formatNum(b)}\n\nStep 1: Find the greatest common divisor of ${a} and ${b}\nGCD = ${g}\n\nStep 2: Divide both parts by ${g}\n${a} ÷ ${g} = ${a/g}\n${b} ÷ ${g} = ${b/g}\n\nAnswer: ${a/g}:${b/g}\n\nWhy: Dividing both parts by the same non-zero number keeps the ratio equivalent`;
+  }
+  m=q.match(/(?:what\s+is\s+)?(-?\d+(?:\.\d+)?)\s*%\s*(?:of\s*)?(-?\d+(?:\.\d+)?)/);
+  if(m){
+    const p=+m[1],n=+m[2],v=p*n/100;
+    return `Let's find ${p}% of ${n}\n\nStep 1: Convert the percentage to a fraction\n${p}% = ${p}/100\n\nStep 2: Multiply by ${n}\n(${p}/100) × ${n} = ${formatNum(v)}\n\nAnswer: ${formatNum(v)}\n\nWhy: Percent means "per hundred", so we divide the percentage by 100 before multiplying`;
+  }
+  // Explicit arithmetic prompt or a clean arithmetic expression
+  let expr = q.replace(/^(?:what is|calculate|compute|evaluate|work out|solve)\s+/i,"").replace(/^(?:the answer to)\s+/i,"").trim();
+  if(/[+\-*/×÷^()%]/.test(expr) && /^[\d\s.,()+\-*/×÷%^]+$/.test(expr)){
+    try{
+      const v=evalArithmetic(expr);
+      const squareMatch=expr.match(/^(\d+(?:\.\d+)?)\s*[×*]\s*\1$/);
+      if(squareMatch){const n=+squareMatch[1],tens=Math.floor(n/10)*10,units=n-tens;if(Number.isInteger(n)&&n>=10&&n<100&&units!==0){return `Let's calculate ${expr}\n\nStep 1: Break  ${n} into tens and ones\n${n} = ${tens} + ${units}\n\nStep 2: Multiply each part\n${n} × ${tens} = ${formatNum(n*tens)}\n${n} × ${units} = ${formatNum(n*units)}\n\nStep 3: Add the results\n${formatNum(n*tens)} + ${formatNum(n*units)} = ${formatNum(v)}\n\nAnswer: ${formatNum(v)}\n\nThis uses the distributive property: ${n} × (${tens} + ${units})`;}}
+      return `Let's calculate ${expr}\n\nStep 1: Follow the order of operations\nBrackets first, then powers, then multiplication or division, then addition or subtraction\n\nStep 2: Evaluate the expression\n${expr} = ${formatNum(v)}\n\nAnswer: ${formatNum(v)}\n\nCheck: You can substitute the result back into the original expression to verify the calculation`;
+    }catch(e){ return e.message==="zero" ? "This calculation divides by zero, so it has no defined numerical answer" : "I couldn't safely read that expression. Try a clear format such as 12 × (4 + 3) or calculate 15% of 240"; }
+  }
+  // Linear equations with x, one occurrence of x and basic operations
+  m=q.match(/(?:solve\s+)?(-?\d*\.?\d*)\s*x\s*([+-]\s*\d+(?:\.\d+)?)?\s*=\s*(-?\d+(?:\.\d+)?)/i);
+  if(m){
+    let a=m[1]; a=(!a||a==="+")?1:(a==="-"?-1:Number(a));
+    const b=m[2]?Number(m[2].replace(/\s/g,"")):0,c=Number(m[3]);
+    if(a===0) return "The coefficient of x is zero, so this is not a solvable linear equation for x";
+    const rhs=c-b, x=rhs/a;
+    return `Let's solve ${m[0].replace(/^solve\s+/i,"")}\n\nStep 1: Move the constant term to the other side\n${formatNum(a)}x = ${formatNum(c)} ${b>0?"− "+formatNum(b):b<0?"+ "+formatNum(-b):""}\n${formatNum(a)}x = ${formatNum(rhs)}\n\nStep 2: Divide both sides by ${formatNum(a)}\nx = ${formatNum(rhs)} ÷ ${formatNum(a)}\n\nAnswer: x = ${formatNum(x)}\n\nCheck: Substitute x = ${formatNum(x)} into the original equation`;
+  }
+  return "";
+}
+
+
+/* ── QUESTION ── */
+function answerQuestion(){
+  const lang = document.getElementById("language").value;
+  const q = document.getElementById("studentQuestion").value.trim();
+  let s = document.getElementById("subject").value;
+  let t = document.getElementById("topic").value;
+  const mode = document.getElementById("mode").value;
+  if(!q) return;
+
+  const isFollowUpMessage = text => /\b(?:i\s+)?(?:still\s+)?(?:don't|do not|dont)\s+understand\b|\b(?:i\s+)?(?:still\s+)?(?:don't get it|do not get it|am confused|i'm confused|im confused|need help)\b|\bexplain (?:it )?(?:in another way|another way|differently|more simply|again)\b|\btry another way\b|\bsay that again\b/i.test(String(text || ""));
+  const previousUserMessage = [...chatMessages].reverse().find(m => m.role === "user" && !isFollowUpMessage(m.text));
+  const previousQuestion = previousUserMessage ? previousUserMessage.text : "";
+  if(!isFollowUpMessage(q)) mathExplanationAttempts = 0;
+  let autoSwitched = false;
+  if(s !== "math" && lang === "en" && isMathQuestion(q)){
+    document.getElementById("subject").value = "math";
+    updateTopics();
+    updateContent();
+    s = "math"; t = "";
+    autoSwitched = true;
+  }
+
+  stopVoice();
+  if(sessionFocus.subject !== s || sessionFocus.topic !== t) resetSession();
+  sessionFocus.subject = s;
+  sessionFocus.topic = t;
+
+  const subjectData = getSubjectData(lang, s);
+  const base = subjectData[t] || data.en[s]?.[t] || `This question is about ${prettyTopic(t || s)}.`;
+  const followUp = /\b(?:i\s+)?(?:still\s+)?(?:don't|do not|dont)\s+understand\b|\bexplain (?:it )?(?:in another way|another way|differently)\b|\btry another way\b/i.test(q);
+  const focus = pickQuestionFocus(q, subjectData, t);
+  let localReply = "";
+  if(lang === "en" && (s === "biology" || s === "biochemistry") && /photosynthesis/i.test(q)){
+    localReply = "Photosynthesis is how green plants make glucose (a type of sugar) using light energy.\n\n1. The leaves absorb light, mainly using chlorophyll.\n2. The plant takes in carbon dioxide from the air through tiny openings in its leaves.\n3. The roots absorb water from the soil.\n4. Using light energy, the plant converts carbon dioxide and water into glucose and releases oxygen.\n\nIn simple terms: light + water + carbon dioxide → glucose + oxygen. The glucose helps the plant grow and store energy. The oxygen is released into the air.\n\nRemember: plants do not turn sunlight directly into food; they use light energy to make glucose through a chemical process.";
+  } else if(lang === "en" && followUp && previousQuestion){
+    // Keep follow-ups attached to the last real question, not to "I don't understand".
+    if(s === "math"){
+      mathExplanationAttempts++;
+      localReply = localMathFollowup(previousQuestion, q, mathExplanationAttempts);
+    } else if((s === "biology" || s === "biochemistry") && /photosynthesis/i.test(previousQuestion)){
+      const attempt = chatMessages.filter(m => m.role === "user" && isFollowUpMessage(m.text)).length + 1;
+      if(attempt <= 1){
+        localReply = "Let's picture a plant as a tiny food-making workshop. Its leaves capture light, its roots take in water, and carbon dioxide enters through tiny openings in the leaves. Using light energy, the plant makes glucose, a sugar it can use for energy and growth, and releases oxygen.\n\nThe key idea: light provides the energy; water and carbon dioxide provide the materials. Which part should we unpack first?";
+      } else {
+        localReply = "Let's break photosynthesis into inputs and outputs.\n\nINPUTS: water from the roots + carbon dioxide from the air + light energy.\nOUTPUTS: glucose (sugar the plant makes) + oxygen released into the air.\n\nA simple summary is: carbon dioxide + water + light energy → glucose + oxygen. The arrow means the plant uses the inputs to make the outputs. Which word is confusing: carbon dioxide, glucose, chlorophyll, or oxygen?";
+      }
+    } else {
+      localReply = `Let's stay with your original question: “${previousQuestion}”.\n\nI may not have explained it clearly enough. I can try a simpler example, break it into smaller steps, or compare it with something familiar. What part is confusing you most?`;
+    }
+  } else if(lang === "en" && (s === "math" || /\bratio\b/i.test(q))){
+    localReply = localMathReply(q);
+  }
+  const reply = localReply || makeSmartReply(lang, s, t, q, mode, subjectData[focus] || base);
+
+  if(autoSwitched){
+    chatMessages.push({role:"baint", text:"I noticed this is a mathematics question, so I switched your subject to Mathematics."});
+  }
+  chatMessages.push({role:"user", text:q});
+  chatMessages.push({role:"baint", text:reply});
+  lastAssistantReply = reply;
+  renderChat();
+  document.getElementById("studentQuestion").value = "";
+}
+
+
+</script>
+</body>
+</html>
