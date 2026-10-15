@@ -1053,3 +1053,326 @@ eduAdd("practical_problem_solving","engineering",["physics"],"Practical problem 
  ["Can take time and several attempts","Needs clear information about the problem","Constraints often force trade-offs"],
  "Define → model → test → improve.");
 
+
+/* ══ MATHEMATICS BATCH 2 — secondary school and university ══ */
+
+/* ── Secondary school ── */
+eduAdd("straight_line_graphs","math",[],"Straight-line graphs",
+ ["straight line graph","straight line graphs","equation of a straight line","gradient and intercept","linear graph","linear graphs","gradient","coordinate geometry","coordinates"],
+ "A straight-line graph shows a linear relationship. Its equation is y = mx + c, where m is the gradient (steepness) and c is the y-intercept (where the line crosses the y-axis).",
+ "Think of a hill: the gradient says how steep it is, and the intercept says the height where you start.",
+ ["Gradient m = change in y ÷ change in x (rise over run).","The y-intercept c is the value of y when x = 0.","Write the line as y = mx + c.","Parallel lines have the same gradient; perpendicular lines have gradients that multiply to −1."],
+ "Through (0, 1) and (2, 5): gradient = (5 − 1) ÷ (2 − 0) = 2, intercept = 1, so y = 2x + 1.",
+ "Taxi fares, phone bills, speed-time graphs and any steady rate of change.",
+ ["Shows a rate of change clearly","Easy to predict new values","Basis for algebra and calculus"],
+ ["Only describes steady, linear change","Reading values from a hand-drawn graph is not exact","Sign and fraction mistakes in the gradient are common"],
+ "Straight line: y = mx + c.");
+
+eduAdd("factorisation","math",[],"Factorisation and expanding brackets",
+ ["factorisation","factorization","factorise","factorize","factorising","factorizing","expanding brackets","expand brackets","expanding and factorising","difference of two squares"],
+ "Expanding removes brackets by multiplying out. Factorising is the reverse: writing an expression as a product of brackets.",
+ "Expanding is unpacking a box; factorising is packing the items back into the box.",
+ ["Expand: multiply each term in one bracket by each term in the other, for example (x + 2)(x + 3) = x² + 5x + 6.","Factorise: look for a common factor first.","For x² + bx + c, find two numbers that multiply to c and add to b.","Check by expanding your answer."],
+ "Factorise x² + 5x + 6: the numbers that multiply to 6 and add to 5 are 2 and 3, so x² + 5x + 6 = (x + 2)(x + 3). Difference of two squares: x² − 9 = (x − 3)(x + 3).",
+ "Solving quadratic equations, simplifying fractions and algebra in science.",
+ ["Makes quadratic equations easy to solve","Simplifies long expressions","Shows the structure of an expression"],
+ ["Needs good times-table and sign skills","Not every expression factorises neatly","Easy to make sign mistakes"],
+ "Expand = multiply out; factorise = write as a product.");
+
+eduAdd("interest","math",[],"Simple and compound interest",
+ ["simple interest","compound interest","interest rate","interest rates","compound growth","depreciation"],
+ "Interest is the money paid for borrowing, or earned by saving. Simple interest is calculated on the original amount only; compound interest is calculated on the amount plus the interest already earned.",
+ "Compound interest is like a snowball: it grows faster because the interest earns interest.",
+ ["Simple interest: I = P × r × t (principal × rate × time).","Compound interest: A = P(1 + r)ⁿ, where n is the number of periods.","Interest earned = final amount − original amount.","Use r as a decimal (5% = 0.05)."],
+ "$1000 at 10% a year for 2 years. Simple: 1000 × 0.10 × 2 = $200. Compound: 1000 × 1.1² = $1210, so interest = $210.",
+ "Savings, loans, mortgages, investments and population growth.",
+ ["Helps you plan savings and compare loans","Compound interest rewards long-term saving","The formula also models growth and decay"],
+ ["Compound interest makes debts grow quickly","Rates and periods are easy to mix up","Real banks may add fees"],
+ "Simple: I = Prt. Compound: A = P(1 + r)ⁿ.");
+
+eduAdd("speed_distance_time","math",["physics"],"Speed, distance and time",
+ ["speed distance time","distance speed time","speed formula","average speed","distance time graph","distance time graphs"],
+ "Speed tells how fast something moves: speed = distance ÷ time. The same formula can be rearranged to find distance or time.",
+ "Use the triangle trick: put D on top and S and T at the bottom. Cover what you want to find.",
+ ["Speed = distance ÷ time.","Distance = speed × time.","Time = distance ÷ speed.","Keep the units consistent (km with hours, m with seconds)."],
+ "A bus travels 150 km in 2.5 hours: speed = 150 ÷ 2.5 = 60 km/h. At 60 km/h for 3 hours the distance is 180 km.",
+ "Travel planning, sport, road safety and aviation.",
+ ["Simple and useful in daily life","Lets you plan journeys","Basis for velocity and acceleration"],
+ ["Average speed hides stops and speed changes","Mixed units cause errors","Real journeys are rarely at constant speed"],
+ "Speed = distance ÷ time.");
+
+eduAdd("surds","math",[],"Surds",
+ ["surd","surds","rationalising the denominator","rationalise denominator","simplifying surds","irrational roots"],
+ "A surd is a root that cannot be written as an exact fraction, such as √2 or √5. Surds are kept in root form to stay exact.",
+ "√2 is like an exact measurement that a calculator can only approximate as 1.414…",
+ ["Simplify by taking out square factors: √12 = √(4 × 3) = 2√3.","Multiply: √a × √b = √(ab).","Add like surds only: 2√3 + 5√3 = 7√3.","Rationalise a denominator by multiplying top and bottom by the root."],
+ "√50 = √(25 × 2) = 5√2. Rationalise 1/√3: multiply by √3/√3 to get √3/3.",
+ "Geometry (Pythagoras), trigonometry, physics and engineering.",
+ ["Gives exact answers without rounding","Keeps calculations accurate","Needed for exact trigonometric values"],
+ ["Harder to picture than decimals","Rules are easy to misapply","Calculators often show only approximations"],
+ "Surd = an exact root that is not a whole number or fraction.");
+
+eduAdd("permutations_combinations","math",[],"Permutations and combinations",
+ ["permutation","permutations","combination","combinations","factorial","counting principle","ncr","npr","arrangements and selections"],
+ "Permutations count the ways to arrange items when order matters. Combinations count the ways to choose items when order does not matter.",
+ "A lock code is a permutation (order matters). A team picked from a class is a combination (order does not matter).",
+ ["Factorial: n! = n × (n − 1) × … × 1.","Permutations: nPr = n! ÷ (n − r)!.","Combinations: nCr = n! ÷ (r!(n − r)!).","Ask: does order matter? Yes uses permutations, no uses combinations."],
+ "Choose 2 students from 5: 5C2 = 5! ÷ (2! × 3!) = 10. Arrange 2 of 5 in order: 5P2 = 20.",
+ "Passwords, lotteries, team selection, probability and scheduling.",
+ ["Counts possibilities without listing them","Needed for probability","Used in computing and statistics"],
+ ["Numbers grow very quickly","Choosing between permutation and combination causes mistakes","Repeated items need extra care"],
+ "Permutation = order matters; combination = order does not matter.");
+
+eduAdd("congruence_similarity","math",[],"Congruence and similarity",
+ ["congruent triangles","congruent","congruence","similar triangles","similar shapes","similarity","scale factor"],
+ "Congruent shapes are exactly the same size and shape. Similar shapes have the same shape, but one is an enlargement of the other.",
+ "Congruent is like two photocopies at the same size; similar is like the same photo printed small and large.",
+ ["Triangles are congruent if they satisfy SSS, SAS, ASA (AAS) or RHS.","Similar shapes have equal angles and sides in the same ratio (the scale factor).","Lengths multiply by the scale factor k; areas by k²; volumes by k³.","Use the ratio to find missing sides."],
+ "Two similar triangles with sides 3, 4, 5 and 6, 8, 10 have scale factor 2. Their areas are in the ratio 1 : 4.",
+ "Maps and models, architecture, photography and shadows.",
+ ["Finds lengths that cannot be measured directly","Basis of scale drawings and maps","Proves geometry results"],
+ ["Needs correct matching of corresponding sides","Area and volume scale differently, which confuses beginners","Diagrams may not be drawn to scale"],
+ "Congruent = identical; similar = same shape, different size.");
+
+eduAdd("circle_theorems","math",[],"Circle theorems",
+ ["circle theorem","circle theorems","angle in a semicircle","angle at the centre","tangent to a circle","cyclic quadrilateral","chord"],
+ "Circle theorems are rules about angles and lines in circles, used to find missing angles.",
+ "They are like shortcuts: spot the pattern in the circle and the angle is known immediately.",
+ ["The angle in a semicircle is 90°.","The angle at the centre is twice the angle at the circumference on the same arc.","Angles in the same segment are equal.","Opposite angles of a cyclic quadrilateral add to 180°; a tangent meets the radius at 90°."],
+ "If the angle at the circumference is 35°, the angle at the centre on the same arc is 70°.",
+ "Geometry proofs, design, engineering and exam problems.",
+ ["Gives quick answers for angle problems","Trains logical proof","Links to trigonometry"],
+ ["Many rules to remember","Needs careful reading of the diagram","Easy to apply the wrong rule"],
+ "Circle theorems = rules for angles in circles.");
+
+eduAdd("transformations","math",[],"Geometric transformations",
+ ["geometric transformations","transformation","transformations","transformations in maths","reflection rotation translation enlargement","translation and enlargement"],
+ "A transformation changes the position or size of a shape. The four main types are reflection, rotation, translation and enlargement.",
+ "Think of sliding, flipping, turning or zooming a picture on your phone.",
+ ["Reflection: flips the shape over a mirror line.","Rotation: turns it about a point by an angle.","Translation: slides it by a vector, without turning.","Enlargement: scales it by a scale factor from a centre."],
+ "Translate the point (2, 3) by the vector (4, −1): the new point is (6, 2).",
+ "Animation, computer graphics, design, robotics and patterns.",
+ ["Describes movement precisely","Basis of computer graphics","Helps understand symmetry"],
+ ["Rotations and enlargements need a centre, which is easy to forget","Describing a transformation fully needs several details","Hard to picture without a diagram"],
+ "Transformations: reflect, rotate, translate, enlarge.");
+
+eduAdd("bearings","math",[],"Bearings",
+ ["bearing","bearings","three figure bearings","compass bearings"],
+ "A bearing is a direction measured clockwise from north, written as three digits (for example 045°).",
+ "Imagine standing facing north and turning clockwise to face where you want to go.",
+ ["Always measure from north.","Always measure clockwise.","Write three digits: 5° is 005°.","The back bearing differs by 180°."],
+ "East is 090°, south is 180°, west is 270°. If A is on a bearing of 060° from B, the bearing of B from A is 240°.",
+ "Navigation, ships and aircraft, hiking and surveying.",
+ ["Gives exact directions","Used with trigonometry to find distances","Standard in navigation"],
+ ["Mixing up the starting point causes errors","Needs accurate angle measurement","Back bearings confuse beginners"],
+ "Bearing = angle clockwise from north, in three digits.");
+
+eduAdd("binomial_theorem","math",[],"Binomial theorem",
+ ["binomial theorem","binomial expansion","pascals triangle","pascal's triangle","expand brackets to a power"],
+ "The binomial theorem gives a formula for expanding (a + b)ⁿ without multiplying out repeatedly.",
+ "Pascal's triangle is the pattern of coefficients, built by adding the two numbers above.",
+ ["Rows of Pascal's triangle give the coefficients: 1, 2, 1 then 1, 3, 3, 1 and so on.","(a + b)ⁿ = Σ nCr aⁿ⁻ʳ bʳ.","Powers of a go down while powers of b go up.","Use it to find a particular term quickly."],
+ "(x + 2)³ = x³ + 3x²(2) + 3x(2²) + 2³ = x³ + 6x² + 12x + 8.",
+ "Algebra, probability (binomial distribution) and approximations.",
+ ["Expands large powers quickly","Links algebra, counting and probability","Gives approximations"],
+ ["Arithmetic grows long for large n","Signs go wrong with negative terms","Needs nCr notation"],
+ "Binomial theorem: expand (a + b)ⁿ using nCr coefficients.");
+
+eduAdd("binary_numbers","math",["computer"],"Number bases and binary",
+ ["binary","binary numbers","number bases","hexadecimal","denary","base 2","base 10"],
+ "A number base says how many digits a counting system uses. We use base 10 (denary); computers use base 2 (binary), with only 0 and 1.",
+ "Binary is like a row of light switches: each one is either off (0) or on (1).",
+ ["In binary, place values are 1, 2, 4, 8, 16, … from the right.","To convert binary to denary, add the place values with a 1.","To convert denary to binary, keep dividing by 2 and read the remainders upward.","Hexadecimal (base 16) uses 0–9 and A–F as a shorter way to write binary."],
+ "Binary 1011 = 8 + 0 + 2 + 1 = 11. Denary 13 = 8 + 4 + 1 = 1101 in binary.",
+ "Computers, digital electronics, networking and data storage.",
+ ["Matches how computers store information","Simple on/off logic","Hex shortens long binary numbers"],
+ ["Binary numbers get long","Hard for people to read","Conversions need practice"],
+ "Binary = counting in base 2 using 0 and 1.");
+
+eduAdd("correlation_regression","math",[],"Correlation and regression",
+ ["correlation","regression","line of best fit","scatter graph","scatter graphs","scatter plot","scatter diagram"],
+ "Correlation describes how two variables are related. A line of best fit (regression line) shows the trend and can be used for predictions.",
+ "If ice-cream sales and temperature both rise together, the scatter graph slopes upward.",
+ ["Plot the data as a scatter graph.","Describe the correlation: positive, negative or none.","Draw the line of best fit through the trend.","Use the line to estimate values, with caution outside the data range."],
+ "Study hours and test marks that rise together show positive correlation. Using the line, 5 hours might predict a mark of about 70.",
+ "Science, economics, medicine, weather and business forecasting.",
+ ["Shows relationships in data","Allows predictions","Easy to read visually"],
+ ["Correlation does not prove one thing causes the other","Predictions outside the data can be unreliable","Outliers distort the line"],
+ "Correlation = how two variables move together.");
+
+/* ── University / advanced ── */
+eduAdd("limits_continuity","math",[],"Limits and continuity",
+ ["limits and continuity","limit of a function","limits in calculus","continuity","continuous function","continuous functions","one sided limit"],
+ "A limit is the value a function approaches as the input gets closer to a point. A function is continuous at a point if the limit equals the value there, with no jump or break.",
+ "Walk toward a door: the limit is the door you are heading to, even if you never stand exactly on it.",
+ ["Write lim x→a f(x) = L.","Check the left-hand and right-hand limits; they must agree.","Continuous at a means f(a) exists, the limit exists and they are equal.","Use algebra, factorising or L'Hôpital's rule for 0/0 forms."],
+ "lim x→2 (x² − 4) ÷ (x − 2): factorise to (x − 2)(x + 2) ÷ (x − 2) = x + 2, so the limit is 4.",
+ "Defining derivatives and integrals, analysis and modelling.",
+ ["The foundation of calculus","Handles values where a function is undefined","Makes ideas like infinity precise"],
+ ["Abstract at first","The formal ε–δ definition is hard","Some limits need special techniques"],
+ "Limit = the value a function approaches.");
+
+eduAdd("differentiation_rules","math",[],"Differentiation rules",
+ ["chain rule","product rule","quotient rule","differentiation rules","rules of differentiation","implicit differentiation"],
+ "Differentiation rules let you find derivatives of complicated functions by breaking them into simpler parts.",
+ "They are a toolbox: each rule is for a different kind of combination of functions.",
+ ["Product rule: d(uv) = u′v + uv′.","Quotient rule: d(u/v) = (u′v − uv′) ÷ v².","Chain rule: d f(g(x)) = f′(g(x)) × g′(x).","Common derivatives: d(sin x) = cos x, d(eˣ) = eˣ, d(ln x) = 1/x."],
+ "Differentiate (3x + 1)⁴ with the chain rule: 4(3x + 1)³ × 3 = 12(3x + 1)³.",
+ "Physics, engineering, economics and machine learning.",
+ ["Handle any combination of functions","Allow exact rates of change","Support optimisation"],
+ ["Many rules to remember","Long expressions invite mistakes","Choosing the right rule takes practice"],
+ "Product, quotient and chain rules extend differentiation.");
+
+eduAdd("integration_techniques","math",[],"Integration techniques",
+ ["integration by parts","integration by substitution","u substitution","definite integral","definite integrals","techniques of integration","partial fractions"],
+ "Integration techniques are methods for integrating functions that cannot be integrated with a simple rule.",
+ "Substitution undoes the chain rule; integration by parts undoes the product rule.",
+ ["Substitution: let u = g(x), replace dx and integrate in u.","By parts: ∫u dv = uv − ∫v du.","Partial fractions: split a fraction into simpler ones.","Definite integrals: evaluate F(b) − F(a) after integrating."],
+ "∫2x(x² + 1)³ dx: let u = x² + 1, du = 2x dx, so the integral is u⁴/4 + C = (x² + 1)⁴/4 + C.",
+ "Areas, physics, probability and engineering.",
+ ["Solve many integrals exactly","Reverse the differentiation rules","Needed in physics and engineering"],
+ ["Choosing a method needs practice","Algebra gets long","Some integrals have no neat answer"],
+ "Substitution and parts reverse the chain and product rules.");
+
+eduAdd("optimisation","math",[],"Maxima, minima and optimisation",
+ ["optimisation","optimization","maximum and minimum","maxima and minima","turning points","stationary points","stationary point"],
+ "Optimisation uses derivatives to find the greatest or smallest value of something, such as maximum profit or minimum cost.",
+ "On a hill, the top is where the slope is flat (zero) before it goes downhill.",
+ ["Write the quantity to optimise as a function.","Differentiate and set f′(x) = 0 to find stationary points.","Use the second derivative: f″ < 0 is a maximum, f″ > 0 is a minimum.","Check the answer makes sense in the problem."],
+ "Maximise area with 40 m of fence: for a rectangle, A = x(20 − x), A′ = 20 − 2x = 0, so x = 10 and A = 100 m² (a square).",
+ "Business profit, engineering design, packaging and machine learning.",
+ ["Finds best solutions exactly","Applies to many real problems","Saves cost and materials"],
+ ["Needs the problem written as a function","Only finds local, not always global, extremes","Constraints add complexity"],
+ "Optimisation: solve f′(x) = 0 and test the result.");
+
+eduAdd("differential_equations","math",["physics","engineering"],"Differential equations",
+ ["differential equation","differential equations","separable equations","first order differential equation","second order differential equation"],
+ "A differential equation links a function to its derivatives. Solving it means finding the function that satisfies the relationship.",
+ "It describes the rule of change, like 'the faster it grows, the more it grows', and the solution is the whole story.",
+ ["Identify the order (highest derivative) and type.","Separable: move y terms with dy and x terms with dx, then integrate both sides.","Linear first order: use an integrating factor.","Use initial conditions to find the constants."],
+ "dy/dx = 2y: separate dy/y = 2 dx, integrate to ln y = 2x + C, so y = Ae²ˣ. Population growth follows this pattern.",
+ "Population models, circuits, vibrations, cooling and finance.",
+ ["Model real change over time","Predict future behaviour","Used throughout physics and engineering"],
+ ["Many have no exact solution","Different types need different methods","Initial conditions must be known"],
+ "Differential equation = an equation involving a function and its derivatives.");
+
+eduAdd("partial_derivatives","math",[],"Partial derivatives and multivariable calculus",
+ ["partial derivative","partial derivatives","multivariable calculus","multiple integrals","double integral","gradient vector"],
+ "Partial derivatives measure how a function of several variables changes when one variable changes and the others stay fixed.",
+ "On a hillside, the slope depends on the direction you walk; a partial derivative picks east-west or north-south.",
+ ["For f(x, y), ∂f/∂x treats y as a constant.","∂f/∂y treats x as a constant.","The gradient vector (∂f/∂x, ∂f/∂y) points in the steepest direction.","Double integrals add up values over a region."],
+ "f(x, y) = x²y: ∂f/∂x = 2xy and ∂f/∂y = x².",
+ "Physics, economics, machine learning (gradient descent) and engineering.",
+ ["Handles functions of many variables","Needed for optimisation in many dimensions","Basis of machine learning"],
+ ["Harder to visualise","More notation and rules","Computation can be long"],
+ "Partial derivative = change with respect to one variable at a time.");
+
+eduAdd("taylor_series","math",[],"Taylor and Maclaurin series",
+ ["taylor series","maclaurin series","power series","taylor expansion","series expansion"],
+ "A Taylor series writes a function as an infinite sum of terms built from its derivatives at a point. A Maclaurin series is the case at x = 0.",
+ "It is like approximating a curve with a polynomial that matches its height, slope and bend.",
+ ["Taylor: f(x) = Σ f⁽ⁿ⁾(a)(x − a)ⁿ ÷ n!.","Maclaurin: use a = 0.","Common series: eˣ = 1 + x + x²/2! + x³/3! + …","Truncate after a few terms for an approximation."],
+ "sin x ≈ x − x³/6 for small x. At x = 0.1: 0.1 − 0.000167 ≈ 0.099833, very close to the true value.",
+ "Calculators, physics approximations and numerical methods.",
+ ["Approximates hard functions with simple polynomials","Used inside calculators and computers","Helps solve equations"],
+ ["Only accurate near the chosen point","May not converge for all x","Needs many derivatives"],
+ "Taylor series = a function as an infinite polynomial.");
+
+eduAdd("complex_numbers","math",["engineering"],"Complex numbers",
+ ["complex number","complex numbers","imaginary number","imaginary numbers","argand diagram","imaginary unit"],
+ "A complex number has the form a + bi, where i is the imaginary unit with i² = −1.",
+ "Real numbers sit on a line; complex numbers fill a whole plane, with a real axis and an imaginary axis.",
+ ["a is the real part and b is the imaginary part.","Add and subtract the real and imaginary parts separately.","Multiply as brackets and use i² = −1.","The modulus is √(a² + b²), the distance from the origin."],
+ "(2 + 3i)(1 − i) = 2 − 2i + 3i − 3i² = 2 + i + 3 = 5 + i.",
+ "Electrical engineering (AC circuits), signal processing, quantum physics and control.",
+ ["Solve equations with no real roots","Describe waves and rotations neatly","Essential in engineering"],
+ ["Abstract at first","The imaginary part cannot be measured directly in daily life","Sign errors with i²"],
+ "Complex number = a + bi, where i² = −1.");
+
+eduAdd("linear_algebra","math",["engineering"],"Linear algebra and vector spaces",
+ ["linear algebra","vector space","vector spaces","linear independence","basis and dimension","linear transformation","linear transformations","matrix inverse"],
+ "Linear algebra studies vectors, matrices and the linear relationships between them, including vector spaces and linear transformations.",
+ "It is the maths of 'straight' relationships, and it powers graphics, data analysis and AI.",
+ ["A vector space is a set of vectors you can add and scale.","Vectors are linearly independent if none is a combination of the others.","A basis is a minimal set that spans the space; its size is the dimension.","Matrices represent linear transformations; Ax = b is a system of equations."],
+ "In 2D, the vectors (1, 0) and (0, 1) form a basis, and (3, 4) = 3(1, 0) + 4(0, 1).",
+ "Computer graphics, data science, machine learning, physics and economics.",
+ ["Solves large systems efficiently","Basis of data science and AI","Unifies many parts of maths"],
+ ["Very abstract at first","Large matrices need a computer","Many definitions to learn"],
+ "Linear algebra = vectors, matrices and linear transformations.");
+
+eduAdd("eigenvalues","math",["engineering","physics"],"Eigenvalues and eigenvectors",
+ ["eigenvalue","eigenvalues","eigenvector","eigenvectors","eigen values","characteristic equation"],
+ "An eigenvector of a matrix A is a non-zero vector whose direction does not change when A acts on it; it is only scaled by a number λ, the eigenvalue: Av = λv.",
+ "Stretch a rubber sheet: lines along certain directions only stretch, never turn; those are the eigenvectors.",
+ ["Solve det(A − λI) = 0 to find the eigenvalues λ.","For each λ, solve (A − λI)v = 0 to find the eigenvector.","The sum of the eigenvalues is the trace; their product is the determinant.","Use them to simplify matrix powers and systems."],
+ "A = [2 0; 0 3] has eigenvalues 2 and 3 with eigenvectors (1, 0) and (0, 1).",
+ "Vibration analysis, Google PageRank, quantum mechanics, data science (PCA) and stability studies.",
+ ["Simplify complicated transformations","Reveal natural directions and frequencies","Basis of PCA and many algorithms"],
+ ["Hard to compute by hand for large matrices","Not all matrices have real eigenvalues","Abstract"],
+ "Eigenvector: Av = λv.");
+
+eduAdd("laplace_fourier","math",["engineering"],"Laplace and Fourier transforms",
+ ["laplace transform","laplace transforms","fourier series","fourier transform","fourier transforms","frequency domain"],
+ "Transforms convert a function into another form that is easier to work with. Laplace transforms solve differential equations; Fourier methods break a signal into sine and cosine waves.",
+ "A Fourier transform is like hearing a chord and identifying each separate note inside it.",
+ ["Laplace: L{f(t)} = ∫₀^∞ f(t)e⁻ˢᵗ dt turns calculus into algebra.","Solve the algebra in the s-domain, then transform back.","Fourier series write a periodic signal as a sum of sines and cosines.","Fourier transforms extend this to non-periodic signals."],
+ "L{1} = 1/s and L{eᵃᵗ} = 1/(s − a). A square wave can be built from sine waves of increasing frequency.",
+ "Electrical engineering, audio and image compression, control systems and vibrations.",
+ ["Turn hard differential equations into algebra","Reveal the frequency content of signals","Used everywhere in signal processing"],
+ ["Heavy algebra","Need tables and inverse transforms","Concepts are abstract"],
+ "Transforms turn hard problems into easier ones in another domain.");
+
+eduAdd("normal_distribution","math",[],"Normal distribution",
+ ["normal distribution","bell curve","gaussian distribution","standard normal","z score","z-score","standard normal distribution"],
+ "The normal distribution is a symmetric, bell-shaped probability distribution described by its mean μ and standard deviation σ.",
+ "Heights of adults cluster around an average, with fewer very short and very tall people.",
+ ["The curve is symmetric about the mean.","About 68% of values lie within 1σ, 95% within 2σ and 99.7% within 3σ.","Standardise with z = (x − μ) ÷ σ.","Look up z in a table or use a calculator for probabilities."],
+ "Marks have mean 60 and σ = 10. A mark of 80 has z = (80 − 60) ÷ 10 = 2, which is higher than about 97.7% of students.",
+ "Exam marks, measurement errors, quality control and many natural measurements.",
+ ["Models many real measurements","Easy to calculate with z-scores","Foundation of statistics"],
+ ["Real data is often not perfectly normal","Outliers can distort it","Misused when the data is skewed"],
+ "Normal distribution = symmetric bell curve defined by μ and σ.");
+
+eduAdd("binomial_distribution","math",[],"Binomial distribution",
+ ["binomial distribution","binomial probability","bernoulli trial","bernoulli trials"],
+ "The binomial distribution gives the probability of a certain number of successes in a fixed number of independent trials, each with the same chance of success.",
+ "Toss a coin 10 times: how likely are exactly 6 heads? That is binomial.",
+ ["Check: fixed n trials, two outcomes, constant probability p, independent trials.","P(X = k) = nCk × pᵏ × (1 − p)ⁿ⁻ᵏ.","Mean = np; variance = np(1 − p).","Add probabilities for 'at most' or 'at least' questions."],
+ "Fair coin, n = 3, P(exactly 2 heads) = 3C2 × 0.5² × 0.5 = 3 × 0.125 = 0.375.",
+ "Quality control, surveys, medicine trials and games.",
+ ["Simple formula for repeated yes/no events","Gives exact probabilities","Mean and variance are easy"],
+ ["Needs independent trials with the same probability","Large n makes the calculation long","Not suitable when p changes"],
+ "Binomial: P(X = k) = nCk pᵏ(1 − p)ⁿ⁻ᵏ.");
+
+eduAdd("hypothesis_testing","math",[],"Hypothesis testing",
+ ["hypothesis test","hypothesis testing","hypothesis tests","null hypothesis","p value","p-value","significance level","t test","t-test","chi squared test"],
+ "Hypothesis testing is a method for deciding, using sample data, whether there is enough evidence to reject an assumption (the null hypothesis).",
+ "Like a courtroom: the null hypothesis is 'innocent until proven guilty', and the data is the evidence.",
+ ["State the null hypothesis H₀ and the alternative H₁.","Choose a significance level, often 5%.","Calculate the test statistic and the p-value.","If p is less than the significance level, reject H₀; otherwise do not reject it."],
+ "A coin is claimed fair. Out of 100 tosses it lands heads 70 times. The p-value is very small, so there is strong evidence the coin is not fair.",
+ "Medical trials, quality control, psychology, business and research.",
+ ["Gives a clear rule for decisions","Reduces guessing","Standard in research"],
+ ["A small p-value does not prove the claim is true","Results depend on sample size","Easy to misinterpret"],
+ "Hypothesis test: compare p-value with the significance level.");
+
+eduAdd("mathematical_proof","math",[],"Mathematical proof and induction",
+ ["mathematical induction","proof by induction","mathematical proof","proof by contradiction","direct proof","proofs"],
+ "A mathematical proof is a logical argument that shows a statement is always true. Induction proves a statement for all whole numbers.",
+ "Induction is like dominoes: if the first falls and each one knocks over the next, they all fall.",
+ ["Direct proof: start from known facts and reason step by step.","Contradiction: assume the statement is false and show this is impossible.","Induction, step 1: show it is true for n = 1 (the base case).","Induction, step 2: assume it is true for n = k and prove it for n = k + 1."],
+ "Prove 1 + 2 + … + n = n(n + 1)/2. Base case n = 1: 1 = 1. If true for k, adding k + 1 gives (k + 1)(k + 2)/2, so it is true for k + 1.",
+ "Higher maths, computer science (algorithms) and logic.",
+ ["Gives certainty, not just examples","Builds careful reasoning","Foundation of advanced maths"],
+ ["Needs abstract thinking","Writing clear proofs takes practice","Examples alone are never a proof"],
+ "Proof = a logical argument that a statement is always true.");
+
+eduAdd("numerical_methods","math",["computer","engineering"],"Numerical methods",
+ ["numerical methods","numerical method","newton raphson","newton-raphson","bisection method","trapezium rule","trapezoidal rule","iteration","iterative methods"],
+ "Numerical methods find approximate answers to problems that cannot be solved exactly, usually by repeating a calculation until it is accurate enough.",
+ "It is like guessing a number and improving the guess each time until it is close enough.",
+ ["Rewrite the problem so you can improve a guess.","Newton–Raphson: xₙ₊₁ = xₙ − f(xₙ) ÷ f′(xₙ).","Trapezium rule: estimate an area by trapezia.","Stop when two successive answers agree to the accuracy needed."],
+ "Solve x² − 2 = 0 starting at x = 1.5: x₁ = 1.5 − (0.25 ÷ 3) = 1.4167, which is close to √2 = 1.4142.",
+ "Engineering, computers, weather forecasting and science.",
+ ["Solve problems with no exact formula","Computers can do it quickly","Accuracy can be chosen"],
+ ["Answers are approximate","A bad starting guess may fail","Needs many repeated calculations"],
+ "Numerical methods = approximate answers by repeated improvement.");
