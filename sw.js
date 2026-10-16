@@ -1,7 +1,7 @@
 /* BAINT AI service worker: lets the app open with no data after the first visit,
    and lets notifications work on Android (which needs a service worker). */
-const CACHE = "baint-v39-1";
-const SHELL = ["./", "lessons.js", "logo.png"];
+const CACHE = "baint-v39-2";
+const SHELL = ["./", "lessons.js", "solver.js", "logo.png"];
 
 self.addEventListener("install", event => {
   event.waitUntil(
