@@ -2077,3 +2077,37 @@ eduAdd("sociolinguistics","english",["history"],"Sociolinguistics: dialects, acc
  ["Shows that variation is normal, not wrong","Helps with respectful teaching and policy","Explains how languages change"],
  ["Treating one dialect as superior","Confusing accent and dialect","Ignoring the social context"],
  "Sociolinguistics = language in society.", EN_W);
+
+/* ══ PHYSICS AND CHEMISTRY: extra topics used by the problem solver ══ */
+eduAdd("density_pressure","physics",["engineering"],"Density and pressure",
+ ["density and pressure","density","pressure","floating and sinking","pascal"],
+ "Density is how much mass is packed into a volume (density = mass ÷ volume). Pressure is the force pressing on each unit of area (pressure = force ÷ area).",
+ "A brick and a sponge can be the same size, but the brick is denser. A sharp knife presses harder than a blunt one because the same force acts on a smaller area.",
+ ["Density ρ = m ÷ V, measured in kg/m³ or g/cm³.","Pressure p = F ÷ A, measured in pascals (N/m²).","An object floats if its density is less than the liquid's density.","Pressure in a liquid increases with depth."],
+ "A 100 g metal block with volume 20 cm³ has density 100 ÷ 20 = 5 g/cm³. A 100 N force on 2 m² gives a pressure of 50 N/m².",
+ "Ships and submarines, tyres, dams, hydraulic machines and weather.",
+ ["Explain why things float or sink","Help design safe structures and machines","Simple formulas that apply widely"],
+ ["Unit mistakes (g and kg, cm² and m²)","Mixing up mass and weight","Forgetting that pressure depends on area"],
+ "Density = mass ÷ volume; pressure = force ÷ area.");
+
+eduAdd("moles","chemistry",["biochemistry"],"Moles and molar mass",
+ ["moles and molar mass","mole","moles","molar mass","relative formula mass","relative molecular mass","avogadro","avogadros number","mole concept","amount of substance"],
+ "A mole is the amount of substance containing 6.02 × 10²³ particles. The molar mass is the mass of one mole in grams (g/mol), found by adding the atomic masses in the formula.",
+ "A mole is a chemist's 'dozen': a fixed number of particles, so we can count atoms by weighing them.",
+ ["Find the molar mass M by adding the atomic masses (H₂O: 2 × 1 + 16 = 18 g/mol).","moles n = mass ÷ molar mass.","mass = n × M.","One mole of any substance contains 6.02 × 10²³ particles."],
+ "36 g of water is 36 ÷ 18 = 2 moles of water.",
+ "Chemical calculations, medicine doses, lab preparation and industry.",
+ ["Lets you link mass to the number of particles","Needed for balanced-equation calculations","Used in every area of chemistry"],
+ ["Using the wrong formula for the molar mass","Forgetting subscripts when counting atoms","Mixing mass in g and kg"],
+ "n = mass ÷ molar mass.", {not:["animal","skin","spot","spots"]});
+
+eduAdd("concentration","chemistry",["biochemistry"],"Concentration and dilution",
+ ["concentration and dilution","concentration","molarity","molar concentration","dilution","dilute","diluting a solution","c1v1"],
+ "Concentration tells how much solute is dissolved in a given volume of solution, usually in mol/L (molarity). Diluting adds solvent, lowering the concentration without changing the amount of solute.",
+ "Adding water to strong squash makes it weaker, but the amount of squash concentrate stays the same.",
+ ["Concentration = moles ÷ volume in litres.","Convert mL to L by dividing by 1000.","For dilution: C₁V₁ = C₂V₂ (amount of solute stays constant).","Rearrange to find the new concentration or the volume to add."],
+ "0.5 mol dissolved in 250 mL (0.25 L) gives 0.5 ÷ 0.25 = 2 mol/L. Diluting 50 mL of 2 M to 200 mL gives (2 × 50) ÷ 200 = 0.5 M.",
+ "Lab solutions, medicine, cleaning products and food and drink.",
+ ["Gives exact control of solution strength","Needed for titrations and reactions","Easy formulas"],
+ ["Forgetting to convert mL to L","Using the wrong volume in dilution","Mixing up concentration and amount"],
+ "c = n ÷ V; C₁V₁ = C₂V₂.");
