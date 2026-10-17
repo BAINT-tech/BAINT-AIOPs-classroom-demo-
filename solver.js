@@ -1010,6 +1010,379 @@ function sequences(q){
   return null;
 }
 
+
+
+/* ══════════════ PHYSICS AND CHEMISTRY PROBLEMS ══════════════ */
+let lastOriginal = "";
+const NUM = "(\\d+(?:\\.\\d+)?(?:e-?\\d+)?)";
+const g1 = (q, re) => { const m = re.exec(q); return m ? parseFloat(m[1]) : null; };
+function sci(subject, topic, title, formula, subs, calc, answer, extra){
+  const st = ["Write the formula: " + formula, "Substitute the values.\n" + subs, "Calculate.\n" + calc];
+  if(extra) st.push(extra);
+  return {text: steps(title, st, answer), topic, subject};
+}
+function physicsTasks(q){
+  const mass = g1(q, new RegExp(NUM + "\\s*(?:kg|kilograms?|kilos?)\\b"));
+  const force = g1(q, new RegExp(NUM + "\\s*(?:n|newtons?)\\b"));
+  const acc = g1(q, new RegExp(NUM + "\\s*(?:m\\/s\\^?2|m\\/s²|m\\/s2|ms\\^-2|metres? per second squared|meters? per second squared)"));
+  const spd = g1(q, new RegExp(NUM + "\\s*(?:m\\/s|metres? per second|meters? per second)(?![\\^²2])"));
+  const dist = g1(q, new RegExp(NUM + "\\s*(?:m|metres?|meters?)\\b(?![\\/²\\^23])"));
+  const time = g1(q, new RegExp(NUM + "\\s*(?:s|secs?|seconds?)\\b"));
+  const g = 9.8;
+  let m;
+  // acceleration from a change of speed
+  if((m = new RegExp("from\\s*" + NUM + "\\s*(?:m\\/s)?\\s*to\\s*" + NUM + "\\s*m\\/s.*?(?:in|over|within|after)\\s*" + NUM + "\\s*(?:s|secs?|seconds?)\\b").exec(q)) && /accelerat/.test(q)){
+    const u = +m[1], v = +m[2], t = +m[3];
+    if(t === 0) return null;
+    return sci("physics", "motion", "Let's find the acceleration.", "a = (v − u) ÷ t", "a = (" + v + " − " + u + ") ÷ " + t, "a = " + fnum(v - u) + " ÷ " + t + " = " + fnum((v - u) / t) + " m/s²", "Acceleration = " + fnum((v - u) / t) + " m/s²", "Acceleration = " + fnum((v - u) / t) + " m/s²");
+  }
+  // F = ma
+  if(/force|newton/.test(q) && mass != null && acc != null && !/acceleration is|find the (?:mass|acceleration)/.test(q)){
+    return sci("physics", "forces", "Let's find the force.", "F = m × a", "F = " + mass + " kg × " + acc + " m/s²", "F = " + fnum(mass * acc) + " N", "Force = " + fnum(mass * acc) + " N", "Force = " + fnum(mass * acc) + " N");
+  }
+  if(/acceleration/.test(q) && force != null && mass != null && acc == null){
+    if(mass === 0) return null;
+    return sci("physics", "forces", "Let's find the acceleration.", "F = m × a, so a = F ÷ m", "a = " + force + " N ÷ " + mass + " kg", "a = " + fnum(force / mass) + " m/s²", "Acceleration = " + fnum(force / mass) + " m/s²", "Acceleration = " + fnum(force / mass) + " m/s²");
+  }
+  if(/\bmass\b/.test(q) && force != null && acc != null && mass == null){
+    if(acc === 0) return null;
+    return sci("physics", "forces", "Let's find the mass.", "F = m × a, so m = F ÷ a", "m = " + force + " N ÷ " + acc + " m/s²", "m = " + fnum(force / acc) + " kg", "Mass = " + fnum(force / acc) + " kg", "Mass = " + fnum(force / acc) + " kg");
+  }
+  // weight
+  if(/\bweight\b/.test(q) && mass != null && !/density/.test(q)){
+    return sci("physics", "gravity", "Let's find the weight.", "W = m × g  (g ≈ 9.8 N/kg on Earth)", "W = " + mass + " × 9.8", "W = " + fnum(mass * g, 2) + " N", "Weight ≈ " + fnum(mass * g, 2) + " N", "Weight ≈ " + fnum(mass * g, 2) + " N");
+  }
+  // kinetic energy
+  if(/kinetic energy|\bke\b/.test(q) && mass != null && spd != null){
+    const ke = 0.5 * mass * spd * spd;
+    return sci("physics", "energy", "Let's find the kinetic energy.", "KE = ½ × m × v²", "KE = ½ × " + mass + " × " + spd + "²", "KE = ½ × " + mass + " × " + fnum(spd * spd) + " = " + fnum(ke) + " J", "Kinetic energy = " + fnum(ke) + " J", "Kinetic energy = " + fnum(ke) + " J");
+  }
+  // gravitational potential energy
+  if(/potential energy|\bgpe\b|\bpe\b/.test(q) && mass != null){
+    const h = g1(q, new RegExp("(?:height|high|up|above|raised|lifted)[^\\d]{0,20}" + NUM + "\\s*(?:m|metres?|meters?)\\b(?![\\/²\\^])")) ?? g1(q, new RegExp(NUM + "\\s*(?:m|metres?|meters?)\\s*(?:high|above|up)"));
+    if(h != null){
+      const pe = mass * g * h;
+      return sci("physics", "energy", "Let's find the gravitational potential energy.", "PE = m × g × h  (g ≈ 9.8 m/s²)", "PE = " + mass + " × 9.8 × " + h, "PE = " + fnum(pe, 2) + " J", "Potential energy ≈ " + fnum(pe, 2) + " J", "Potential energy ≈ " + fnum(pe, 2) + " J");
+    }
+  }
+  // work done
+  if(/work done|work is done|\bwork\b/.test(q) && force != null && dist != null && !/power/.test(q)){
+    return sci("physics", "energy", "Let's find the work done.", "work = force × distance", "work = " + force + " N × " + dist + " m", "work = " + fnum(force * dist) + " J", "Work done = " + fnum(force * dist) + " J", "Work done = " + fnum(force * dist) + " J");
+  }
+  // electricity
+  const V = g1(q, new RegExp(NUM + "\\s*(?:v|volts?)\\b"));
+  const R = g1(q, new RegExp(NUM + "\\s*(?:ohms?|ω|Ω)"));
+  const I = g1(q, new RegExp(NUM + "\\s*(?:amps?|amperes?)\\b"));
+  const cur = I != null ? I : g1(q, new RegExp(NUM + "\\s*a\\b(?!\\w)"));
+  if(/current|voltage|resistance|ohm|potential difference|\bpd\b/.test(q) && !/power/.test(q)){
+    if(V != null && R != null && /current|amps?/.test(q) && R !== 0) return sci("physics", "electricity", "Let's find the current.", "V = I × R, so I = V ÷ R", "I = " + V + " V ÷ " + R + " Ω", "I = " + fnum(V / R) + " A", "Current = " + fnum(V / R) + " A", "Current = " + fnum(V / R) + " A");
+    if(V != null && cur != null && /resistance|ohm/.test(q) && cur !== 0) return sci("physics", "electricity", "Let's find the resistance.", "V = I × R, so R = V ÷ I", "R = " + V + " V ÷ " + cur + " A", "R = " + fnum(V / cur) + " Ω", "Resistance = " + fnum(V / cur) + " Ω", "Resistance = " + fnum(V / cur) + " Ω");
+    if(cur != null && R != null && /voltage|potential difference|\bpd\b|\bv\b/.test(q)) return sci("physics", "electricity", "Let's find the voltage.", "V = I × R", "V = " + cur + " A × " + R + " Ω", "V = " + fnum(cur * R) + " V", "Voltage = " + fnum(cur * R) + " V", "Voltage = " + fnum(cur * R) + " V");
+  }
+  // power
+  if(/\bpower\b/.test(q)){
+    if(V != null && cur != null) return sci("physics", "electricity", "Let's find the electrical power.", "P = V × I", "P = " + V + " V × " + cur + " A", "P = " + fnum(V * cur) + " W", "Power = " + fnum(V * cur) + " W", "Power = " + fnum(V * cur) + " W");
+    const W = g1(q, new RegExp(NUM + "\\s*(?:j|joules?)\\b"));
+    if(W != null && time != null && time !== 0) return sci("physics", "energy", "Let's find the power.", "power = work ÷ time", "P = " + W + " J ÷ " + time + " s", "P = " + fnum(W / time) + " W", "Power = " + fnum(W / time) + " W", "Power = " + fnum(W / time) + " W");
+  }
+  // density
+  if(/density/.test(q)){
+    const mm = new RegExp(NUM + "\\s*(kg|g)\\b").exec(q), vm = new RegExp(NUM + "\\s*(cm3|cm\\^3|cm³|m3|m\\^3|m³|ml|l)\\b").exec(q);
+    if(mm && vm && parseFloat(vm[1]) !== 0){
+      const mv = parseFloat(mm[1]), vv = parseFloat(vm[1]);
+      const unit = mm[2] + "/" + (/ml|cm/.test(vm[2]) ? "cm³" : /^l$/.test(vm[2]) ? "L" : "m³");
+      return sci("physics", "density_pressure", "Let's find the density.", "density = mass ÷ volume", "density = " + mv + " " + mm[2] + " ÷ " + vv + " " + vm[2], "density = " + fnum(mv / vv) + " " + unit, "Density = " + fnum(mv / vv) + " " + unit, "Density = " + fnum(mv / vv) + " " + unit);
+    }
+  }
+  // pressure
+  if(/pressure/.test(q) && force != null){
+    const am = new RegExp(NUM + "\\s*(m2|m\\^2|m²|cm2|cm\\^2|cm²)").exec(q);
+    if(am && parseFloat(am[1]) !== 0){
+      const a = parseFloat(am[1]), u = /^cm/.test(am[2]) ? "N/cm²" : "N/m² (pascals)";
+      return sci("physics", "density_pressure", "Let's find the pressure.", "pressure = force ÷ area", "p = " + force + " N ÷ " + a + " " + am[2].replace(/\^?2$/, "²").replace("²²", "²"), "p = " + fnum(force / a) + " " + u, "Pressure = " + fnum(force / a) + " " + u, "Pressure = " + fnum(force / a) + " " + u);
+    }
+  }
+  // waves
+  if(/wave|wavelength|frequency/.test(q)){
+    const f = g1(q, new RegExp(NUM + "\\s*(?:hz|hertz)\\b")), kf = g1(q, new RegExp(NUM + "\\s*khz"));
+    const fr = f != null ? f : (kf != null ? kf * 1000 : null);
+    const lam = g1(q, new RegExp("(?:wavelength[^\\d]{0,12})?" + NUM + "\\s*(?:m|metres?|meters?)\\b(?![\\/²\\^])"));
+    if(fr != null && lam != null && /speed|velocity|how fast/.test(q)) return sci("physics", "waves", "Let's find the wave speed.", "v = f × λ", "v = " + fnum(fr) + " Hz × " + lam + " m", "v = " + fnum(fr * lam) + " m/s", "Wave speed = " + fnum(fr * lam) + " m/s", "Wave speed = " + fnum(fr * lam) + " m/s");
+    if(fr != null && spd != null && /wavelength/.test(q) && fr !== 0) return sci("physics", "waves", "Let's find the wavelength.", "v = f × λ, so λ = v ÷ f", "λ = " + spd + " m/s ÷ " + fnum(fr) + " Hz", "λ = " + fnum(spd / fr) + " m", "Wavelength = " + fnum(spd / fr) + " m", "Wavelength = " + fnum(spd / fr) + " m");
+    if(spd != null && lam != null && /frequency/.test(q) && lam !== 0) return sci("physics", "waves", "Let's find the frequency.", "v = f × λ, so f = v ÷ λ", "f = " + spd + " m/s ÷ " + lam + " m", "f = " + fnum(spd / lam) + " Hz", "Frequency = " + fnum(spd / lam) + " Hz", "Frequency = " + fnum(spd / lam) + " Hz");
+  }
+  // momentum
+  if(/momentum/.test(q) && mass != null && spd != null){
+    return sci("physics", "forces", "Let's find the momentum.", "p = m × v", "p = " + mass + " kg × " + spd + " m/s", "p = " + fnum(mass * spd) + " kg m/s", "Momentum = " + fnum(mass * spd) + " kg m/s", "Momentum = " + fnum(mass * spd) + " kg m/s");
+  }
+  return null;
+}
+
+/* ---------- chemistry ---------- */
+const ATOMIC = {H:1, He:4, Li:7, Be:9, B:11, C:12, N:14, O:16, F:19, Ne:20, Na:23, Mg:24, Al:27, Si:28, P:31, S:32, Cl:35.5, Ar:40, K:39, Ca:40, Mn:55, Fe:56, Co:59, Ni:59, Cu:63.5, Zn:65, Br:80, Ag:108, Sn:119, I:127, Ba:137, Hg:201, Pb:207, Cr:52, Au:197, Li2:7};
+const ELEMENT_NAMES = {hydrogen:"H", helium:"He", lithium:"Li", carbon:"C", nitrogen:"N", oxygen:"O", fluorine:"F", sodium:"Na", magnesium:"Mg", aluminium:"Al", aluminum:"Al", silicon:"Si", phosphorus:"P", sulfur:"S", sulphur:"S", chlorine:"Cl", potassium:"K", calcium:"Ca", iron:"Fe", copper:"Cu", zinc:"Zn", silver:"Ag", bromine:"Br", iodine:"I"};
+const SUBSTANCES = {"water":"H2O","carbon dioxide":"CO2","carbon monoxide":"CO","sodium chloride":"NaCl","salt":"NaCl","table salt":"NaCl","glucose":"C6H12O6","ammonia":"NH3","methane":"CH4","ethanol":"C2H5OH","hydrochloric acid":"HCl","sulfuric acid":"H2SO4","sulphuric acid":"H2SO4","nitric acid":"HNO3","calcium carbonate":"CaCO3","sodium hydroxide":"NaOH","potassium hydroxide":"KOH","calcium hydroxide":"Ca(OH)2","magnesium oxide":"MgO","sodium carbonate":"Na2CO3","copper sulfate":"CuSO4","copper sulphate":"CuSO4","oxygen":"O2","hydrogen":"H2","nitrogen":"N2","chlorine":"Cl2","hydrogen peroxide":"H2O2","sulfur dioxide":"SO2","sulphur dioxide":"SO2","magnesium chloride":"MgCl2","calcium chloride":"CaCl2","potassium chloride":"KCl","sodium bicarbonate":"NaHCO3","baking soda":"NaHCO3","propane":"C3H8","butane":"C4H10","ethene":"C2H4","ethane":"C2H6","iron oxide":"Fe2O3","aluminium oxide":"Al2O3","silver nitrate":"AgNO3"};
+const KNOWN_LOWER = {};
+Object.keys(SUBSTANCES).forEach(k => { KNOWN_LOWER[SUBSTANCES[k].toLowerCase()] = SUBSTANCES[k]; });
+function resolveFormula(tok){
+  tok = String(tok || "").trim().replace(/[?.,;]+$/, "");
+  if(!tok) return null;
+  const lower = tok.toLowerCase();
+  if(SUBSTANCES[lower]) return SUBSTANCES[lower];
+  if(/[A-Z]/.test(tok) && /^[A-Za-z0-9()]+$/.test(tok)) return tok;
+  if(KNOWN_LOWER[lower]) return KNOWN_LOWER[lower];
+  return null;
+}
+function parseFormula(f){
+  const toks = f.match(/[A-Z][a-z]?|\(|\)|\d+/g);
+  if(!toks || toks.join("") !== f) return null;
+  const stack = [{}];
+  for(let i = 0; i < toks.length; i++){
+    const t = toks[i];
+    if(t === "(") stack.push({});
+    else if(t === ")"){
+      if(stack.length < 2) return null;
+      const top = stack.pop();
+      let mult = 1;
+      if(/^\d+$/.test(toks[i + 1] || "")){ mult = parseInt(toks[++i], 10); }
+      Object.keys(top).forEach(el => { stack[stack.length - 1][el] = (stack[stack.length - 1][el] || 0) + top[el] * mult; });
+    } else if(/^[A-Z]/.test(t)){
+      if(ATOMIC[t] == null) return null;
+      let n = 1;
+      if(/^\d+$/.test(toks[i + 1] || "")){ n = parseInt(toks[++i], 10); }
+      stack[stack.length - 1][t] = (stack[stack.length - 1][t] || 0) + n;
+    } else return null;
+  }
+  if(stack.length !== 1) return null;
+  return stack[0];
+}
+function molarMass(f){
+  const c = parseFormula(f);
+  if(!c) return null;
+  let total = 0; const lines = [];
+  Object.keys(c).forEach(el => { const part = c[el] * ATOMIC[el]; total += part; lines.push(el + ": " + c[el] + " × " + ATOMIC[el] + " = " + fnum(part, 2)); });
+  return {mass: total, lines, counts: c};
+}
+const prettyF = f => f.replace(/(\d+)/g, d => String(d).split("").map(c => ({0:"₀",1:"₁",2:"₂",3:"₃",4:"₄",5:"₅",6:"₆",7:"₇",8:"₈",9:"₉"})[c]).join(""));
+function findSubstance(text){
+  const t = text.toLowerCase();
+  const names = Object.keys(SUBSTANCES).sort((a, b) => b.length - a.length);
+  for(const n of names) if(new RegExp("\\b" + n + "\\b").test(t)) return SUBSTANCES[n];
+  const m = text.match(/\b([A-Z][A-Za-z0-9()]*[0-9)]?|[a-z0-9()]+)\b/g) || [];
+  for(const tok of m){ const f = resolveFormula(tok); if(f && parseFormula(f)) return f; }
+  return null;
+}
+function balance(orig){
+  const am = /(.+?)\s*(?:->|→|=>|=)\s*(.+)/.exec(orig.replace(/^.*?(?:balance|balancing)\s*(?:the\s*)?(?:equation|chemical equation|reaction)?\s*[:\-]?\s*/i, ""));
+  if(!am) return null;
+  const side = s => s.split("+").map(x => x.trim().replace(/^\d+\s*/, "")).filter(Boolean);
+  const L = side(am[1]).map(resolveFormula), R = side(am[2]).map(resolveFormula);
+  if(!L.length || !R.length || L.concat(R).some(f => !f || !parseFormula(f))) return null;
+  const species = L.concat(R), counts = species.map(parseFormula);
+  const elements = Array.from(new Set(counts.flatMap(c => Object.keys(c))));
+  // matrix: rows = elements, columns = species (right side negative)
+  const M = elements.map(el => species.map((_, j) => F((counts[j][el] || 0) * (j < L.length ? 1 : -1))));
+  // gaussian elimination for the null space
+  const rows = M.length, cols = species.length;
+  let r = 0; const pivots = [];
+  for(let c = 0; c < cols && r < rows; c++){
+    let p = r; while(p < rows && fzero(M[p][c])) p++;
+    if(p === rows) continue;
+    [M[r], M[p]] = [M[p], M[r]];
+    const inv = fdiv(F(1), M[r][c]);
+    M[r] = M[r].map(v => fmul(v, inv));
+    for(let i = 0; i < rows; i++) if(i !== r && !fzero(M[i][c])){ const f = M[i][c]; M[i] = M[i].map((v, k) => fsub(v, fmul(f, M[r][k]))); }
+    pivots.push(c); r++;
+  }
+  const free = []; for(let c = 0; c < cols; c++) if(pivots.indexOf(c) < 0) free.push(c);
+  if(free.length !== 1) return null;
+  const sol = new Array(cols).fill(null).map(() => F(0));
+  sol[free[0]] = F(1);
+  pivots.forEach((pc, i) => { sol[pc] = fmul(M[i][free[0]], F(-1)); });
+  let den = 1; sol.forEach(v => { den = lcm(den, v.d); });
+  const ints = sol.map(v => v.n * (den / v.d));
+  if(ints.some(v => v <= 0)) return null;
+  const gg = ints.reduce((a, b) => gcd(a, b), 0); const co = ints.map(v => v / gg);
+  const fmt = (arr, off) => arr.map((f, i) => (co[off + i] === 1 ? "" : co[off + i]) + prettyF(f)).join(" + ");
+  const out = fmt(L, 0) + " → " + fmt(R, L.length);
+  const check = elements.map(el => el + ": " + species.slice(0, L.length).reduce((s, f, i) => s + co[i] * (counts[i][el] || 0), 0) + " on the left, " + species.slice(L.length).reduce((s, f, i) => s + co[L.length + i] * (counts[L.length + i][el] || 0), 0) + " on the right").join("\n");
+  return {text: steps("Let's balance the equation.", ["Write the formulas.\n" + L.map(prettyF).join(" + ") + " → " + R.map(prettyF).join(" + "), "Count the atoms of each element on both sides and choose whole-number coefficients so they match.", "Balanced equation.\n" + out, "Check the atoms.\n" + check + " ✓"], out), topic: "chemical_reactions", subject: "chemistry"};
+}
+function chemistryTasks(q, orig){
+  let m;
+  const bal = /balanc/.test(q) || (/(?:->|→|=>)/.test(orig) && /[A-Z]/.test(orig));
+  if(bal){ const r = balance(orig); if(r) return r; }
+  // molar mass
+  if((m = /(?:molar mass|molecular mass|formula mass|relative formula mass|relative molecular mass|\bmr\b|\brmm\b|\brfm\b)\s*(?:of|for)?\s*(.+)$/i.exec(orig))){
+    const f = findSubstance(m[1].replace(/[?.]+$/, ""));
+    const mm = f && molarMass(f);
+    if(mm) return {text: steps("Let's find the molar mass of " + prettyF(f) + ".", ["Use the atomic masses (whole numbers, with Cl = 35.5 and Cu = 63.5).", "Multiply the atoms of each element by its atomic mass.\n" + mm.lines.join("\n"), "Add them up.\n" + Object.keys(mm.counts).map(el => fnum(mm.counts[el] * ATOMIC[el], 2)).join(" + ") + " = " + fnum(mm.mass, 2)], "Molar mass of " + prettyF(f) + " = " + fnum(mm.mass, 2) + " g/mol"), topic: "moles", subject: "chemistry"};
+  }
+  // percentage composition
+  if((m = /percentage\s*(?:by mass\s*)?of\s*([A-Za-z]+)\s*in\s*(.+)$/i.exec(orig))){
+    const f = findSubstance(m[2].replace(/[?.]+$/, "")), el = ELEMENT_NAMES[m[1].toLowerCase()] || (ATOMIC[m[1]] != null ? m[1] : (ATOMIC[m[1][0].toUpperCase() + m[1].slice(1).toLowerCase()] != null ? m[1][0].toUpperCase() + m[1].slice(1).toLowerCase() : null));
+    const mm = f && molarMass(f);
+    if(mm && el && mm.counts[el]){
+      const part = mm.counts[el] * ATOMIC[el], pct = part / mm.mass * 100;
+      return {text: steps("Let's find the percentage of " + el + " in " + prettyF(f) + ".", ["Find the molar mass of " + prettyF(f) + ".\n" + fnum(mm.mass, 2) + " g/mol", "Find the mass of " + el + " in one mole.\n" + mm.counts[el] + " × " + ATOMIC[el] + " = " + fnum(part, 2), "Percentage = (part ÷ whole) × 100.\n(" + fnum(part, 2) + " ÷ " + fnum(mm.mass, 2) + ") × 100 = " + fnum(pct, 2) + "%"], fnum(pct, 2) + "% " + el), topic: "moles", subject: "chemistry"};
+    }
+  }
+  // moles from a mass
+  if(/mole|\bmol\b/.test(q) && (m = new RegExp(NUM + "\\s*g(?:rams?)?\\b\\s*(?:of)?\\s*(.+)$", "i").exec(orig)) && !/mass of/.test(q)){
+    const f = findSubstance(m[2].replace(/[?.]+$/, ""));
+    const mm = f && molarMass(f);
+    if(mm){
+      const mass = parseFloat(m[1]), n = mass / mm.mass;
+      return {text: steps("Let's find the number of moles.", ["Write the formula: moles = mass ÷ molar mass.", "Find the molar mass of " + prettyF(f) + ".\n" + Object.keys(mm.counts).map(el => mm.counts[el] + " × " + ATOMIC[el]).join(" + ") + " = " + fnum(mm.mass, 2) + " g/mol", "Substitute.\nn = " + mass + " g ÷ " + fnum(mm.mass, 2) + " g/mol = " + fnum(n, 4) + " mol"], "Moles = " + fnum(n, 4) + " mol"), topic: "moles", subject: "chemistry"};
+    }
+  }
+  // mass from moles
+  if(/mass/.test(q) && (m = new RegExp(NUM + "\\s*mol(?:es?)?\\b\\s*(?:of)?\\s*(.+)$", "i").exec(orig))){
+    const f = findSubstance(m[2].replace(/[?.]+$/, ""));
+    const mm = f && molarMass(f);
+    if(mm){
+      const n = parseFloat(m[1]);
+      return {text: steps("Let's find the mass.", ["Write the formula: mass = moles × molar mass.", "Find the molar mass of " + prettyF(f) + ".\n" + fnum(mm.mass, 2) + " g/mol", "Substitute.\nmass = " + n + " mol × " + fnum(mm.mass, 2) + " g/mol = " + fnum(n * mm.mass, 4) + " g"], "Mass = " + fnum(n * mm.mass, 4) + " g"), topic: "moles", subject: "chemistry"};
+    }
+  }
+  // pH
+  if(/\bph\b/.test(q)){
+    const ml = /\[\s*h\+?\s*\]\s*=?\s*([\d.]+(?:e-?\d+)?(?:\s*[x×*]\s*10\^?-?\d+)?)/i.exec(orig) || new RegExp("hydrogen ion concentration\\s*(?:of|is|=)?\\s*" + NUM + "(?:\\s*[x×*]\\s*10\\^?(-?\\d+))?", "i").exec(orig);
+    const sa = new RegExp("ph\\s*(?:of|for)?\\s*(?:a\\s*)?" + NUM + "\\s*(?:m|mol\\/l|mol\\/dm3|molar)?\\s*(?:solution of\\s*)?(hcl|hno3|hydrochloric acid|nitric acid|naoh|koh|sodium hydroxide|potassium hydroxide)", "i").exec(orig);
+    if(sa){
+      const c = parseFloat(sa[1]), sub = sa[2].toLowerCase(), isAcid = /hcl|hno3|hydrochloric|nitric/.test(sub);
+      if(c > 0){
+        if(isAcid){
+          const ph = -Math.log10(c);
+          return {text: steps("Let's find the pH.", ["The acid is strong, so it fully ionises: [H⁺] = " + c + " mol/L.", "Use pH = −log₁₀[H⁺].\npH = −log₁₀(" + c + ")", "Calculate.\npH = " + fnum(ph, 2)], "pH = " + fnum(ph, 2)), topic: "acids_bases", subject: "chemistry"};
+        }
+        const poh = -Math.log10(c), ph = 14 - poh;
+        return {text: steps("Let's find the pH.", ["The base is strong, so it fully ionises: [OH⁻] = " + c + " mol/L.", "Find pOH = −log₁₀[OH⁻].\npOH = −log₁₀(" + c + ") = " + fnum(poh, 2), "Use pH + pOH = 14 (at 25 °C).\npH = 14 − " + fnum(poh, 2) + " = " + fnum(ph, 2)], "pH = " + fnum(ph, 2)), topic: "acids_bases", subject: "chemistry"};
+      }
+    }
+    if(ml){
+      let c = parseFloat(ml[1]);
+      if(ml[2] != null && /^-?\d+$/.test(ml[2])) c = c * Math.pow(10, parseInt(ml[2], 10));
+      if(c > 0 && c < 100) { const ph = -Math.log10(c); return {text: steps("Let's find the pH.", ["Use pH = −log₁₀[H⁺].\npH = −log₁₀(" + c + ")", "Calculate.\npH = " + fnum(ph, 2)], "pH = " + fnum(ph, 2)), topic: "acids_bases", subject: "chemistry"}; }
+    }
+    const fromPh = /(?:concentration|\[h\+?\]).*?ph\s*(?:is|=|of)?\s*(\d+(?:\.\d+)?)|ph\s*(?:is|=|of)?\s*(\d+(?:\.\d+)?).*?(?:concentration|\[h\+?\])/.exec(q);
+    if(fromPh){
+      const ph = parseFloat(fromPh[1] || fromPh[2]);
+      if(ph >= 0 && ph <= 14){ const c = Math.pow(10, -ph); return {text: steps("Let's find the hydrogen ion concentration.", ["Use [H⁺] = 10^(−pH).\n[H⁺] = 10^(−" + ph + ")", "Calculate.\n[H⁺] = " + c.toExponential(2).replace("e", " × 10^").replace("+", "") + " mol/L"], "[H⁺] ≈ " + c.toExponential(2).replace("e", " × 10^").replace("+", "") + " mol/L"), topic: "acids_bases", subject: "chemistry"}; }
+    }
+  }
+  // dilution (C1V1 = C2V2)
+  if(/dilut/.test(q) && (m = new RegExp(NUM + "\\s*(ml|cm3|cm³|l|dm3|dm³)\\s*of\\s*" + NUM + "\\s*(?:m\\b|mol\\/l|mol\\/dm3|molar)[^\\d]*" + NUM + "\\s*(ml|cm3|cm³|l|dm3|dm³)", "i").exec(orig)) && /concentration|molarity|find|calculate/.test(q)){
+    const v1 = +m[1], c1 = +m[3], v2 = +m[4];
+    const toMl = u => /^(l|dm)/i.test(u) ? 1000 : 1;
+    const V1 = v1 * toMl(m[2]), V2 = v2 * toMl(m[5]);
+    if(V2 > 0 && V2 >= V1){
+      const c2 = c1 * V1 / V2;
+      return {text: steps("Let's find the new concentration after dilution.", ["Write the formula: C₁V₁ = C₂V₂, so C₂ = C₁V₁ ÷ V₂.", "Substitute.\nC₂ = (" + c1 + " × " + fnum(V1) + ") ÷ " + fnum(V2), "Calculate.\nC₂ = " + fnum(c2, 4) + " mol/L"], "New concentration = " + fnum(c2, 4) + " mol/L"), topic: "concentration", subject: "chemistry"};
+    }
+  }
+  // concentration = moles / volume
+  if(/concentration|molarity/.test(q) && (m = new RegExp(NUM + "\\s*mol(?:es?)?\\b[^\\d]*" + NUM + "\\s*(l|dm3|dm³|litres?|liters?|ml|cm3|cm³)", "i").exec(orig))){
+    const n = +m[1], v = +m[2], litres = /^(ml|cm)/i.test(m[3]) ? v / 1000 : v;
+    if(litres > 0) return {text: steps("Let's find the concentration.", ["Write the formula: concentration = moles ÷ volume (in litres).", "Convert the volume if needed.\n" + (litres !== v ? v + " " + m[3] + " = " + fnum(litres, 4) + " L" : v + " L"), "Substitute.\nc = " + n + " mol ÷ " + fnum(litres, 4) + " L = " + fnum(n / litres, 4) + " mol/L"], "Concentration = " + fnum(n / litres, 4) + " mol/L"), topic: "concentration", subject: "chemistry"};
+  }
+  return null;
+}
+function scienceTasks(q){
+  const r = physicsTasks(q);
+  if(r) return r;
+  return chemistryTasks(q, lastOriginal);
+}
+
+/* ══════════════ ALGEBRA FROM A WHOLE SENTENCE ══════════════ */
+const ALG_TOKEN = /^[0-9xy+\-*\/^().=²³]+$/;
+function mathRuns(q){
+  const t = q.replace(/\*\*/g, "^").replace(/[\u2212\u2013\u2014]/g, "-").replace(/×/g, "*").replace(/÷/g, "/");
+  const runs = [], other = [];
+  let cur = [], prevWord = "";
+  const flush = () => { if(cur.length){ runs.push(cur.join("")); cur = []; } };
+  const LEAD = /^(?:for|find|of|if|when|what|is|the|value|solve|then|that|so|giving|where)$/;
+  for(const w0 of t.split(/\s+/).filter(Boolean)){
+    const stop = /[,;]$/.test(w0);
+    const colon = /:$/.test(w0);
+    const w = w0.replace(/[,;?!:]+$/, "").replace(/^:+/, "");
+    const loneVar = /^[xy]$/.test(w);
+    const asWord = loneVar && (colon || LEAD.test(prevWord));   // "solve for x:" / "find x if"
+    if(w && ALG_TOKEN.test(w) && !asWord){
+      if(cur.length){
+        const joined = cur.join(""), prev = cur[cur.length - 1];
+        if(joined.indexOf("=") >= 0 && !/[+\-*\/^=(]$/.test(prev) && !/^[+\-*\/^=)]/.test(w)) flush();   // a second equation starts here
+      }
+      cur.push(w);
+      if(stop) flush();
+      prevWord = "";
+    } else {
+      flush();
+      if(w){ other.push(w.toLowerCase()); prevWord = w.toLowerCase(); }
+    }
+  }
+  flush();
+  return {runs, other};
+}
+function unsupportedAlgebra(shown, why){
+  return {
+    text: "I can see the equation " + shown + ", but " + why + " I solve linear and quadratic equations step by step, and I won't guess on one I can't verify.\\n\\nTry: break it into factors, or ask me to explain the method.",
+    topic: "algebra", chips: ["Explain quadratic equations", "Explain algebra"]
+  };
+}
+function algebraFromSentence(q){
+  const {runs, other} = mathRuns(q);
+  const withX = runs.filter(r => /x/.test(r) || /=/.test(r));
+  if(!withX.length) return null;
+  const words = other.join(" ");
+  const eqRuns = runs.filter(r => (r.match(/=/g) || []).length === 1 && /[xy]/.test(r));
+  // two equations in x and y
+  if(eqRuns.length === 2 && eqRuns.every(r => /x/.test(r) && /y/.test(r))){
+    const r = solveSimultaneous(eqRuns[0] + " and " + eqRuns[1]);
+    if(r) return r;
+  }
+  // one equation in x
+  if(eqRuns.length === 1 && /x/.test(eqRuns[0]) && !/y/.test(eqRuns[0].replace(/^y=|^f\(x\)=/, "x"))){
+    const eq = eqRuns[0];
+    if(/^(?:y|f\(x\))=/.test(eq)) return null;               // a function: other branches (differentiate, integrate)
+    if(/factori|expand|differentiat|derivativ|integrat|integral|simplif/.test(words)) return null;
+    const [L, R] = eq.split("=");
+    const pl = parsePoly(L), pr = parsePoly(R);
+    if(!pl || !pr) return null;
+    const diff = pAdd(pl, pScale(pr, F(-1)));
+    const deg = pDeg(diff);
+    const shown = pStr(pl) + " = " + pStr(pr);
+    if(deg === 2) return solveQuadratic(diff);
+    if(deg === 1 && (pDeg(pl) > 1 || pDeg(pr) > 1 || /\(|\//.test(eq))) return solveLinear(pl, pr, shown);
+    if(deg >= 3) return unsupportedAlgebra(shown, "it has x to a power higher than 2, which I can't solve with certainty yet.");
+    return null;
+  }
+  // an expression with no equals sign
+  const exprRuns = runs.filter(r => /x/.test(r) && !/=/.test(r) && !/y/.test(r));
+  if(exprRuns.length === 1 && !eqRuns.length){
+    const expr = exprRuns[0];
+    if(/^\d+x\d+$/.test(expr)) return null;                   // "12 x 4" is multiplication
+    const p = parsePoly(expr);
+    if(!p || pDeg(p) < 1 || pDeg(p) > 8) return null;
+    if(/factori|factor\b/.test(words)) return factorise(p);
+    if(/expand|multiply out/.test(words) && /\(/.test(expr)) return expandText(expr);
+    if(/differentiat|derivativ|\bdiff\b|gradient/.test(words)) return differentiate(p);
+    if(/integrat|integral|antiderivative/.test(words)) return integrate(p);
+    if(/\bsolve\b|\broots?\b|\bsolutions?\b|find x|value of x/.test(words)){
+      const d = pDeg(p);
+      if(d === 2) return solveQuadratic(p);
+      if(d >= 3) return unsupportedAlgebra(pStr(p) + " = 0", "it has x to a power higher than 2, which I can't solve with certainty yet.");
+      return null;
+    }
+    if(words === "" && (pDeg(p) === 2 || /\(/.test(expr))){
+      const shown = pStr(p);
+      return {text: "I can see the expression " + shown + ". What would you like me to do with it?", topic: "algebra",
+              chips: ["Factorise " + shown, "Solve " + shown + " = 0", "Differentiate " + shown]};
+    }
+  }
+  return null;
+}
+
 /* ══════════════ MAIN ENTRY ══════════════ */
 const POLITE = /^(?:please\s+|pls\s+|can you\s+|could you\s+|help me\s+|i want to\s+|i need to\s+|how do i\s+|how to\s+|show me how to\s+|teach me how to\s+)+/;
 function stripCommand(q, words){
@@ -1020,14 +1393,24 @@ function trimTail(s){
 }
 function pRight(s){ return s.replace(/^(?:y|f\(x\)|f\s*x|dy\/dx)\s*=\s*/i, ""); }
 
-function baintSolve(question){
+let lastNote = "";
+function baintSolveRaw(question){
   try{
     let q = String(question || "").toLowerCase().replace(/[\u2212\u2013\u2014]/g, "-").replace(/[“”"]/g, "").trim();
     if(!q || q.length > 220) return null;
     q = q.replace(POLITE, "").replace(/\s+/g, " ").trim();
+    let note = "";
+    const SHORT = /(^|[^a-z0-9.])(\d*)x(\d)(?![\d.a-z])/g;
+    if(!/[\^²³]|\*\*/.test(q) && SHORT.test(q)){
+      const first = /(^|[^a-z0-9.])(\d*x\d)(?![\d.a-z])/.exec(q);
+      q = q.replace(/(^|[^a-z0-9.])(\d*)x(\d)(?![\d.a-z])/g, "$1$2x^$3");
+      note = "Note: I read “" + (first ? first[2] : "x2") + "” as " + (first ? first[2].replace(/x(\d)/, "x") + sup(first[2].replace(/.*x/, "")) : "x²") + ". If you meant x times a number, write it like 2x.";
+    }
+    lastNote = note;
     let r;
 
     // word problems and special tasks first (they contain words, so they cannot be confused with algebra)
+    if((r = scienceTasks(q))) return r;
     if((r = interest(q))) return r;
     if((r = speedTasks(q))) return r;
     if((r = probabilityTasks(q))) return r;
@@ -1110,10 +1493,17 @@ function baintSolve(question){
         }
       }
     }
-    return null;
+    // last chance: pick the maths out of a whole sentence ("please solve x^2-5x+6=0 for me")
+    return algebraFromSentence(q);
   }catch(e){
     return null;
   }
+}
+function baintSolve(question){
+  lastNote = "";
+  lastOriginal = String(question || "");
+  const r = baintSolveRaw(question);
+  return (r && lastNote) ? {text: lastNote + "\n\n" + r.text, topic: r.topic, chips: r.chips, subject: r.subject} : r;
 }
 
 window.baintSolve = baintSolve;
