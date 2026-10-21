@@ -166,7 +166,7 @@ eduAdd("functions","math",[],"Functions",
  "Function = a rule: each input gives exactly one output.");
 
 eduAdd("quadratic","math",[],"Quadratic equations",
- ["quadratic","quadratics","quadratic equation","quadratic equations","quadratic formula"],
+ ["quadratic","quadratics","quadratic equation","quadratic equations"],
  "A quadratic equation has the form ax² + bx + c = 0 (with a not zero). The highest power of x is 2, and it can have two, one or no real solutions.",
  "Throw a ball upward: its height over time follows a quadratic curve that rises and falls.",
  ["Write the equation as ax² + bx + c = 0.","Try factorising, or use the formula x = (−b ± √(b² − 4ac)) ÷ 2a.","Check the discriminant b² − 4ac: positive gives two real roots, zero gives one, negative gives none.","Substitute your answers back to check them."],
@@ -2111,3 +2111,59 @@ eduAdd("concentration","chemistry",["biochemistry"],"Concentration and dilution"
  ["Gives exact control of solution strength","Needed for titrations and reactions","Easy formulas"],
  ["Forgetting to convert mL to L","Using the wrong volume in dilution","Mixing up concentration and amount"],
  "c = n ÷ V; C₁V₁ = C₂V₂.");
+
+/* ══ SECONDARY MATHS: quadratics in depth and related algebra ══ */
+eduAdd("completing_square","math",[],"Completing the square",
+ ["completing the square","complete the square","completing square","completed square form","vertex form","completing the square method"],
+ "Completing the square rewrites a quadratic so that part of it is a perfect square, such as (x + 3)². It is used to solve quadratic equations, to find the turning point of a parabola, and to prove the quadratic formula.",
+ "You are adding exactly the missing piece that turns x² + 6x into a square: x² + 6x + 9 = (x + 3)².",
+ ["Make the x² coefficient 1 (divide through by a if needed).","Move the constant to the right-hand side.","Add (half the x coefficient)² to both sides.","Factorise the left side as a square, take the square root of both sides (±), then solve for x."],
+ "Solve x² + 6x + 5 = 0. Move 5: x² + 6x = -5. Half of 6 is 3, and 3² = 9, so x² + 6x + 9 = 4. Then (x + 3)² = 4, so x + 3 = ±2 and x = -1 or x = -5.",
+ "Solving quadratics that do not factorise, finding the maximum or minimum of a quadratic, graphs and physics.",
+ ["Works for every quadratic, even when factorising fails","Shows the turning point directly: a(x + h)² + k has its turning point at (-h, k)","Is the method behind the quadratic formula"],
+ ["Forgetting to add the same number to BOTH sides","Dividing only some terms by a","Forgetting the ± when taking the square root"],
+ "Completing the square: add (b/2)² to both sides to make a perfect square.");
+
+eduAdd("quadratic_formula","math",[],"Quadratic formula and discriminant",
+ ["quadratic formula","discriminant","nature of roots","nature of the roots","derive the quadratic formula","derivation of the quadratic formula","b squared minus 4ac"],
+ "The quadratic formula x = (−b ± √(b² − 4ac)) ÷ 2a solves any equation ax² + bx + c = 0. The expression b² − 4ac is the discriminant, and it tells you the nature of the roots.",
+ "The formula is a ready-made recipe: put in a, b and c and it hands you the answers.",
+ ["Write the equation as ax² + bx + c = 0 and identify a, b and c.","Work out the discriminant D = b² − 4ac.","If D > 0 there are two different real roots, if D = 0 two equal roots, and if D < 0 no real roots.","Substitute into x = (−b ± √D) ÷ 2a and simplify."],
+ "2x² + 3x − 5 = 0: a = 2, b = 3, c = −5. D = 9 + 40 = 49, so x = (−3 ± 7) ÷ 4, which gives x = 1 or x = −5/2.",
+ "Solving any quadratic, projectile problems, area and design problems.",
+ ["Always works, whatever the numbers","The discriminant shows how many real roots there are before solving","Proved from completing the square"],
+ ["Sign errors with −b and with negative c","Forgetting that the whole of 2a is the denominator","Mixing up b² − 4ac with (b − 4ac)²"],
+ "x = (−b ± √(b² − 4ac)) ÷ 2a; D = b² − 4ac.");
+
+eduAdd("roots_sum_product","math",[],"Sum and product of roots",
+ ["sum and product of roots","sum of roots","product of roots","roots of a quadratic","forming a quadratic equation","form a quadratic equation","formation of quadratic equations"],
+ "For a quadratic ax² + bx + c = 0 with roots α and β, the sum of the roots is −b/a and the product is c/a. Reversing this lets you build a quadratic from its roots.",
+ "The roots and the coefficients are linked, so you can find one from the other without solving.",
+ ["For ax² + bx + c = 0: α + β = −b/a and αβ = c/a.","To form an equation from the roots, find their sum and product.","Write x² − (sum)x + (product) = 0.","Multiply through to clear any fractions."],
+ "Roots 2 and 3: sum = 5, product = 6, so the equation is x² − 5x + 6 = 0.",
+ "Checking answers, forming equations, and problems about unknown numbers.",
+ ["Gives quick checks of solutions","Lets you form equations without expanding","Used in many exam questions"],
+ ["Forgetting the minus sign in −b/a","Writing x² + (sum)x instead of x² − (sum)x","Not clearing fractions when asked for integer coefficients"],
+ "Sum = −b/a, product = c/a; equation: x² − (sum)x + (product) = 0.");
+
+eduAdd("algebraic_fractions","math",[],"Algebraic fractions",
+ ["algebraic fraction","algebraic fractions","simplifying algebraic fractions","rational expressions","cancelling in algebra"],
+ "An algebraic fraction has algebra on the top, the bottom, or both. You simplify it by factorising and cancelling common factors.",
+ "It works like simplifying 6/9 to 2/3 by cancelling the common factor, but the factors are brackets.",
+ ["Factorise the top and the bottom fully.","Cancel any common bracket (never cancel single terms).","To add or subtract, first write over a common denominator.","State any value of x that makes the bottom zero."],
+ "(x² − 9) ÷ (x − 3) = (x − 3)(x + 3) ÷ (x − 3) = x + 3, for x ≠ 3.",
+ "Simplifying formulas, solving equations and calculus.",
+ ["Makes long expressions short","Needed for solving equations with fractions","Builds factorising skill"],
+ ["Cancelling terms instead of factors","Forgetting that the bottom cannot be zero","Not factorising fully"],
+ "Algebraic fractions: factorise, then cancel common factors.");
+
+eduAdd("change_subject","math",["physics"],"Changing the subject of a formula",
+ ["change the subject","changing the subject","make the subject","subject of a formula","rearranging formulae","rearranging formulas","transposition of formulae","transposing formulas"],
+ "Changing the subject means rearranging a formula so that a different letter is on its own on one side.",
+ "Think of undoing the steps in reverse order, like unwrapping a gift.",
+ ["Identify the letter you want as the subject.","Undo additions and subtractions by doing the opposite to both sides.","Undo multiplication and division in the same way.","Undo powers by taking roots; keep the whole expression balanced."],
+ "y = 3x + 2. Subtract 2: y − 2 = 3x. Divide by 3: x = (y − 2) ÷ 3. For v = u + at, subtract u and divide by t to get a = (v − u) ÷ t.",
+ "Physics and chemistry formulas, geometry and finance.",
+ ["Lets you use one formula for many questions","Needed in science","Builds equation-solving skill"],
+ ["Not doing the same thing to both sides","Undoing steps in the wrong order","Forgetting brackets when dividing a whole side"],
+ "Change the subject: undo the operations in reverse order, keeping both sides equal.");
