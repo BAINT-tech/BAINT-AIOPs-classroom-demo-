@@ -209,6 +209,8 @@ function quadraticRoots(A, B, C){
   return D;
 }
 function solveQuadratic(p){
+  if(lastMethod === "square") return completeSquareSolve(p);
+  const forceFormula = lastMethod === "formula";
   let [C, B, A] = intCoeffs(p);
   let note = "";
   if(A < 0){ A = -A; B = -B; C = -C; note = " (multiplied by -1 so a is positive)"; }
@@ -221,13 +223,13 @@ function solveQuadratic(p){
     const v = pEval([F(C), F(B), F(A)], r);
     return v.n === 0;
   };
-  if(C === 0){
+  if(C === 0 && !forceFormula){
     const r2 = F(-B, A);
     st.push("There is no constant term, so take out x as a common factor.\nx(" + pStr([F(B), F(A)]) + ") = 0");
     st.push("Set each part to zero.\nx = 0   or   " + pStr([F(B), F(A)]) + " = 0");
     st.push("Solve the second part: x = " + fstr(r2));
     roots = fzero(r2) ? [F(0)] : [r2.n < 0 ? r2 : F(0), r2.n < 0 ? F(0) : r2];
-  } else if(B === 0){
+  } else if(B === 0 && !forceFormula){
     const rhs = F(-C, A);
     st.push("There is no x term, so isolate x².\nx² = " + fstr(rhs));
     if(rhs.n < 0){
@@ -247,7 +249,7 @@ function solveQuadratic(p){
   } else {
     const sq = perfectSquare(D);
     st.push("Work out the discriminant D = b² − 4ac.\nD = (" + B + ")² − 4(" + A + ")(" + C + ") = " + D);
-    if(D >= 0 && sq >= 0){
+    if(D >= 0 && sq >= 0 && !forceFormula){
       const r1 = F(-B + sq, 2 * A), r2 = F(-B - sq, 2 * A);
       if(A === 1){
         st.push("D is a perfect square, so it factorises. Find two numbers that multiply to " + C + " and add to " + B + ": " + (-r1.n) + " and " + (-r2.n) + ".\n" + factorStr(r1.n, r1.d) + factorStr(r2.n, r2.d) + " = 0");
@@ -256,6 +258,11 @@ function solveQuadratic(p){
         st.push("D is a perfect square, so it factorises.\n" + (k.n === 1 && k.d === 1 ? "" : fstr(k) + " ") + factorStr(r1.n, r1.d) + factorStr(r2.n, r2.d) + " = 0");
       }
       st.push("Set each bracket to zero.\nx = " + fstr(r2) + "   or   x = " + fstr(r1) + (sq === 0 ? "   (the same root twice)" : ""));
+      roots = sq === 0 ? [r1] : [r2, r1];
+    } else if(D >= 0 && sq >= 0){
+      const r1 = F(-B + sq, 2 * A), r2 = F(-B - sq, 2 * A);
+      st.push("Use the quadratic formula x = (-b ± √D) ÷ 2a.\nx = (" + (-B) + " ± √" + D + ") ÷ " + (2 * A));
+      st.push("√" + D + " = " + sq + ", so\nx = (" + (-B) + " + " + sq + ") ÷ " + (2 * A) + " = " + fstr(r1) + (sq === 0 ? "" : "\nx = (" + (-B) + " − " + sq + ") ÷ " + (2 * A) + " = " + fstr(r2)));
       roots = sq === 0 ? [r1] : [r2, r1];
     } else if(D >= 0){
       const s = simplifySqrt(D);
@@ -554,11 +561,12 @@ function factorial(q){
   return {text: steps("Let's work out " + n + "!", st, n + "! = " + r), topic: "permutations_combinations"};
 }
 function logarithm(q){
-  let m = /\blog\s*(?:base\s*)?(\d+(?:\.\d+)?)\s+(?:of\s+)?(\d+(?:\.\d+)?)\b/.exec(q);
+  const body = q.replace(/^(?:what is|what's|find|evaluate|calculate|work out|determine|compute)\s+/, "").replace(/^(?:the\s+)?(?:value\s+of\s+)?/, "").replace(/[?.!]+$/, "").trim();
+  let m = /^log\s*(?:base\s*)?(\d+(?:\.\d+)?)\s+(?:of\s+)?(\d+(?:\.\d+)?)$/.exec(body);
   let base, val;
   if(m){ base = parseFloat(m[1]); val = parseFloat(m[2]); }
   else {
-    m = /\blog\s*(?:of\s*)?(\d+(?:\.\d+)?)\b/.exec(q);
+    m = /^log\s*(?:of\s*)?(\d+(?:\.\d+)?)$/.exec(body);
     if(!m) return null;
     base = 10; val = parseFloat(m[1]);
   }
@@ -1294,6 +1302,275 @@ function scienceTasks(q){
   return chemistryTasks(q, lastOriginal);
 }
 
+
+/* ══════════════ QUADRATIC METHODS AND SECONDARY ALGEBRA ══════════════ */
+let lastMethod = "";
+function detectMethod(q){
+  if(/complet\w*\s+(?:the\s+)?square/.test(q)) return "square";
+  if(/(?:using|use|by|with|apply|applying)\s+(?:the\s+)?(?:quadratic\s+)?formula|quadratic formula/.test(q)) return "formula";
+  return "";
+}
+const binomialStr = h => fzero(h) ? "x" : "(x " + (h.n < 0 ? "- " + fstr(F(-h.n, h.d)) : "+ " + fstr(h)) + ")";
+const toF = t => String(t).indexOf("/") >= 0 ? fdiv(fromDecimalString(t.split("/")[0]), fromDecimalString(t.split("/")[1])) : fromDecimalString(String(t));
+
+function completeSquareSolve(p){
+  p = pTrim(p);
+  const a = p[2], b = p[1] || F(0), c = p[0] || F(0);
+  const title = "Let's solve " + pStr(p) + " = 0 by completing the square.";
+  const st = ["Write the equation in the form ax² + bx + c = 0.\n" + pStr(p) + " = 0"];
+  const b1 = fdiv(b, a), c1 = fdiv(c, a);
+  if(!(a.n === 1 && a.d === 1)) st.push("Divide every term by " + fstr(a) + " so that the x² term has coefficient 1.\n" + pStr([c1, b1, F(1)]) + " = 0");
+  const rhs0 = fmul(c1, F(-1));
+  st.push("Move the constant term to the right-hand side.\n" + pStr([F(0), b1, F(1)]) + " = " + fstr(rhs0));
+  const half = fdiv(b1, F(2)), sq = fmul(half, half), rhs = fadd(rhs0, sq);
+  if(fzero(half)){
+    st.push("There is no x term, so the left side is already a perfect square.\nx² = " + fstr(rhs));
+  } else {
+    st.push("Complete the square: add (half of the x coefficient)² to both sides.\n(" + fstr(b1) + " ÷ 2)² = (" + fstr(half) + ")² = " + fstr(sq) + "\n" + pStr([sq, b1, F(1)]) + " = " + fstr(rhs0) + " + " + fstr(sq) + " = " + fstr(rhs));
+    st.push("The left side is a perfect square. Factorise it.\n" + binomialStr(half) + "² = " + fstr(rhs));
+  }
+  if(rhs.n < 0){
+    st.push("The right-hand side is negative, and a real number squared is never negative. So there are no real solutions.");
+    return {text: steps(title, st, "No real solutions."), topic: "completing_square"};
+  }
+  const lhs = fzero(half) ? "x" : "x " + (half.n < 0 ? "- " + fstr(F(-half.n, half.d)) : "+ " + fstr(half));
+  const num = perfectSquare(rhs.n), den = perfectSquare(rhs.d);
+  const nh = fmul(half, F(-1));
+  if(num >= 0 && den >= 0){
+    const r = F(num, den);
+    st.push("Take the square root of both sides (remember ±).\n" + lhs + " = " + (fzero(r) ? "0" : "±" + fstr(r)));
+    let roots = [fadd(nh, r), fsub(nh, r)];
+    if(fzero(r)) roots = [roots[0]]; else roots.sort((u, v) => fval(u) - fval(v));
+    st.push("Solve for x.\n" + (fzero(r) ? "x = " + fstr(roots[0]) : "x = " + fstr(nh) + " ± " + fstr(r) + "\nx = " + roots.map(fstr).join("   or   x = ")));
+    const lines = roots.map(x => "x = " + fstr(x) + (fzero(pEval(p, x)) ? " ✓" : ""));
+    st.push("Check by substituting back into the equation.\n" + lines.join("\n"));
+    return {text: steps(title, st, roots.length === 1 ? "x = " + fstr(roots[0]) : "x = " + roots.map(fstr).join(" or x = ")), topic: "completing_square"};
+  }
+  const surd = sqrtStr(rhs.n * rhs.d) + (rhs.d === 1 ? "" : "/" + rhs.d);
+  const dv = Math.sqrt(fval(rhs)), v1 = fval(nh) - dv, v2 = fval(nh) + dv;
+  st.push("Take the square root of both sides (remember ±).\n" + lhs + " = ±√" + fstr(rhs) + " = ±" + surd);
+  const exact = "x = " + (fzero(nh) ? "" : fstr(nh) + " ") + "± " + surd;
+  st.push("Solve for x.\n" + exact + "\nx ≈ " + fnum(v1) + "   or   x ≈ " + fnum(v2));
+  return {text: steps(title, st, "x ≈ " + fnum(v1) + " or x ≈ " + fnum(v2) + "  (exact: " + exact.replace("x = ", "") + ")"), topic: "completing_square"};
+}
+
+function completedForm(p, words){
+  p = pTrim(p);
+  if(p.length !== 3) return null;
+  const a = p[2], b = p[1] || F(0), c = p[0] || F(0);
+  const h = fdiv(b, fmul(a, F(2))), k = fsub(c, fmul(a, fmul(h, h)));
+  const aStr = (a.n === 1 && a.d === 1) ? "" : (a.n === -1 && a.d === 1) ? "-" : fstr(a);
+  const form = aStr + binomialStr(h) + "²" + (fzero(k) ? "" : " " + (k.n < 0 ? "- " : "+ ") + fstr(F(Math.abs(k.n), k.d)));
+  const st = [];
+  const inner = fdiv(b, a);
+  st.push("Take out the coefficient of x² from the x² and x terms.\n" + pStr(p) + " = " + ((a.n === 1 && a.d === 1) ? "" : aStr) + "(" + pStr([F(0), inner, F(1)]) + ")" + (fzero(c) ? "" : " " + (c.n < 0 ? "- " : "+ ") + fstr(F(Math.abs(c.n), c.d))));
+  if(!fzero(h)) st.push("Complete the square inside the bracket: half of " + fstr(inner) + " is " + fstr(h) + ".\n" + pStr([F(0), inner, F(1)]) + " = " + binomialStr(h) + "² - " + fstr(fmul(h, h)));
+  st.push("Multiply out and collect the numbers.\n" + form);
+  const minmax = a.n > 0 ? "minimum" : "maximum";
+  st.push("The turning point is at x = " + fstr(fmul(h, F(-1))) + ". The " + minmax + " value is " + fstr(k) + ", reached when x = " + fstr(fmul(h, F(-1))) + ".");
+  const wantsValue = /minimum|maximum|least|greatest|lowest|highest|turning|vertex/.test(words || "");
+  return {text: steps("Let's write " + pStr(p) + " in completed-square form.", st, wantsValue ? "The " + minmax + " value is " + fstr(k) + " (at x = " + fstr(fmul(h, F(-1))) + ").  Completed-square form: " + form : form), topic: "completing_square"};
+}
+
+function derivation(q){
+  if(/=|\d/.test(q.replace(/\b2a\b|\bsquare\b/g, ""))) return null;
+  const asks = /\b(derive|derivation|derived|proof|prove|obtain|origin|come from|comes from|get the formula)\b|formula for (?:the )?complet\w*\s*(?:the\s+)?square/.test(q);
+  if(!asks) return null;
+  if(!(/quadratic/.test(q) || /complet\w*\s+(?:the\s+)?square/.test(q)) || !(/formula/.test(q) || /complet/.test(q))) return null;
+  const st = [
+    "Start with the general quadratic equation (a is not zero).\nax² + bx + c = 0",
+    "Divide every term by a so the x² term has coefficient 1.\nx² + (b/a)x + c/a = 0",
+    "Move the constant term to the right-hand side.\nx² + (b/a)x = -c/a",
+    "Complete the square: add (half of b/a)² = (b/2a)² to both sides.\nx² + (b/a)x + (b/2a)² = -c/a + (b/2a)²",
+    "Factorise the left side. It is a perfect square trinomial, so it factorises as a square.\n(x + b/2a)² = -c/a + b²/4a²",
+    "Combine the right side over the common denominator 4a².\n-c/a + b²/4a² = (b² - 4ac) / 4a²\nSo (x + b/2a)² = (b² - 4ac) / 4a²",
+    "Take the square root of both sides (remember ±).\nx + b/2a = ± √(b² - 4ac) / 2a",
+    "Subtract b/2a from both sides.\nx = -b/2a ± √(b² - 4ac) / 2a"
+  ];
+  return {text: steps("Let's derive the quadratic formula by completing the square.", st, "x = (−b ± √(b² − 4ac)) ÷ 2a"), topic: "quadratic_formula"};
+}
+
+function sumProductRoots(p){
+  p = pTrim(p);
+  const a = p[2], b = p[1] || F(0), c = p[0] || F(0);
+  const S = fmul(fdiv(b, a), F(-1)), P = fdiv(c, a);
+  const st = ["Write the equation in the form ax² + bx + c = 0.\n" + pStr(p) + " = 0\na = " + fstr(a) + ", b = " + fstr(b) + ", c = " + fstr(c),
+    "For a quadratic with roots α and β: the sum α + β = -b/a and the product αβ = c/a.",
+    "Sum of the roots = -(" + fstr(b) + ") ÷ " + fstr(a) + " = " + fstr(S) + "\nProduct of the roots = " + fstr(c) + " ÷ " + fstr(a) + " = " + fstr(P)];
+  const ints = intCoeffs(p), D = ints[1] * ints[1] - 4 * ints[2] * ints[0], sq = perfectSquare(D);
+  if(D >= 0 && sq >= 0){
+    const r1 = F(-ints[1] + sq, 2 * ints[2]), r2 = F(-ints[1] - sq, 2 * ints[2]);
+    st.push("Check with the actual roots: x = " + fstr(r2) + " and x = " + fstr(r1) + ".\nSum = " + fstr(fadd(r1, r2)) + ", product = " + fstr(fmul(r1, r2)) + " ✓");
+  }
+  return {text: steps("Let's find the sum and product of the roots.", st, "sum = " + fstr(S) + ", product = " + fstr(P)), topic: "roots_sum_product"};
+}
+function natureOfRoots(p){
+  const [C, B, A] = intCoeffs(p);
+  const D = B * B - 4 * A * C, sq = perfectSquare(D);
+  const st = ["Write a, b and c.\n" + pStr([F(C), F(B), F(A)]) + " = 0\na = " + A + ", b = " + B + ", c = " + C,
+    "Work out the discriminant D = b² − 4ac.\nD = (" + B + ")² − 4(" + A + ")(" + C + ") = " + D,
+    "Use the rule: D > 0 two different real roots; D = 0 two equal real roots; D < 0 no real roots."];
+  let ans;
+  if(D > 0) ans = "D = " + D + " > 0, so there are two different real roots" + (sq >= 0 ? " (rational, because D is a perfect square)." : " (irrational, because D is not a perfect square).");
+  else if(D === 0) ans = "D = 0, so there are two equal real roots (a repeated root).";
+  else ans = "D = " + D + " < 0, so there are no real roots.";
+  return {text: steps("Let's find the nature of the roots.", st, ans), topic: "quadratic_formula"};
+}
+function formFromRoots(q){
+  if(!/roots?/.test(q) || !/form|find|write|construct|obtain|equation/.test(q) || !/quadratic|equation/.test(q)) return null;
+  const m = /roots?\s*(?:are|is|of|:|=)?\s*(-?\d+(?:\.\d+)?(?:\/\d+)?)\s*(?:and|,|&)\s*(-?\d+(?:\.\d+)?(?:\/\d+)?)/.exec(q);
+  if(!m || /x/.test(q.replace(/\bequation\b|\bexpress/g, ""))) return null;
+  const r1 = toF(m[1]), r2 = toF(m[2]);
+  const S = fadd(r1, r2), P = fmul(r1, r2);
+  const poly = [P, fmul(S, F(-1)), F(1)];
+  const L = lcm(S.d, P.d);
+  const intPoly = poly.map(c => fmul(c, F(L)));
+  const st = ["Find the sum and the product of the roots.\nsum = " + fstr(r1) + " + " + (r2.n < 0 ? "(" + fstr(r2) + ")" : fstr(r2)) + " = " + fstr(S) + "\nproduct = " + fstr(r1) + " × " + (r2.n < 0 ? "(" + fstr(r2) + ")" : fstr(r2)) + " = " + fstr(P),
+    "Use the pattern x² − (sum)x + (product) = 0.\nx² − (" + fstr(S) + ")x + (" + fstr(P) + ") = 0",
+    "Simplify.\n" + pStr(poly) + " = 0"];
+  if(L > 1) st.push("Multiply every term by " + L + " to remove the fractions.\n" + pStr(intPoly) + " = 0");
+  st.push("Check: put x = " + fstr(r1) + " and x = " + fstr(r2) + " into the equation. Both give 0 ✓");
+  return {text: steps("Let's form the quadratic equation with roots " + fstr(r1) + " and " + fstr(r2) + ".", st, pStr(intPoly) + " = 0"), topic: "roots_sum_product"};
+}
+function expEquation(eq){
+  // a^(x+k) = b  (brackets required when there is an offset in the power)   or   a^x + c = b
+  let m = /^(\d+(?:\.\d+)?)\^\(x(?:([+-])(\d+))?\)=(-?\d+(?:\.\d+)?)$/.exec(eq);
+  let a, b, k = 0, c = 0, shifted = false;
+  if(m){ a = parseFloat(m[1]); b = parseFloat(m[4]); k = m[2] ? (m[2] === "-" ? -1 : 1) * parseInt(m[3], 10) : 0; }
+  else if((m = /^(\d+(?:\.\d+)?)\^x(?:([+-])(\d+(?:\.\d+)?))?=(-?\d+(?:\.\d+)?)$/.exec(eq))){
+    a = parseFloat(m[1]); b = parseFloat(m[4]);
+    if(m[2]){ c = (m[2] === "-" ? -1 : 1) * parseFloat(m[3]); shifted = true; }
+  } else return null;
+  if(!(a > 0) || a === 1) return null;
+  const A = fnum(a), expo = "x" + (k === 0 ? "" : (k < 0 ? " - " + (-k) : " + " + k));
+  const shown = shifted ? A + "^x " + (c < 0 ? "- " + fnum(-c) : "+ " + fnum(c)) + " = " + fnum(b) : A + (k === 0 ? "^x" : "^(" + expo + ")") + " = " + fnum(b);
+  const st = ["Write the equation.\n" + shown];
+  if(shifted){
+    const nb = b - c;
+    st.push("Get the power on its own.\n" + A + "^x = " + fnum(b) + (c < 0 ? " + " + fnum(-c) : " - " + fnum(c)) + " = " + fnum(nb));
+    b = nb;
+  }
+  if(!(b > 0)){
+    st.push("A positive number raised to any power is always positive, so it can never equal " + fnum(b) + ". There is no real solution.");
+    return {text: steps("Let's solve the exponential equation.", st, "No real solution."), topic: "exponents"};
+  }
+  const y = Math.log(b) / Math.log(a), n = Math.round(y);
+  const left = A + (k === 0 ? "^x" : "^(" + expo + ")");
+  let xv, ans;
+  if(Math.abs(Math.pow(a, n) - b) < 1e-9){
+    st.push("Write " + fnum(b) + " as a power of " + A + ".\n" + fnum(b) + " = " + A + sup(n));
+    st.push("The bases are the same, so the powers must be equal.\n" + expo + " = " + n);
+    xv = n - k;
+    st.push("Solve for x.\nx = " + n + (k === 0 ? "" : (k < 0 ? " + " + (-k) : " − " + k)) + " = " + xv);
+    st.push("Check: " + A + "^(" + xv + (k === 0 ? "" : (k < 0 ? " − " + (-k) : " + " + k)) + ") = " + A + "^" + n + " = " + fnum(b) + (shifted ? ", and " + fnum(b) + (c < 0 ? " − " + fnum(-c) : " + " + fnum(c)) + " = " + fnum(b + c) + " ✓" : " ✓"));
+    ans = "x = " + xv;
+  } else {
+    st.push(fnum(b) + " is not an exact power of " + A + ", so take logarithms of both sides.\n(" + expo + ") × log " + A + " = log " + fnum(b));
+    st.push("Divide by log " + A + ".\n" + expo + " = log " + fnum(b) + " ÷ log " + A + " = " + fnum(y, 4));
+    xv = y - k;
+    ans = "x ≈ " + fnum(xv, 4);
+    st.push("Solve for x.\n" + ans);
+  }
+  return {text: steps("Let's solve the exponential equation.", st, ans), topic: "exponents"};
+}
+function numberPair(q){
+  let m = /sum of (?:the |these |two |2 )*(?:two |2 )?(?:positive |whole |natural )?(?:numbers|integers)\s*(?:is|=|equals)\s*(\d+)[^\d]*product\s*(?:is|=|equals)?\s*(\d+)/.exec(q);
+  let S, P;
+  if(m){ S = +m[1]; P = +m[2]; }
+  else if((m = /product of (?:the |these |two |2 )*(?:two |2 )?(?:positive |whole |natural )?(?:numbers|integers)\s*(?:is|=|equals)\s*(\d+)[^\d]*sum\s*(?:is|=|equals)?\s*(\d+)/.exec(q))){ P = +m[1]; S = +m[2]; }
+  else return null;
+  const D = S * S - 4 * P, sq = perfectSquare(D);
+  const st = ["Let the numbers be x and (" + S + " − x), so that their sum is " + S + ".",
+    "Their product is " + P + ".\nx(" + S + " − x) = " + P + "\n" + S + "x − x² = " + P,
+    "Rearrange into standard form.\nx² − " + S + "x + " + P + " = 0"];
+  if(D < 0) { st.push("Discriminant D = " + S + "² − 4(" + P + ") = " + D + ", which is negative, so there are no real numbers that fit."); return {text: steps("Let's find the two numbers.", st, "No two real numbers have that sum and product."), topic: "quadratic"}; }
+  if(sq >= 0){
+    const a1 = (S + sq) / 2, a2 = (S - sq) / 2;
+    st.push("Solve the quadratic.\nD = " + D + ", √D = " + sq + "\nx = (" + S + " ± " + sq + ") ÷ 2 = " + fnum(a1) + " or " + fnum(a2));
+    st.push("The two numbers are " + fnum(a2) + " and " + fnum(a1) + ".\nCheck: sum = " + fnum(a1 + a2) + ", product = " + fnum(a1 * a2) + " ✓");
+    return {text: steps("Let's find the two numbers.", st, fnum(a2) + " and " + fnum(a1)), topic: "quadratic"};
+  }
+  const v1 = (S - Math.sqrt(D)) / 2, v2 = (S + Math.sqrt(D)) / 2;
+  st.push("Solve with the quadratic formula.\nD = " + D + "\nx = (" + S + " ± √" + D + ") ÷ 2 ≈ " + fnum(v1) + " or " + fnum(v2));
+  return {text: steps("Let's find the two numbers.", st, "≈ " + fnum(v1) + " and " + fnum(v2)), topic: "quadratic"};
+}
+function rectangleProblem(q){
+  const U = "(?:\\s*(?:cm|m|metres?|meters?|units?|mm|km))?";
+  let m = new RegExp("(?:length|longer side)[^.]*?(\\d+(?:\\.\\d+)?)" + U + "\\s*(?:more|greater|longer|bigger|larger)\\s*than\\s*(?:the\\s*|its\\s*|their\\s*)?(?:width|breadth)[^.]*?area[^\\d]*(\\d+(?:\\.\\d+)?)").exec(q)
+        || new RegExp("(?:width|breadth)[^.]*?(\\d+(?:\\.\\d+)?)" + U + "\\s*(?:less|shorter|smaller)\\s*than\\s*(?:the\\s*|its\\s*|their\\s*)?length[^.]*?area[^\\d]*(\\d+(?:\\.\\d+)?)").exec(q);
+  if(!m || !/rectang/.test(q)) return null;
+  const k = parseFloat(m[1]), A = parseFloat(m[2]);
+  const D = k * k + 4 * A, sq = Math.sqrt(D), w = (-k + sq) / 2, l = w + k;
+  const exact = Number.isInteger(w);
+  const st = ["Let the width be w. Then the length is w + " + fnum(k) + ".",
+    "Area = length × width.\nw(w + " + fnum(k) + ") = " + fnum(A) + "\nw² + " + fnum(k) + "w − " + fnum(A) + " = 0",
+    "Solve the quadratic.\nD = " + fnum(k) + "² + 4(" + fnum(A) + ") = " + fnum(D) + "\nw = (−" + fnum(k) + " ± √" + fnum(D) + ") ÷ 2" + (exact ? " = " + fnum(w) + " or " + fnum((-k - sq) / 2) : " ≈ " + fnum(w) + " or " + fnum((-k - sq) / 2)),
+    "A length cannot be negative, so take the positive value.\nwidth = " + fnum(w, 4),
+    "Length = width + " + fnum(k) + " = " + fnum(l, 4) + ".\nCheck: " + fnum(w, 4) + " × " + fnum(l, 4) + " = " + fnum(w * l, 4) + " ✓"];
+  return {text: steps("Let's solve the rectangle problem.", st, "width = " + fnum(w, 4) + ", length = " + fnum(l, 4)), topic: "quadratic"};
+}
+
+/* ----- algebraic fractions ----- */
+function pDivMod(n, d){
+  n = pTrim(n); d = pTrim(d);
+  if(d.length === 1 && fzero(d[0])) return null;
+  let rem = n.slice();
+  const quo = [];
+  for(let i = 0; i <= Math.max(0, n.length - d.length); i++) quo.push(F(0));
+  while(rem.length >= d.length && !(rem.length === 1 && fzero(rem[0]))){
+    const k = rem.length - d.length;
+    const coef = fdiv(rem[rem.length - 1], d[d.length - 1]);
+    quo[k] = coef;
+    for(let i = 0; i < d.length; i++) rem[i + k] = fsub(rem[i + k], fmul(coef, d[i]));
+    rem.pop();
+    while(rem.length > 1 && fzero(rem[rem.length - 1])) rem.pop();
+    if(!rem.length) rem = [F(0)];
+  }
+  return {q: pTrim(quo), r: pTrim(rem)};
+}
+function pGcd(a, b){
+  a = pTrim(a); b = pTrim(b);
+  while(!(b.length === 1 && fzero(b[0]))){
+    const r = pDivMod(a, b).r;
+    a = b; b = r;
+  }
+  const lead = a[a.length - 1];
+  return pTrim(a.map(c => fdiv(c, lead)));
+}
+function factoredOrPlain(p){
+  p = pTrim(p);
+  if(p.length >= 2 && p.length <= 3){
+    const f = factorise(p);
+    const am = f && /Answer: (.*)$/m.exec(f.text);
+    if(am && !/does not factorise|cannot be factorised/.test(am[1])) return am[1];
+  }
+  return pStr(p);
+}
+function simplifyAlgFraction(q){
+  if(!/simplify|reduce/.test(q)) return null;
+  const body = q.replace(/^(?:please\s+)?(?:simplify|reduce)\s*(?:the\s*)?(?:expression\s*|fraction\s*|algebraic fraction\s*)?/, "").replace(/[?.!]+$/, "").replace(/\s+/g, "");
+  let m = /^\(([^()]+)\)\/\(([^()]+)\)$/.exec(body) || /^\(([^()]+)\)\/([0-9x^]+)$/.exec(body);
+  if(!m) return null;
+  const num = parsePoly(m[1]), den = parsePoly(m[2]);
+  if(!num || !den || pDeg(den) < 1 || pDeg(num) < 1 || !/x/.test(m[1] + m[2])) return null;
+  const g = pGcd(num, den);
+  const shown = "(" + pStr(num) + ") ÷ (" + pStr(den) + ")";
+  const st = ["Factorise the top.\n" + pStr(num) + " = " + factoredOrPlain(num), "Factorise the bottom.\n" + pStr(den) + " = " + factoredOrPlain(den)];
+  if(pDeg(g) === 0){
+    st.push("There is no common factor to cancel, so the fraction cannot be simplified further.");
+    return {text: steps("Let's simplify " + shown + ".", st, "(" + pStr(num) + ") / (" + pStr(den) + ") is already in its simplest form."), topic: "algebraic_fractions"};
+  }
+  const nq = pDivMod(num, g).q, dq = pDivMod(den, g).q;
+  st.push("Cancel the common factor (" + pStr(g) + ") from the top and the bottom.");
+  let result;
+  if(pDeg(dq) === 0) result = pStr(pScale(nq, fdiv(F(1), dq[0])));
+  else result = (pDeg(nq) === 0 ? pStr(nq) : "(" + pStr(nq) + ")") + " / (" + pStr(dq) + ")";
+  st.push("Write what is left.\n" + result);
+  const dr = pDeg(den) === 1 ? "x ≠ " + fstr(fdiv(fmul(den[0], F(-1)), den[1])) : "";
+  if(dr) st.push("Note: the original fraction is only defined when the bottom is not zero, so " + dr + ".");
+  return {text: steps("Let's simplify " + shown + ".", st, result), topic: "algebraic_fractions"};
+}
+
 /* ══════════════ ALGEBRA FROM A WHOLE SENTENCE ══════════════ */
 const ALG_TOKEN = /^[0-9xy+\-*\/^().=²³]+$/;
 function mathRuns(q){
@@ -1345,6 +1622,8 @@ function algebraFromSentence(q){
   if(eqRuns.length === 1 && /x/.test(eqRuns[0]) && !/y/.test(eqRuns[0].replace(/^y=|^f\(x\)=/, "x"))){
     const eq = eqRuns[0];
     if(/^(?:y|f\(x\))=/.test(eq)) return null;               // a function: other branches (differentiate, integrate)
+    const ee = expEquation(eq);
+    if(ee) return ee;
     if(/factori|expand|differentiat|derivativ|integrat|integral|simplif/.test(words)) return null;
     const [L, R] = eq.split("=");
     const pl = parsePoly(L), pr = parsePoly(R);
@@ -1352,6 +1631,8 @@ function algebraFromSentence(q){
     const diff = pAdd(pl, pScale(pr, F(-1)));
     const deg = pDeg(diff);
     const shown = pStr(pl) + " = " + pStr(pr);
+    if(deg === 2 && /nature|discriminant|type of roots|kind of roots/.test(words)) return natureOfRoots(diff);
+    if(deg === 2 && /sum|product/.test(words) && /roots?/.test(words)) return sumProductRoots(diff);
     if(deg === 2) return solveQuadratic(diff);
     if(deg === 1 && (pDeg(pl) > 1 || pDeg(pr) > 1 || /\(|\//.test(eq))) return solveLinear(pl, pr, shown);
     if(deg >= 3) return unsupportedAlgebra(shown, "it has x to a power higher than 2, which I can't solve with certainty yet.");
@@ -1370,10 +1651,13 @@ function algebraFromSentence(q){
     if(/integrat|integral|antiderivative/.test(words)) return integrate(p);
     if(/\bsolve\b|\broots?\b|\bsolutions?\b|find x|value of x/.test(words)){
       const d = pDeg(p);
+      if(d === 2 && /nature|discriminant/.test(words)) return natureOfRoots(p);
       if(d === 2) return solveQuadratic(p);
       if(d >= 3) return unsupportedAlgebra(pStr(p) + " = 0", "it has x to a power higher than 2, which I can't solve with certainty yet.");
       return null;
     }
+    if(pDeg(p) === 2 && /nature|discriminant/.test(words)) return natureOfRoots(p);
+    if(pDeg(p) === 2 && /minimum|maximum|least|greatest|lowest|highest|turning|vertex|complet|in the form|express|rewrite|write/.test(words)) return completedForm(p, words);
     if(words === "" && (pDeg(p) === 2 || /\(/.test(expr))){
       const shown = pStr(p);
       return {text: "I can see the expression " + shown + ". What would you like me to do with it?", topic: "algebra",
@@ -1407,24 +1691,35 @@ function baintSolveRaw(question){
       note = "Note: I read “" + (first ? first[2] : "x2") + "” as " + (first ? first[2].replace(/x(\d)/, "x") + sup(first[2].replace(/.*x/, "")) : "x²") + ". If you meant x times a number, write it like 2x.";
     }
     lastNote = note;
+    lastMethod = detectMethod(q);
     let r;
 
     // word problems and special tasks first (they contain words, so they cannot be confused with algebra)
+    // a request for a derivation, and problems that need the secondary-level algebra helpers
+    if((r = derivation(q))) return r;
     if((r = scienceTasks(q))) return r;
+    if((r = formFromRoots(q))) return r;
+    if((r = numberPair(q))) return r;
+    if((r = rectangleProblem(q))) return r;
+    if((r = simplifyAlgFraction(q))) return r;
+    // an equation that contains x or y must never be answered as if it were a simple sum, root, log or percentage
+    const eqLike = /=/.test(q) && !/->|→|=>/.test(q) && /(?:^|[^a-z])[xy](?![a-z])/.test(q);
     if((r = interest(q))) return r;
     if((r = speedTasks(q))) return r;
     if((r = probabilityTasks(q))) return r;
-    if((r = ratioShare(q))) return r;
-    if((r = percentTasks(q))) return r;
-    if((r = statsTasks(q))) return r;
-    if((r = sequences(q))) return r;
-    if((r = standardForm(q))) return r;
     if((r = geom(q))) return r;
-    if((r = fractionTasks(q))) return r;
-    if((r = roots(q))) return r;
-    if((r = factorial(q))) return r;
-    if((r = logarithm(q))) return r;
-    if((r = trigValues(q))) return r;
+    if(!eqLike){
+      if((r = ratioShare(q))) return r;
+      if((r = percentTasks(q))) return r;
+      if((r = statsTasks(q))) return r;
+      if((r = sequences(q))) return r;
+      if((r = standardForm(q))) return r;
+      if((r = fractionTasks(q))) return r;
+      if((r = roots(q))) return r;
+      if((r = factorial(q))) return r;
+      if((r = logarithm(q))) return r;
+      if((r = trigValues(q))) return r;
+    }
 
     // simultaneous equations
     if(/=/.test(q) && /y/.test(q) && /x/.test(q) && (r = solveSimultaneous(q))) return r;
