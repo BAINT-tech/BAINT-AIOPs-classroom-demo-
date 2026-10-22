@@ -2167,3 +2167,21 @@ eduAdd("change_subject","math",["physics"],"Changing the subject of a formula",
  ["Lets you use one formula for many questions","Needed in science","Builds equation-solving skill"],
  ["Not doing the same thing to both sides","Undoing steps in the wrong order","Forgetting brackets when dividing a whole side"],
  "Change the subject: undo the operations in reverse order, keeping both sides equal.");
+
+
+/* ══ SUBJECT REGISTRY: any subject listed here is added to the dropdown automatically if the page does not have it yet ══ */
+const BAINT_SUBJECTS = [["english", "English Language and Literature"]];
+document.addEventListener("DOMContentLoaded", function(){
+  try{
+    var sel = document.getElementById("subject");
+    if(sel){
+      BAINT_SUBJECTS.forEach(function(pair){
+        if(!sel.querySelector('option[value="' + pair[0] + '"]')){
+          var o = document.createElement("option"); o.value = pair[0]; o.textContent = pair[1];
+          sel.insertBefore(o, sel.options[1] || null);
+        }
+      });
+    }
+    if(typeof data !== "undefined" && data.en && !data.en.english) data.en.english = {english_language: "English language and literature"};
+  }catch(e){}
+});
