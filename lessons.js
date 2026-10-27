@@ -45,7 +45,7 @@ eduAdd("calculus","math",[],"Calculus",
  "Calculus = the maths of change (derivatives) and accumulation (integrals).");
 
 eduAdd("derivatives","math",[],"Derivatives",
- ["derivative","derivatives","differentiation","differentiate","rate of change","slope of a curve","gradient of a curve"],
+ ["derivative","derivatives","differentiation","differentiate","rate of change","slope of a curve","gradient of a curve","gradient at a point","tangent to a curve","equation of the tangent","equation of a tangent","tangent line","normal to a curve","equation of the normal"],
  "A derivative measures how fast a quantity is changing. Geometrically it is the slope of a curve at one point.",
  "It is the speedometer reading: not the average speed of the whole trip, but your speed at this exact moment.",
  ["Power rule: the derivative of xⁿ is n·xⁿ⁻¹.","A constant multiplier stays: the derivative of 3x² is 3 × 2x.","Differentiate a sum term by term.","Put in a value of x to get the slope at that point."],
