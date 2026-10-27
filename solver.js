@@ -524,7 +524,8 @@ const STD_INTEG = {"sin x": ["-cos x + C", "The integral of sin x is -cos x."], 
 
 /* ══════════════ NUMBERS AND ARITHMETIC TOPICS ══════════════ */
 function roots(q){
-  let m = /(?:square\s*root|sqrt|√)\s*(?:of\s*)?\(?\s*(\d+(?:\.\d+)?)\s*\)?/.exec(q);
+  const body = q.replace(/^(?:what is|what's|find|evaluate|calculate|work out|determine|compute)\s+/, "").replace(/^(?:the\s+)?(?:value\s+of\s+)?/, "").replace(/[?.!]+$/, "").trim();
+  let m = /^(?:square\s*root|sqrt|√)\s*(?:of\s*)?\(?\s*(\d+(?:\.\d+)?)\s*\)?$/.exec(body);
   if(m){
     const n = parseFloat(m[1]);
     if(Number.isInteger(n)){
@@ -538,7 +539,7 @@ function roots(q){
     }
     return {text: steps("Let's find the square root of " + n + ".", ["Use a calculator or estimate between two square numbers."], "√" + n + " ≈ " + fnum(Math.sqrt(n))), topic: "exponents"};
   }
-  m = /(?:cube\s*root|∛)\s*(?:of\s*)?(\d+)/.exec(q);
+  m = /^(?:cube\s*root|∛)\s*(?:of\s*)?(\d+)$/.exec(body);
   if(m){
     const n = parseInt(m[1], 10), r = Math.round(Math.cbrt(n));
     if(r * r * r === n) return {text: steps("Let's find the cube root of " + n + ".", ["Ask: which number multiplied by itself three times gives " + n + "?\n" + r + " × " + r + " × " + r + " = " + n], "∛" + n + " = " + r), topic: "exponents"};
@@ -1571,6 +1572,856 @@ function simplifyAlgFraction(q){
   return {text: steps("Let's simplify " + shown + ".", st, result), topic: "algebraic_fractions"};
 }
 
+
+/* ══════════════ CALCULUS SKILLS ══════════════
+   A small expression tree lets BAINT work with sin, cos, tan, ln, e^x, roots, products, quotients and chains.
+   Every answer is checked numerically before it is shown; if the check fails, nothing is shown. */
+const ZERO = {t: "num", v: F(0)}, ONE = {t: "num", v: F(1)}, X = {t: "x"};
+const cnum = f => ({t: "num", v: f});
+const isNumN = n => n.t === "num";
+const isZ = n => isNumN(n) && fzero(n.v);
+const isOne = n => isNumN(n) && n.v.n === 1 && n.v.d === 1;
+const isE = n => n.t === "const" && n.name === "e";
+function hasX(n){
+  switch(n.t){
+    case "x": return true;
+    case "num": case "const": return false;
+    case "neg": case "fn": return hasX(n.a);
+    default: return hasX(n.a) || hasX(n.b);
+  }
+}
+function mkNeg(a){ if(isNumN(a)) return cnum(fmul(a.v, F(-1))); if(a.t === "neg") return a.a; return {t: "neg", a}; }
+function mkAdd(a, b){
+  if(isNumN(a) && isNumN(b)) return cnum(fadd(a.v, b.v));
+  if(isZ(a)) return b;
+  if(isZ(b)) return a;
+  return {t: "add", a, b};
+}
+function mkMul(a, b){
+  if(isZ(a) || isZ(b)) return ZERO;
+  if(isOne(a)) return b;
+  if(isOne(b)) return a;
+  if(isNumN(a) && isNumN(b)) return cnum(fmul(a.v, b.v));
+  if(a.t === "neg") return mkNeg(mkMul(a.a, b));
+  if(b.t === "neg") return mkNeg(mkMul(a, b.a));
+  if(isNumN(b) && !isNumN(a)) return mkMul(b, a);
+  if(isNumN(a) && b.t === "mul" && isNumN(b.a)) return mkMul(cnum(fmul(a.v, b.a.v)), b.b);
+  if(b.t === "mul" && isNumN(b.a) && !isNumN(a)) return mkMul(b.a, mkMul(a, b.b));
+  return {t: "mul", a, b};
+}
+function mkDiv(a, b){
+  if(isOne(b)) return a;
+  if(isZ(a)) return ZERO;
+  if(isNumN(a) && isNumN(b) && !isZ(b)) return cnum(fdiv(a.v, b.v));
+  if(b.t === "neg") return mkNeg(mkDiv(a, b.a));
+  if(a.t === "neg") return mkNeg(mkDiv(a.a, b));
+  return {t: "div", a, b};
+}
+function mkPow(a, b){
+  if(isNumN(b)){
+    if(isOne(b)) return a;
+    if(isZ(b)) return ONE;
+    if(isNumN(a) && b.v.d === 1 && Math.abs(b.v.n) <= 8 && !isZ(a)){
+      let r = F(1);
+      for(let i = 0; i < Math.abs(b.v.n); i++) r = fmul(r, a.v);
+      return cnum(b.v.n < 0 ? fdiv(F(1), r) : r);
+    }
+  }
+  return {t: "pow", a, b};
+}
+const mkFn = (name, a) => ({t: "fn", name, a});
+const E_CONST = {t: "const", name: "e"};
+const mkExp = u => mkPow(E_CONST, u);
+
+/* ---------- parsing ---------- */
+function tokenize(str){
+  const s = String(str).toLowerCase().replace(/[\u2212\u2013\u2014]/g, "-").replace(/[×·]/g, "*").replace(/÷/g, "/")
+    .replace(/[⁰¹²³⁴⁵⁶⁷⁸⁹]+/g, m => "^" + m.split("").map(ch => "⁰¹²³⁴⁵⁶⁷⁸⁹".indexOf(ch)).join("")).replace(/π/g, "pi").replace(/√/g, "sqrt");
+  const toks = [];
+  let i = 0, sp = false;
+  while(i < s.length){
+    const c = s[i];
+    if(/\s/.test(c)){ sp = true; i++; continue; }
+    const rest = s.slice(i);
+    let m;
+    if((m = /^(?:\d+\.?\d*|\.\d+)/.exec(rest))){ toks.push({k: "num", v: m[0], sp}); i += m[0].length; }
+    else if((m = /^(sin|cos|tan|sec|ln|exp|sqrt)/.exec(rest))){ toks.push({k: "fn", v: m[1], sp}); i += m[1].length; }
+    else if(rest.startsWith("pi")){ toks.push({k: "const", v: "pi", sp}); i += 2; }
+    else if(c === "x" || c === "t"){ toks.push({k: "x", v: "x", sp}); i++; }
+    else if(c === "e"){ toks.push({k: "const", v: "e", sp}); i++; }
+    else if("+-*/^()".indexOf(c) >= 0){ toks.push({k: "op", v: c, sp}); i++; }
+    else return null;
+    sp = false;
+  }
+  return toks;
+}
+function parseAst(str){
+  const toks = tokenize(str);
+  if(!toks || !toks.length) return null;
+  let i = 0;
+  const peek = () => toks[i];
+  const startsAtom = t => !!t && (t.k === "num" || t.k === "x" || t.k === "const" || t.k === "fn" || (t.k === "op" && t.v === "("));
+  const isOp = (t, v) => !!t && t.k === "op" && t.v === v;
+  function closeParen(){ if(!isOp(peek(), ")")) throw new Error("paren"); i++; }
+  function expr(){
+    let n = term();
+    while(isOp(peek(), "+") || isOp(peek(), "-")){
+      const op = toks[i++].v;
+      const r = term();
+      n = op === "+" ? mkAdd(n, r) : mkAdd(n, mkNeg(r));
+    }
+    return n;
+  }
+  function term(){
+    let n = unary();
+    for(;;){
+      const t = peek();
+      if(!t) break;
+      if(isOp(t, "*")){ i++; n = mkMul(n, unary()); }
+      else if(isOp(t, "/")){ i++; n = mkDiv(n, unary()); }
+      else if(startsAtom(t)) n = mkMul(n, unary());
+      else break;
+    }
+    return n;
+  }
+  function unary(){
+    if(isOp(peek(), "-")){ i++; return mkNeg(unary()); }
+    if(isOp(peek(), "+")){ i++; return unary(); }
+    return power(false);
+  }
+  function power(noFn){
+    const base = atom(noFn);
+    if(isOp(peek(), "^")){ i++; return mkPow(base, exponent(base)); }
+    return base;
+  }
+  function exponent(base){
+    let neg = false;
+    if(isOp(peek(), "-")){ neg = true; i++; }
+    const t = peek();
+    if(!t) throw new Error("exp");
+    let ex;
+    if(isOp(t, "(")){ i++; ex = expr(); closeParen(); }
+    else if(t.k === "num"){
+      i++; ex = cnum(fromDecimalString(t.v));
+      if(isE(base) && peek() && peek().k === "x" && !peek().sp){ i++; ex = mkMul(ex, X); }   // e^2x means e^(2x)
+    }
+    else if(t.k === "x"){ i++; ex = X; }
+    else if(t.k === "const"){ i++; ex = {t: "const", name: t.v}; }
+    else throw new Error("exp");
+    return neg ? mkNeg(ex) : ex;
+  }
+  function atom(noFn){
+    const t = toks[i];
+    if(!t) throw new Error("end");
+    if(t.k === "num"){ i++; return cnum(fromDecimalString(t.v)); }
+    if(t.k === "x"){ i++; return X; }
+    if(t.k === "const"){ i++; return {t: "const", name: t.v}; }
+    if(isOp(t, "(")){ i++; const e = expr(); closeParen(); return e; }
+    if(t.k === "fn" && !noFn){
+      i++;
+      let p = null;
+      if(isOp(peek(), "^")){
+        i++;
+        const pt = peek();
+        if(!pt || pt.k !== "num") throw new Error("fnpow");
+        i++; p = parseInt(pt.v, 10);
+      }
+      let arg;
+      if(isOp(peek(), "(")){ i++; arg = expr(); closeParen(); }
+      else arg = tightArg();
+      const node = t.v === "exp" ? mkExp(arg) : mkFn(t.v, arg);
+      return p ? mkPow(node, cnum(F(p))) : node;
+    }
+    throw new Error("atom");
+  }
+  function tightArg(){
+    const parts = [];
+    for(;;){
+      const t = peek();
+      if(!t || (parts.length && t.sp) || !startsAtom(t) || t.k === "fn") break;
+      parts.push(power(true));
+    }
+    if(!parts.length) throw new Error("arg");
+    return parts.reduce((a, b) => mkMul(a, b));
+  }
+  try{
+    const n = expr();
+    return i === toks.length ? n : null;
+  }catch(e){ return null; }
+}
+function astToPoly(n){
+  switch(n.t){
+    case "num": return [n.v];
+    case "x": return [F(0), F(1)];
+    case "neg": { const p = astToPoly(n.a); return p && pScale(p, F(-1)); }
+    case "add": { const a = astToPoly(n.a), b = astToPoly(n.b); return a && b && pAdd(a, b); }
+    case "mul": { const a = astToPoly(n.a), b = astToPoly(n.b); return a && b && pMul(a, b); }
+    case "div": { const a = astToPoly(n.a), b = astToPoly(n.b); return (a && b && b.length === 1 && !fzero(b[0])) ? pScale(a, fdiv(F(1), b[0])) : null; }
+    case "pow": {
+      if(!isNumN(n.b) || n.b.v.d !== 1 || n.b.v.n < 0 || n.b.v.n > 6) return null;
+      const a = astToPoly(n.a); return a && pPow(a, n.b.v.n);
+    }
+    default: return null;
+  }
+}
+function evalN(n, x){
+  switch(n.t){
+    case "num": return fval(n.v);
+    case "x": return x;
+    case "const": return n.name === "e" ? Math.E : Math.PI;
+    case "add": return evalN(n.a, x) + evalN(n.b, x);
+    case "neg": return -evalN(n.a, x);
+    case "mul": return evalN(n.a, x) * evalN(n.b, x);
+    case "div": return evalN(n.a, x) / evalN(n.b, x);
+    case "pow": return Math.pow(evalN(n.a, x), evalN(n.b, x));
+    case "fn": {
+      const u = evalN(n.a, x);
+      switch(n.name){
+        case "sin": return Math.sin(u);
+        case "cos": return Math.cos(u);
+        case "tan": return Math.tan(u);
+        case "sec": return 1 / Math.cos(u);
+        case "ln": return Math.log(u);
+        case "sqrt": return Math.sqrt(u);
+      }
+    }
+  }
+  return NaN;
+}
+
+/* ---------- printing ---------- */
+const TRIG = {sin: 1, cos: 1, tan: 1, sec: 1};
+function atomicN(n){ return n.t === "x" || n.t === "const" || (n.t === "num" && n.v.d === 1 && n.v.n >= 0); }
+function prFactor(n){ return (n.t === "add" || n.t === "neg" || n.t === "div" || (n.t === "num" && (n.v.n < 0 || n.v.d !== 1))) ? "(" + pr(n) + ")" : pr(n); }
+function prFnArg(n){ return atomicN(n) ? " " + pr(n) : "(" + pr(n) + ")"; }
+function pr(n){
+  switch(n.t){
+    case "num": return n.v.n < 0 ? "-" + fstr(F(-n.v.n, n.v.d)) : fstr(n.v);
+    case "x": return "x";
+    case "const": return n.name === "e" ? "e" : "π";
+    case "neg": return "-" + (n.a.t === "add" ? "(" + pr(n.a) + ")" : pr(n.a));
+    case "add": {
+      const b = n.b, left = pr(n.a);
+      if(b.t === "neg") return left + " - " + (b.a.t === "add" ? "(" + pr(b.a) + ")" : pr(b.a));
+      if(isNumN(b) && b.v.n < 0) return left + " - " + fstr(F(-b.v.n, b.v.d));
+      if(b.t === "mul" && isNumN(b.a) && b.a.v.n < 0) return left + " - " + pr(mkMul(cnum(fmul(b.a.v, F(-1))), b.b));
+      return left + " + " + pr(b);
+    }
+    case "mul": {
+      const fs = [];
+      (function collect(m){ if(m.t === "mul"){ collect(m.a); collect(m.b); } else fs.push(m); })(n);
+      let coef = "", rest = fs;
+      if(isNumN(fs[0])){
+        const c = fs[0].v;
+        rest = fs.slice(1);
+        if(c.n === -1 && c.d === 1) coef = "-";
+        else if(c.d === 1) coef = String(c.n);
+        else coef = (c.n < 0 ? "-" : "") + "(" + fstr(F(Math.abs(c.n), c.d)) + ")";
+      }
+      const parts = rest.map(prFactor);
+      let s = coef;
+      parts.forEach((p, i) => {
+        const prev = i === 0 ? coef : parts[i - 1];
+        const sep = (prev === "" || prev === "-") ? "" : ((/[0-9)]$/.test(prev) && /^[a-zπ(]/.test(p)) ? "" : " ");
+        s += sep + p;
+      });
+      return s;
+    }
+    case "div": {
+      const top = (atomicN(n.a) || n.a.t === "fn") ? pr(n.a) : "(" + pr(n.a) + ")";
+      const bot = (atomicN(n.b) || n.b.t === "fn") ? pr(n.b) : "(" + pr(n.b) + ")";
+      return top + " / " + bot;
+    }
+    case "pow": {
+      if(n.a.t === "fn" && TRIG[n.a.name] && isNumN(n.b) && n.b.v.d === 1 && (n.b.v.n === 2 || n.b.v.n === 3))
+        return n.a.name + (n.b.v.n === 2 ? "²" : "³") + prFnArg(n.a.a);
+      const base = atomicN(n.a) ? pr(n.a) : "(" + pr(n.a) + ")";
+      if(isNumN(n.b)){
+        if(n.b.v.d === 1 && n.b.v.n === 2) return base + "²";
+        if(n.b.v.d === 1 && n.b.v.n === 3) return base + "³";
+        if(n.b.v.d === 1 && n.b.v.n >= 0) return base + "^" + n.b.v.n;
+        return base + "^(" + fstr(n.b.v) + ")";
+      }
+      return base + "^" + (atomicN(n.b) ? pr(n.b) : "(" + pr(n.b) + ")");
+    }
+    case "fn": return (n.name === "sqrt" ? "√" : n.name) + (n.name === "sqrt" ? (atomicN(n.a) ? pr(n.a) : "(" + pr(n.a) + ")") : prFnArg(n.a));
+  }
+  return "?";
+}
+
+/* ---------- differentiation ---------- */
+function dNode(n){
+  switch(n.t){
+    case "num": case "const": return ZERO;
+    case "x": return ONE;
+    case "neg": return mkNeg(dNode(n.a));
+    case "add": return mkAdd(dNode(n.a), dNode(n.b));
+    case "mul": return mkAdd(mkMul(dNode(n.a), n.b), mkMul(n.a, dNode(n.b)));
+    case "div": return mkDiv(mkAdd(mkMul(dNode(n.a), n.b), mkNeg(mkMul(n.a, dNode(n.b)))), mkPow(n.b, cnum(F(2))));
+    case "pow": {
+      if(!hasX(n.b)) return mkMul(mkMul(n.b, mkPow(n.a, mkAdd(n.b, cnum(F(-1))))), dNode(n.a));
+      if(isE(n.a)) return mkMul(n, dNode(n.b));
+      if(!hasX(n.a)) return mkMul(mkMul(n, mkFn("ln", n.a)), dNode(n.b));
+      throw new Error("unsupported power");
+    }
+    case "fn": {
+      const u = n.a, du = dNode(u);
+      switch(n.name){
+        case "sin": return mkMul(mkFn("cos", u), du);
+        case "cos": return mkNeg(mkMul(mkFn("sin", u), du));
+        case "tan": return mkMul(mkPow(mkFn("sec", u), cnum(F(2))), du);
+        case "ln": return mkDiv(du, u);
+        case "sqrt": return mkMul(mkDiv(ONE, mkMul(cnum(F(2)), mkFn("sqrt", u))), du);
+        case "sec": return mkMul(mkMul(mkFn("sec", u), mkFn("tan", u)), du);
+      }
+    }
+  }
+  throw new Error("unsupported");
+}
+const SAMPLE_X = [0.37, 0.71, 1.13, 1.57, 2.09, 2.63, 3.41, 0.52, 0.23, 0.83, 1.31, 1.93, 2.89, 3.77, 4.31, 0.29];
+function numericallyMatches(f, g, minPoints){
+  let ok = 0;
+  for(const x of SAMPLE_X){
+    const h = 1e-5;
+    const fp = (evalN(f, x + h) - evalN(f, x - h)) / (2 * h), gv = evalN(g, x);
+    if(!isFinite(fp) || !isFinite(gv) || Math.abs(gv) > 1e6) continue;
+    if(Math.abs(fp - gv) > 1e-4 * Math.max(1, Math.abs(gv))) return false;
+    ok++;
+  }
+  return ok >= (minPoints || 2);
+}
+function flattenSum(n, sign, out){
+  if(n.t === "add"){ flattenSum(n.a, sign, out); flattenSum(n.b, sign, out); }
+  else if(n.t === "neg"){ flattenSum(n.a, -sign, out); }
+  else out.push(sign < 0 ? mkNeg(n) : n);
+  return out;
+}
+function derivRuleText(n){
+  const d = dNode(n);
+  switch(n.t){
+    case "add": case "neg": {
+      const terms = flattenSum(n, 1, []);
+      return "Differentiate each term separately.\n" + terms.map(t => "d/dx[" + pr(t) + "] = " + pr(dNode(t))).join("\n");
+    }
+    case "mul": {
+      if(isNumN(n.a)) return "A constant multiplier stays in front: d/dx[k·f] = k·f′.\nk = " + pr(n.a) + ", f = " + pr(n.b) + ", f′ = " + pr(dNode(n.b));
+      return "Use the product rule: d(uv)/dx = u′v + uv′.\nu = " + pr(n.a) + ",  v = " + pr(n.b) + "\nu′ = " + pr(dNode(n.a)) + ",  v′ = " + pr(dNode(n.b));
+    }
+    case "div": return "Use the quotient rule: d(u/v)/dx = (u′v − uv′) ÷ v².\nu = " + pr(n.a) + ",  v = " + pr(n.b) + "\nu′ = " + pr(dNode(n.a)) + ",  v′ = " + pr(dNode(n.b));
+    case "pow": {
+      if(isE(n.a)) return "Chain rule: d/dx[e^u] = e^u · u′.\nu = " + pr(n.b) + ",  u′ = " + pr(dNode(n.b));
+      if(!hasX(n.b)) return (n.a.t === "x") ? "Use the power rule: d/dx[xⁿ] = n·xⁿ⁻¹." : "Chain rule with a power: d/dx[uⁿ] = n·uⁿ⁻¹ · u′.\nu = " + pr(n.a) + ",  u′ = " + pr(dNode(n.a));
+      return "Differentiate using the general power rule.";
+    }
+    case "fn": return "Chain rule: d/dx[f(u)] = f′(u) · u′.\nouter function: " + n.name + ",  inner u = " + pr(n.a) + ",  u′ = " + pr(dNode(n.a));
+  }
+  return "Differentiate.";
+}
+function deriveText(body, label){
+  const ast = parseAst(body);
+  if(!ast || !hasX(ast)) return null;
+  let d;
+  try{ d = dNode(ast); }catch(e){ return null; }
+  if(!numericallyMatches(ast, d, 2)) return null;
+  const st = [derivRuleText(ast), "Put the pieces together and tidy up.\n" + pr(d)];
+  return {text: steps("Let's differentiate " + pr(ast) + ".", st, (label || "dy/dx") + " = " + pr(d)), topic: "derivatives"};
+}
+function secondDerivText(body){
+  const ast = parseAst(body);
+  if(!ast || !hasX(ast)) return null;
+  let d1, d2;
+  try{ d1 = dNode(ast); d2 = dNode(d1); }catch(e){ return null; }
+  if(!numericallyMatches(ast, d1, 2) || !numericallyMatches(d1, d2, 2)) return null;
+  return {text: steps("Let's find the second derivative of " + pr(ast) + ".", ["Differentiate once to get the first derivative.\ndy/dx = " + pr(d1), "Differentiate the first derivative again.\nd²y/dx² = " + pr(d2)], "d²y/dx² = " + pr(d2)), topic: "derivatives"};
+}
+
+/* ---------- integration (standard forms, checked by differentiating the answer) ---------- */
+function linearForm(u){                       // u = a x + b  ->  {a, b} exact, or null
+  const p = astToPoly(u);
+  if(!p || pDeg(p) !== 1) return null;
+  return {a: p[1], b: p[0]};
+}
+function splitConst(n){                        // -> {c, g}: n = c × g, where c is a plain number
+  let c = ONE;
+  const rest = [];
+  (function walk(m){
+    if(m.t === "mul"){ walk(m.a); walk(m.b); }
+    else if(m.t === "neg"){ c = mkMul(c, cnum(F(-1))); walk(m.a); }
+    else if(m.t === "div" && isNumN(m.b)){ c = mkDiv(c, m.b); walk(m.a); }
+    else if(isNumN(m)) c = mkMul(c, m);
+    else rest.push(m);
+  })(n);
+  let g = rest.length ? rest[0] : ONE;
+  for(let i = 1; i < rest.length; i++) g = {t: "mul", a: g, b: rest[i]};
+  return {c, g};
+}
+function termAntiderivative(t){               // returns {F: node, rule: text} or null; t has no top-level sum
+  const sc = splitConst(t);
+  let c = sc.c, g = sc.g;
+  const wrap = (node, rule) => ({F: mkMul(c, node), rule});
+  const lin = linearForm;
+  const inv = a => cnum(fdiv(F(1), a));
+  if(g.t === "fn" && (g.name === "sin" || g.name === "cos")){
+    const L = lin(g.a); if(!L) return null;
+    return g.name === "sin"
+      ? wrap(mkMul(mkNeg(mkFn("cos", g.a)), inv(L.a)), "∫ sin(ax + b) dx = −cos(ax + b) ÷ a")
+      : wrap(mkMul(mkFn("sin", g.a), inv(L.a)), "∫ cos(ax + b) dx = sin(ax + b) ÷ a");
+  }
+  if(g.t === "pow" && isE(g.a)){
+    const L = lin(g.b); if(!L) return null;
+    return wrap(mkMul(g, inv(L.a)), "∫ e^(ax + b) dx = e^(ax + b) ÷ a");
+  }
+  if(g.t === "pow" && isNumN(g.b) && !(g.b.v.n === -1 && g.b.v.d === 1) && g.a.t !== "x"){
+    const L = lin(g.a); if(!L) return null;
+    const np = fadd(g.b.v, F(1));
+    return wrap(mkMul(mkPow(g.a, cnum(np)), cnum(fdiv(F(1), fmul(L.a, np)))), "∫ (ax + b)ⁿ dx = (ax + b)ⁿ⁺¹ ÷ [a(n + 1)]");
+  }
+  if(g.t === "div" && isNumN(g.a)){
+    const L = lin(g.b); if(L && !(g.b.t === "x" && false)){
+      const k = g.a.v;
+      return {F: mkMul(mkMul(c, cnum(k)), mkMul(inv(L.a), mkFn("ln", g.b))), rule: "∫ 1/(ax + b) dx = ln|ax + b| ÷ a"};
+    }
+  }
+  if(g.t === "pow" && isNumN(g.b) && g.b.v.n === -1 && g.b.v.d === 1){
+    const L = lin(g.a); if(L) return wrap(mkMul(inv(L.a), mkFn("ln", g.a)), "∫ 1/(ax + b) dx = ln|ax + b| ÷ a");
+  }
+  if(g.t === "fn" && g.name === "sqrt"){
+    const L = lin(g.a); if(!L) return null;
+    return wrap(mkMul(mkPow(g.a, cnum(F(3, 2))), cnum(fdiv(F(2), fmul(F(3), L.a)))), "∫ √(ax + b) dx = 2(ax + b)^(3/2) ÷ (3a)");
+  }
+  if(g.t === "fn" && g.name === "ln" && g.a.t === "x") return wrap(mkAdd(mkMul(X, mkFn("ln", X)), mkNeg(X)), "Integration by parts: ∫ ln x dx = x ln x − x");
+  if(g.t === "fn" && g.name === "sec") return null;
+  if(g.t === "pow" && g.a.t === "fn" && g.a.name === "sec" && isNumN(g.b) && g.b.v.n === 2 && g.b.v.d === 1){
+    const L = lin(g.a.a); if(!L) return null;
+    return wrap(mkMul(mkFn("tan", g.a.a), inv(L.a)), "∫ sec²(ax + b) dx = tan(ax + b) ÷ a");
+  }
+  if(g.t === "mul"){
+    let u = g.a, v = g.b;
+    if(!(u.t === "x" || (u.t === "pow" && u.a.t === "x"))) { const tmp = u; u = v; v = tmp; }
+    if(u.t === "x" || (u.t === "pow" && u.a.t === "x" && isNumN(u.b) && u.b.v.d === 1 && u.b.v.n >= 1 && u.b.v.n <= 3)){
+      const n = u.t === "x" ? 1 : u.b.v.n;
+      if(v.t === "fn" && v.name === "ln" && v.a.t === "x"){
+        const np = F(n + 1);
+        const A = mkMul(mkPow(X, cnum(np)), mkMul(cnum(fdiv(F(1), np)), mkFn("ln", X)));
+        const B = mkNeg(mkMul(mkPow(X, cnum(np)), cnum(fdiv(F(1), fmul(np, np)))));
+        return wrap(mkAdd(A, B), "Integration by parts with u = ln x: ∫ xⁿ ln x dx = xⁿ⁺¹ln x ÷ (n+1) − xⁿ⁺¹ ÷ (n+1)²");
+      }
+      if(n === 1){
+        if(v.t === "pow" && isE(v.a)){
+          const L = lin(v.b); if(!L || !fzero(L.b)) return null;
+          const a = L.a;
+          return wrap(mkMul(mkAdd(mkMul(cnum(fdiv(F(1), a)), X), cnum(fdiv(F(-1), fmul(a, a)))), v), "Integration by parts: ∫ x e^(ax) dx = (x ÷ a − 1 ÷ a²) e^(ax)");
+        }
+        if(v.t === "fn" && (v.name === "sin" || v.name === "cos")){
+          const L = lin(v.a); if(!L || !fzero(L.b)) return null;
+          const a = L.a;
+          if(v.name === "sin") return wrap(mkAdd(mkMul(mkMul(cnum(fdiv(F(-1), a)), X), mkFn("cos", v.a)), mkMul(cnum(fdiv(F(1), fmul(a, a))), mkFn("sin", v.a))), "Integration by parts: ∫ x sin(ax) dx = −x cos(ax) ÷ a + sin(ax) ÷ a²");
+          return wrap(mkAdd(mkMul(mkMul(cnum(fdiv(F(1), a)), X), mkFn("sin", v.a)), mkMul(cnum(fdiv(F(1), fmul(a, a))), mkFn("cos", v.a))), "Integration by parts: ∫ x cos(ax) dx = x sin(ax) ÷ a + cos(ax) ÷ a²");
+        }
+      }
+    }
+  }
+  return null;
+}
+function integrateText(body, lo, hi){
+  const ast = parseAst(body);
+  if(!ast || !hasX(ast)) return null;
+  const terms = flattenSum(ast, 1, []);
+  const parts = [];
+  let total = ZERO;
+  for(const t of terms){
+    const neg = t.t === "neg";
+    const core = neg ? t.a : t;
+    const poly = astToPoly(core);
+    let res;
+    if(poly){
+      const ip = pTrim([F(0)].concat(poly.map((c, k) => fdiv(c, F(k + 1)))));
+      res = {F: parseAst(pStr(ip)) || null, rule: "Power rule: ∫ xⁿ dx = xⁿ⁺¹ ÷ (n + 1)"};
+      if(!res.F) return null;
+    } else res = termAntiderivative(core);
+    if(!res) return null;
+    const Fn = neg ? mkNeg(res.F) : res.F;
+    parts.push({t, F: Fn, rule: res.rule});
+    total = mkAdd(total, Fn);
+  }
+  // check: the derivative of the answer must equal the original function
+  let dt;
+  try{ dt = dNode(total); }catch(e){ return null; }
+  let ok = 0;
+  for(const x of SAMPLE_X){
+    const a = evalN(dt, x), b = evalN(ast, x);
+    if(!isFinite(a) || !isFinite(b)) continue;
+    if(Math.abs(a - b) > 1e-6 * Math.max(1, Math.abs(b))) return null;
+    ok++;
+  }
+  if(ok < 2) return null;
+  const rules = [];
+  parts.forEach(p => { if(rules.indexOf(p.rule) < 0) rules.push(p.rule); });
+  const st = ["Integrate term by term using these standard results:\n" + rules.join("\n"),
+              parts.map(p => "∫ " + pr(p.t) + " dx = " + pr(p.F)).join("\n")];
+  if(lo === undefined){
+    st.push("Add the constant of integration C.\n" + pr(total) + " + C");
+    return {text: steps("Let's integrate " + pr(ast) + ".", st, pr(total) + " + C"), topic: "integrals"};
+  }
+  const a = fval(lo), b = fval(hi), Fb = evalN(total, b), Fa = evalN(total, a);
+  if(!isFinite(Fa) || !isFinite(Fb)) return null;
+  const val = Fb - Fa;
+  st.push("Substitute the limits: F(" + fstr(hi) + ") − F(" + fstr(lo) + ").\nF(" + fstr(hi) + ") ≈ " + fnum(Fb) + "\nF(" + fstr(lo) + ") ≈ " + fnum(Fa));
+  st.push("Subtract.\n" + fnum(val));
+  return {text: steps("Let's find the definite integral of " + pr(ast) + " from " + fstr(lo) + " to " + fstr(hi) + ".", st, "≈ " + fnum(val)), topic: "integrals"};
+}
+
+/* ---------- roots of a polynomial (rational roots exactly, the rest numerically) ---------- */
+function divisorsOf(n){
+  n = Math.abs(n); const out = [];
+  for(let d = 1; d * d <= n; d++) if(n % d === 0){ out.push(d); if(d * d !== n) out.push(n / d); }
+  return out;
+}
+function realRoots(p){                         // -> sorted [{x, exact: F|null}], or null when unsupported
+  p = pTrim(p);
+  const deg = p.length - 1;
+  if(deg < 1 || deg > 6) return null;
+  const roots = [];
+  let cur = p.slice();
+  for(let guard = 0; guard < 8 && cur.length > 3; guard++){
+    const ints = intCoeffs(cur);
+    if(ints[0] === 0){ roots.push({x: 0, exact: F(0)}); cur = pDivMod(cur, [F(0), F(1)]).q; continue; }
+    let found = null;
+    for(const pp of divisorsOf(ints[0])) for(const qq of divisorsOf(ints[ints.length - 1])) for(const sg of [1, -1]){
+      if(found) break;
+      const cand = F(sg * pp, qq);
+      if(fzero(pEval(cur, cand))) found = cand;
+    }
+    if(!found) break;
+    roots.push({x: fval(found), exact: found});
+    cur = pDivMod(cur, [fmul(found, F(-1)), F(1)]).q;
+  }
+  cur = pTrim(cur);
+  if(cur.length === 2){
+    const r = fdiv(fmul(cur[0], F(-1)), cur[1]);
+    roots.push({x: fval(r), exact: r});
+  } else if(cur.length === 3){
+    const a = cur[2], b = cur[1], c = cur[0];
+    const D = fsub(fmul(b, b), fmul(F(4), fmul(a, c)));
+    if(D.n >= 0){
+      const sn = perfectSquare(D.n), sd = perfectSquare(D.d);
+      if(sn >= 0 && sd >= 0){
+        const s = F(sn, sd);
+        const r1 = fdiv(fadd(fmul(b, F(-1)), s), fmul(F(2), a)), r2 = fdiv(fsub(fmul(b, F(-1)), s), fmul(F(2), a));
+        roots.push({x: fval(r1), exact: r1});
+        if(sn !== 0) roots.push({x: fval(r2), exact: r2});
+      } else {
+        const sq = Math.sqrt(fval(D)), A2 = 2 * fval(a);
+        roots.push({x: (-fval(b) + sq) / A2, exact: null});
+        roots.push({x: (-fval(b) - sq) / A2, exact: null});
+      }
+    }
+  } else if(cur.length > 3){
+    // no rational roots left: find the real roots numerically
+    const f = x => fval(pEval(cur, F(Math.round(x * 1e6), 1e6)));
+    const fl = x => cur.reduce((acc, c, k) => acc + fval(c) * Math.pow(x, k), 0);
+    let prevX = -100, prevV = fl(-100);
+    for(let i = 1; i <= 4000; i++){
+      const x = -100 + i * 0.05, v = fl(x);
+      if(prevV === 0){ roots.push({x: prevX, exact: null}); }
+      else if(prevV * v < 0){
+        let lo = prevX, hi = x;
+        for(let k = 0; k < 80; k++){ const mid = (lo + hi) / 2; if(fl(lo) * fl(mid) <= 0) hi = mid; else lo = mid; }
+        roots.push({x: (lo + hi) / 2, exact: null});
+      }
+      prevX = x; prevV = v;
+    }
+  }
+  roots.sort((u, v) => u.x - v.x);
+  const uniq = [];
+  roots.forEach(r => { if(!uniq.length || Math.abs(r.x - uniq[uniq.length - 1].x) > 1e-7) uniq.push(r); });
+  return uniq;
+}
+const rootStr = r => r.exact ? fstr(r.exact) : "≈ " + fnum(r.x);
+function polyAt(p, r){ return r.exact ? {exact: pEval(p, r.exact), x: null} : {exact: null, x: p.reduce((acc, c, k) => acc + fval(c) * Math.pow(r.x, k), 0)}; }
+function valStr(v){ return v.exact ? fstr(v.exact) : "≈ " + fnum(v.x); }
+
+/* ---------- skills ---------- */
+function getFunction(raw){
+  let t = String(raw || "").replace(/[?.!,;]+$/, "").trim();
+  t = t.replace(/^(?:y|f\s*\(\s*x\s*\)|s)\s*=\s*/, "").trim();
+  if(!t) return null;
+  const ast = parseAst(t);
+  if(!ast || !hasX(ast)) return null;
+  return {t, ast, poly: astToPoly(ast)};
+}
+const NUMBER = "-?\\d+(?:\\.\\d+)?(?:\\/\\d+)?";
+const toNum = s => toF(s);
+function gradientAt(fnText, aText){
+  const f = getFunction(fnText); if(!f) return null;
+  const a = toNum(aText);
+  let d;
+  try{ d = dNode(f.ast); }catch(e){ return null; }
+  if(!numericallyMatches(f.ast, d, 2)) return null;
+  const st = ["Differentiate to get the gradient function.\ndy/dx = " + pr(d)];
+  if(f.poly){
+    const dp = astToPoly(d);
+    if(dp){
+      const m = pEval(dp, a), y = pEval(f.poly, a);
+      st.push("Substitute x = " + fstr(a) + " into dy/dx.\ngradient = " + fstr(m) + (m.d !== 1 ? " ≈ " + fnum(fval(m)) : ""));
+      st.push("(For reference, the point on the curve is (" + fstr(a) + ", " + fstr(y) + ").)");
+      return {text: steps("Let's find the gradient of y = " + pr(f.ast) + " at x = " + fstr(a) + ".", st, "gradient = " + fstr(m) + (m.d !== 1 ? " ≈ " + fnum(fval(m)) : "")), topic: "derivatives"};
+    }
+  }
+  const m = evalN(d, fval(a));
+  if(!isFinite(m)) return null;
+  st.push("Substitute x = " + fstr(a) + " into dy/dx.\ngradient ≈ " + fnum(m));
+  return {text: steps("Let's find the gradient of y = " + pr(f.ast) + " at x = " + fstr(a) + ".", st, "gradient ≈ " + fnum(m)), topic: "derivatives"};
+}
+function lineStr(m, c){            // y = m x + c with fractions
+  const mp = fzero(m) ? "" : (m.n === 1 && m.d === 1 ? "x" : (m.n === -1 && m.d === 1 ? "-x" : (m.d === 1 ? m.n + "x" : "(" + fstr(m) + ")x")));
+  if(!mp) return "y = " + fstr(c);
+  if(fzero(c)) return "y = " + mp;
+  return "y = " + mp + (c.n < 0 ? " - " + fstr(F(-c.n, c.d)) : " + " + fstr(c));
+}
+function tangentNormal(kind, fnText, aText, bText){
+  const f = getFunction(fnText); if(!f || !f.poly) return null;       // exact lines for polynomials
+  const a = toNum(aText);
+  const y0 = pEval(f.poly, a);
+  if(bText != null && !(toNum(bText).n === y0.n && toNum(bText).d === y0.d)){
+    return {text: "The point (" + fstr(a) + ", " + bText + ") is not on the curve y = " + pr(f.ast) + ", because when x = " + fstr(a) + " the curve has y = " + fstr(y0) + ". Please check the point.", topic: "derivatives"};
+  }
+  const dp = pDeriv(f.poly), m = pEval(dp, a);
+  const st = ["Find the point on the curve.\nx = " + fstr(a) + ", y = " + fstr(y0),
+              "Differentiate to get the gradient function.\ndy/dx = " + pStr(dp) + "\nGradient of the curve at x = " + fstr(a) + ": m = " + fstr(m)];
+  let ans;
+  if(kind === "tangent"){
+    const c = fsub(y0, fmul(m, a));
+    st.push("The tangent has the same gradient as the curve. Use y − y₁ = m(x − x₁).\ny − " + fstr(y0) + " = " + fstr(m) + "(x − " + fstr(a) + ")");
+    st.push("Rearrange into y = mx + c.\n" + lineStr(m, c));
+    ans = lineStr(m, c);
+  } else {
+    if(fzero(m)){
+      st.push("The tangent is horizontal, so the normal is vertical: its equation is x = " + fstr(a) + ".");
+      ans = "x = " + fstr(a);
+    } else {
+      const mn = fdiv(F(-1), m), c = fsub(y0, fmul(mn, a));
+      st.push("The normal is perpendicular to the tangent, so its gradient is −1 ÷ m.\nm(normal) = −1 ÷ " + fstr(m) + " = " + fstr(mn));
+      st.push("Use y − y₁ = m(x − x₁).\ny − " + fstr(y0) + " = " + fstr(mn) + "(x − " + fstr(a) + ")");
+      st.push("Rearrange into y = mx + c.\n" + lineStr(mn, c));
+      ans = lineStr(mn, c);
+    }
+  }
+  return {text: steps("Let's find the equation of the " + kind + " to y = " + pr(f.ast) + " at x = " + fstr(a) + ".", st, ans), topic: "derivatives"};
+}
+function pDeriv(p){ return pTrim(p.slice(1).map((c, k) => fmul(c, F(k + 1)))); }
+function stationaryPoints(fnText){
+  const f = getFunction(fnText); if(!f || !f.poly) return null;
+  const p = f.poly, dp = pDeriv(p), d2 = pDeriv(dp);
+  if(pDeg(p) < 2) return null;
+  const roots = realRoots(dp);
+  if(!roots) return null;
+  const st = ["Differentiate.\ndy/dx = " + pStr(dp), "Turning points happen where the gradient is zero. Solve dy/dx = 0.\n" + pStr(dp) + " = 0"];
+  if(!roots.length){
+    st.push("This has no real solutions, so the curve has no turning points.");
+    return {text: steps("Let's find the turning points of y = " + pStr(p) + ".", st, "No turning points."), topic: "optimisation"};
+  }
+  st.push("Solutions: " + roots.map(r => "x = " + rootStr(r)).join(",   "));
+  const ys = roots.map(r => polyAt(p, r));
+  st.push("Find y at each x by substituting into y = " + pStr(p) + ".\n" + roots.map((r, i) => "x = " + rootStr(r) + ":  y = " + valStr(ys[i])).join("\n"));
+  const natures = roots.map(r => {
+    const s2 = d2.reduce((acc, c, k) => acc + fval(c) * Math.pow(r.x, k), 0);
+    if(Math.abs(s2) > 1e-9) return s2 > 0 ? "minimum" : "maximum";
+    const dl = dp.reduce((acc, c, k) => acc + fval(c) * Math.pow(r.x - 0.01, k), 0), dr = dp.reduce((acc, c, k) => acc + fval(c) * Math.pow(r.x + 0.01, k), 0);
+    return dl * dr < 0 ? (dl > 0 ? "maximum" : "minimum") : "point of inflection";
+  });
+  st.push("Decide the nature using the second derivative d²y/dx² = " + pStr(d2) + ".\n" + roots.map((r, i) => {
+    const s2 = d2.reduce((acc, c, k) => acc + fval(c) * Math.pow(r.x, k), 0);
+    return "x = " + rootStr(r) + ":  d²y/dx² " + (Math.abs(s2) < 1e-9 ? "= 0 (use the sign of dy/dx on either side)" : (s2 > 0 ? "> 0" : "< 0")) + "  →  " + natures[i];
+  }).join("\n"));
+  const ans = roots.map((r, i) => "(" + rootStr(r) + ", " + valStr(ys[i]) + ") " + natures[i]).join(";  ");
+  return {text: steps("Let's find the turning points of y = " + pStr(p) + ".", st, ans), topic: "optimisation"};
+}
+function areaUnder(fnText, loText, hiText){
+  const f = getFunction(fnText); if(!f || !f.poly) return null;
+  const p = f.poly;
+  const lo = toNum(loText), hi = toNum(hiText);
+  if(fval(lo) >= fval(hi)) return null;
+  const ip = pTrim([F(0)].concat(p.map((c, k) => fdiv(c, F(k + 1)))));
+  const roots = pDeg(p) >= 1 ? realRoots(p) : [];
+  if(roots === null) return null;
+  const inside = roots.filter(r => r.x > fval(lo) + 1e-9 && r.x < fval(hi) - 1e-9);
+  const bounds = [{x: fval(lo), exact: lo}].concat(inside, [{x: fval(hi), exact: hi}]);
+  const exactAll = bounds.every(b => b.exact);
+  const st = ["Integrate the function.\n∫ (" + pStr(p) + ") dx = " + pStr(ip)];
+  if(inside.length) st.push("Check where the curve crosses the x-axis between x = " + fstr(lo) + " and x = " + fstr(hi) + ": it crosses at " + inside.map(r => "x = " + rootStr(r)).join(" and ") + ". Area below the axis counts as positive, so split the area there.");
+  else st.push("The curve does not cross the x-axis between the limits, so one integral gives the area.");
+  let total = exactAll ? F(0) : 0;
+  const lines = [];
+  for(let i = 0; i < bounds.length - 1; i++){
+    const A = bounds[i], B = bounds[i + 1];
+    if(exactAll){
+      const v = fsub(pEval(ip, B.exact), pEval(ip, A.exact)), av = F(Math.abs(v.n), v.d);
+      lines.push("From " + fstr(A.exact) + " to " + fstr(B.exact) + ": " + fstr(v) + (v.n < 0 ? "  (below the axis, so the area is " + fstr(av) + ")" : ""));
+      total = fadd(total, av);
+    } else {
+      const ev = x => ip.reduce((acc, c, k) => acc + fval(c) * Math.pow(x, k), 0);
+      const v = ev(B.x) - ev(A.x);
+      lines.push("From " + fnum(A.x) + " to " + fnum(B.x) + ": " + fnum(v) + (v < 0 ? "  (below the axis, so the area is " + fnum(-v) + ")" : ""));
+      total += Math.abs(v);
+    }
+  }
+  st.push("Substitute the limits for each part.\n" + lines.join("\n"));
+  const ans = exactAll ? fstr(total) + (total.d !== 1 ? " ≈ " + fnum(fval(total)) : "") + " square units" : "≈ " + fnum(total) + " square units";
+  st.push("Add the areas.\nArea = " + ans);
+  return {text: steps("Let's find the area under y = " + pStr(p) + " from x = " + fstr(lo) + " to x = " + fstr(hi) + ".", st, ans), topic: "integrals"};
+}
+function areaEnclosed(fnText){
+  const f = getFunction(fnText); if(!f || !f.poly || pDeg(f.poly) !== 2) return null;
+  const r = realRoots(f.poly);
+  if(!r || r.length !== 2) return null;
+  const lo = r[0].exact || F(Math.round(r[0].x * 1e6), 1e6), hi = r[1].exact || F(Math.round(r[1].x * 1e6), 1e6);
+  const res = areaUnder(fnText, fstr(lo), fstr(hi));
+  if(!res) return null;
+  res.text = res.text.replace(/^Let's find the area under[^\n]*/, "Let's find the area enclosed by y = " + pStr(f.poly) + " and the x-axis.\n\nStep 0: The curve meets the x-axis where " + pStr(f.poly) + " = 0, which gives x = " + rootStr(r[0]) + " and x = " + rootStr(r[1]) + ". These are the limits.");
+  return res;
+}
+function kinematics(q){
+  const sm = /(?:\b(?:s|displacement|position|distance|h|x)\s*=\s*)([0-9t+\-*\/^(). ]+?)(?=\s*(?:[,;]|\band\b|\bfind\b|\bcalculate\b|\bdetermine\b|\bwhat\b|\bwhen\b|\bat\b|\bshow\b|\bthe\b|\bif\b|\bwhere\b|$))/.exec(q);
+  if(!sm || !/t/.test(sm[1])) return null;
+  const f = getFunction(sm[1].replace(/\bt\b/g, "x"));
+  if(!f || !f.poly) return null;
+  const wantV = /velocity|speed|at rest|stationary|instantaneous/.test(q), wantA = /acceleration/.test(q), rest = /at rest|stationary|momentarily/.test(q);
+  if(!wantV && !wantA && !rest) return null;
+  const tm = /\bt\s*=\s*(-?\d+(?:\.\d+)?(?:\/\d+)?)|(?:after|at|when)\s*(?:t\s*=\s*)?(-?\d+(?:\.\d+)?)\s*(?:s\b|sec|seconds?)/.exec(q.replace(sm[0], " "));
+  const tv = tm ? toNum(tm[1] || tm[2]) : null;
+  const v = pDeriv(f.poly), a = pDeriv(v);
+  const tl = p => pStr(p).replace(/x/g, "t");
+  const st = ["Displacement: s = " + tl(f.poly), "Velocity is the rate of change of displacement: v = ds/dt.\nv = " + tl(v)];
+  const ans = [];
+  if(wantV){ ans.push("v = " + tl(v)); }
+  if(wantA || tv !== null){
+    st.push("Acceleration is the rate of change of velocity: a = dv/dt.\na = " + tl(a));
+    if(wantA) ans.push("a = " + tl(a));
+  }
+  if(tv !== null){
+    if(wantV || !wantA) { const vv = pEval(v, tv); st.push("Velocity at t = " + fstr(tv) + ":\nv = " + fstr(vv)); ans.push("v(" + fstr(tv) + ") = " + fstr(vv)); }
+    if(wantA){ const aa = pEval(a, tv); st.push("Acceleration at t = " + fstr(tv) + ":\na = " + fstr(aa)); ans.push("a(" + fstr(tv) + ") = " + fstr(aa)); }
+  }
+  if(rest){
+    const rr = pDeg(v) >= 1 ? realRoots(v) : [];
+    if(rr === null) return null;
+    const times = rr.filter(r => r.x >= 0);
+    st.push("The object is at rest when the velocity is zero. Solve v = 0.\n" + tl(v) + " = 0\n" + (times.length ? times.map(r => "t = " + rootStr(r)).join(" and ") : "no time t ≥ 0"));
+    ans.push(times.length ? "at rest when " + times.map(r => "t = " + rootStr(r)).join(" and ") : "never at rest for t ≥ 0");
+  }
+  if(!ans.length) return null;
+  return {text: steps("Let's analyse the motion.", st, ans.join(";  ")), topic: "motion", subject: "physics"};
+}
+function limitTask(exprText, toText){
+  const toInf = /inf|∞/.test(toText);
+  const neg = /^-/.test(toText);
+  const e = String(exprText).replace(/[?.!,;]+$/, "").trim().replace(/^(?:of\s+)?/, "");
+  const flat = e.toLowerCase().replace(/\s+/g, "");
+  if(!toInf && Number(toText) === 0){
+    let m = /^sin\(?(\d*\.?\d*)x\)?\/\(?(\d*\.?\d*)x\)?$/.exec(flat);
+    if(m){
+      const k = m[1] === "" ? F(1) : fromDecimalString(m[1]), d = m[2] === "" ? F(1) : fromDecimalString(m[2]);
+      const v = fdiv(k, d);
+      return {text: steps("Let's find the limit as x → 0 of sin(kx)/(mx).", ["Use the standard limit: sin(x) ÷ x → 1 as x → 0, so sin(kx) ÷ (mx) → k ÷ m.", "Here k = " + fstr(k) + " and m = " + fstr(d) + "."], fstr(v)), topic: "limits_continuity"};
+    }
+    if(/^tan\(?x\)?\/\(?x\)?$/.test(flat)) return {text: steps("Let's find the limit as x → 0 of tan x ÷ x.", ["Write tan x = sin x ÷ cos x, so tan x ÷ x = (sin x ÷ x) · (1 ÷ cos x).", "Each part has a limit: sin x ÷ x → 1 and 1 ÷ cos x → 1."], "1"), topic: "limits_continuity"};
+    if(/^\(1-cosx\)\/x\^?2?²?$/.test(flat) || flat === "(1-cosx)/x²" || flat === "(1-cosx)/x^2") return {text: steps("Let's find the limit as x → 0 of (1 − cos x) ÷ x².", ["Use the standard result: (1 − cos x) ÷ x² → 1/2 as x → 0."], "1/2"), topic: "limits_continuity"};
+  }
+  // rational functions: P(x) / Q(x)
+  let top = flat, bottom = "1", depth = 0, slash = -1;
+  for(let i = 0; i < flat.length; i++){ const c = flat[i]; if(c === "(") depth++; else if(c === ")") depth--; else if(c === "/" && depth === 0){ if(slash >= 0) return null; slash = i; } }
+  if(slash >= 0){ top = flat.slice(0, slash); bottom = flat.slice(slash + 1); }
+  const strip = s => (/^\(.*\)$/.test(s) && (function(){ let d = 0; for(let i = 0; i < s.length - 1; i++){ if(s[i] === "(") d++; else if(s[i] === ")") d--; if(d === 0) return false; } return true; })()) ? s.slice(1, -1) : s;
+  const P = parsePoly(strip(top)), Q = parsePoly(strip(bottom));
+  if(!P || !Q || fzero(Q[Q.length - 1]) && Q.length === 1) return null;
+  const shown = (slash >= 0 ? "(" + pStr(P) + ") / (" + pStr(Q) + ")" : pStr(P));
+  if(toInf){
+    const dP = pDeg(P), dQ = pDeg(Q);
+    const st = ["Divide the top and the bottom by the highest power of x (x^" + Math.max(dP, dQ) + ").", "As x grows without bound, terms like 1/x, 1/x² tend to 0."];
+    let ans;
+    const lcP = P[dP], lcQ = Q[dQ];
+    if(dP < dQ){ st.push("The bottom has the higher power, so the fraction shrinks to 0."); ans = "0"; }
+    else if(dP === dQ){ const v = fdiv(lcP, lcQ); st.push("The powers are equal, so the limit is the ratio of the leading coefficients: " + fstr(lcP) + " ÷ " + fstr(lcQ) + "."); ans = fstr(v); }
+    else {
+      const sgn = (lcP.n * lcQ.n > 0 ? 1 : -1) * (neg && ((dP - dQ) % 2 === 1) ? -1 : 1);
+      st.push("The top has the higher power, so the values grow without bound."); ans = "does not exist (it tends to " + (sgn > 0 ? "+∞" : "−∞") + ")";
+    }
+    return {text: steps("Let's find the limit of " + shown + " as x → " + (neg ? "−∞" : "∞") + ".", st, ans), topic: "limits_continuity"};
+  }
+  const a = toNum(toText);
+  let p = P, qd = Q;
+  const st = ["Try substituting x = " + fstr(a) + "."];
+  let pv = pEval(p, a), qv = pEval(qd, a);
+  if(!fzero(qv)){
+    st.push("Top = " + fstr(pv) + ", bottom = " + fstr(qv) + ". The bottom is not zero, so the limit is the value of the fraction.");
+    const v = fdiv(pv, qv);
+    return {text: steps("Let's find the limit of " + shown + " as x → " + fstr(a) + ".", st, fstr(v) + (v.d !== 1 ? " ≈ " + fnum(fval(v)) : "")), topic: "limits_continuity"};
+  }
+  if(fzero(pv)){
+    st.push("This gives 0/0, which is not an answer yet. Factorise and cancel the common factor (x − " + fstr(a) + ").");
+    let guard = 0;
+    while(fzero(pv) && fzero(qv) && guard++ < 4){
+      const fac = [fmul(a, F(-1)), F(1)];
+      p = pDivMod(p, fac).q; qd = pDivMod(qd, fac).q;
+      pv = pEval(p, a); qv = pEval(qd, a);
+    }
+    st.push("After cancelling:\n(" + pStr(p) + ") / (" + pStr(qd) + ")");
+    if(!fzero(qv)){
+      const v = fdiv(pv, qv);
+      st.push("Now substitute x = " + fstr(a) + ": top = " + fstr(pv) + ", bottom = " + fstr(qv) + ".");
+      return {text: steps("Let's find the limit of " + shown + " as x → " + fstr(a) + ".", st, fstr(v) + (v.d !== 1 ? " ≈ " + fnum(fval(v)) : "")), topic: "limits_continuity"};
+    }
+  }
+  st.push("The bottom is 0 but the top is not, so the values grow without bound.");
+  return {text: steps("Let's find the limit of " + shown + " as x → " + fstr(a) + ".", st, "does not exist (the values grow without bound)"), topic: "limits_continuity"};
+}
+
+function calculusTasks(q){
+  let m;
+  const FN = "(?:y\\s*=\\s*|f\\s*\\(\\s*x\\s*\\)\\s*=\\s*)?";
+  if((m = new RegExp("(?:gradient|slope)\\s*(?:of|for)?\\s*(?:the\\s*)?(?:curve|graph|function)?\\s*" + FN + "(.+?)\\s*(?:at|when|where)\\s*(?:the point\\s*)?x\\s*=\\s*(" + NUMBER + ")").exec(q))){
+    const r = gradientAt(m[1], m[2]); if(r) return r;
+  }
+  if((m = new RegExp("(tangent|normal)\\s*(?:line\\s*)?(?:to|of|at|on)?\\s*(?:the\\s*)?(?:curve|graph)?\\s*" + FN + "(.+?)\\s*(?:at|when|where)\\s*(?:the point\\s*)?(?:x\\s*=\\s*(" + NUMBER + ")|\\(\\s*(" + NUMBER + ")\\s*,\\s*(" + NUMBER + ")\\s*\\))").exec(q))){
+    const r = tangentNormal(m[1], m[2], m[3] != null ? m[3] : m[4], m[3] != null ? null : m[5]); if(r) return r;
+  }
+  if((m = new RegExp("(?:turning|stationary|critical)\\s*points?\\s*(?:of|on|for)?\\s*(?:the\\s*)?(?:curve|graph|function)?\\s*" + FN + "(.+)$").exec(q))
+     || (m = new RegExp("(?:maxima|minima|maximum|minimum|max|min)(?:\\s*(?:and|or|,)\\s*(?:maxima|minima|maximum|minimum|max|min))?\\s*(?:points?|values?)?\\s*(?:of|on|for)\\s*(?:the\\s*)?(?:curve|graph|function)?\\s*(?:y\\s*=\\s*|f\\s*\\(\\s*x\\s*\\)\\s*=\\s*)(.+)$").exec(q))){
+    const r = stationaryPoints(m[1]); if(r) return r;
+  }
+  if((m = new RegExp("area\\s*(?:under|beneath|bounded by|below)\\s*(?:the\\s*)?(?:curve|graph)?\\s*" + FN + "(.+?)\\s*(?:from|between)\\s*(?:x\\s*=\\s*)?(" + NUMBER + ")\\s*(?:to|and)\\s*(?:x\\s*=\\s*)?(" + NUMBER + ")").exec(q))){
+    const r = areaUnder(m[1], m[2], m[3]); if(r) return r;
+  }
+  if((m = new RegExp("area\\s*(?:enclosed|bounded)\\s*(?:by|between)\\s*(?:the\\s*)?(?:curve\\s*)?" + FN + "(.+?)\\s*and\\s*(?:the\\s*)?x[\\s-]*axis").exec(q))){
+    const r = areaEnclosed(m[1]); if(r) return r;
+  }
+  { const r = kinematics(q); if(r) return r; }
+  {
+    const POINT = "(-?\\d+(?:\\.\\d+)?(?:\\/\\d+)?|-?infinity|-?∞|-?inf)";
+    const TO = "(?:approaches|tends to|->|→|goes to)";
+    let lm = new RegExp("(?:limit|lim)\\s*(?:of\\s*)?(.+?)\\s*(?:as|when)\\s*x\\s*" + TO + "\\s*" + POINT + "\\s*[?.]?\\s*$").exec(q);
+    let lexpr = null, lpoint = null;
+    if(lm){ lexpr = lm[1]; lpoint = lm[2]; }
+    else if((lm = new RegExp("(?:limit|lim)\\s*(?:as|when)\\s*x\\s*" + TO + "\\s*" + POINT + "\\s*(?:of|,|:)?\\s*(.+)$").exec(q))){ lpoint = lm[1]; lexpr = lm[2]; }
+    else if((lm = new RegExp("lim\\s*(?:\\(\\s*)?x\\s*" + TO + "\\s*" + POINT + "\\s*\\)?\\s*(.+)$").exec(q))){ lpoint = lm[1]; lexpr = lm[2]; }
+    if(lexpr){ const r = limitTask(lexpr, lpoint); if(r) return r; }
+  }
+  if((m = /(?:second derivative|d2y\/dx2|d²y\/dx²|d\^?2y\/dx\^?2|find f''\(?x?\)?)\s*(?:of|for)?\s*(?:y\s*=\s*|f\s*\(\s*x\s*\)\s*=\s*)?(.+)$/.exec(q))){
+    const r = secondDerivText(m[1].replace(/[?.!,;]+$/, "")); if(r) return r;
+  }
+  if((m = /y\s*=\s*(.+?)\s*[,.]?\s*(?:find|determine|show)\s*(?:that\s*)?(?:d²y\/dx²|d2y\/dx2|the second derivative)/.exec(q))){
+    const r = secondDerivText(m[1]); if(r) return r;
+  }
+  if((m = /(?:find|determine|calculate)\s*dy\/dx\s*(?:if|when|given|for|where)?\s*y\s*=\s*(.+)$/.exec(q)) || (m = /y\s*=\s*(.+?)\s*[,.]?\s*(?:find|determine|calculate)\s*dy\/dx/.exec(q))){
+    const body = m[1].replace(/[?.!,;]+$/, "");
+    const p = parsePoly(body.replace(/\s+/g, ""));
+    if(p && /x/.test(body) && pDeg(p) <= 8) return differentiate(p);
+    const r = deriveText(body); if(r) return r;
+  }
+  return null;
+}
+
 /* ══════════════ ALGEBRA FROM A WHOLE SENTENCE ══════════════ */
 const ALG_TOKEN = /^[0-9xy+\-*\/^().=²³]+$/;
 function mathRuns(q){
@@ -1702,13 +2553,15 @@ function baintSolveRaw(question){
     if((r = numberPair(q))) return r;
     if((r = rectangleProblem(q))) return r;
     if((r = simplifyAlgFraction(q))) return r;
+    if((r = calculusTasks(q))) return r;
     // an equation that contains x or y must never be answered as if it were a simple sum, root, log or percentage
     const eqLike = /=/.test(q) && !/->|→|=>/.test(q) && /(?:^|[^a-z])[xy](?![a-z])/.test(q);
     if((r = interest(q))) return r;
     if((r = speedTasks(q))) return r;
     if((r = probabilityTasks(q))) return r;
     if((r = geom(q))) return r;
-    if(!eqLike){
+    const hasCalc = /\b(differentiate|integrate|derivative|integral|dy\/dx|d\/dx|limit|lim|tangent|normal|gradient|slope|turning|stationary|area under|second derivative|velocity|acceleration)\b/.test(q);
+    if(!eqLike && !hasCalc){
       if((r = ratioShare(q))) return r;
       if((r = percentTasks(q))) return r;
       if((r = statsTasks(q))) return r;
@@ -1732,6 +2585,8 @@ function baintSolveRaw(question){
       if(STD_DERIV[key]) return {text: steps("Let's differentiate " + body + ".", [STD_DERIV[key][1]], STD_DERIV[key][0]), topic: "derivatives"};
       const p = parsePoly(body);
       if(p && pDeg(p) >= 0 && /x/.test(body) && pDeg(p) <= 8) return differentiate(p);
+      const dr = deriveText(body);
+      if(dr) return dr;
       return null;
     }
     m = /^(?:integrate|integral of|find the integral of|find the integration of|integration of|∫)\s*(.+)$/.exec(q);
@@ -1743,10 +2598,14 @@ function baintSolveRaw(question){
       if(lim){
         const p = parsePoly(lim[1].replace(/\s*dx\s*$/, "")), lo = parsePoly(lim[2]), hi = parsePoly(lim[3]);
         if(p && lo && hi && lo.length === 1 && hi.length === 1 && /x/.test(lim[1]) && pDeg(p) <= 8) return integrate(p, lo[0], hi[0]);
+        const ir = (lo && hi && lo.length === 1 && hi.length === 1) ? integrateText(lim[1].replace(/\s*dx\s*$/, ""), lo[0], hi[0]) : null;
+        if(ir) return ir;
         return null;
       }
       const p = parsePoly(body);
       if(p && /x/.test(body) && pDeg(p) <= 8) return integrate(p);
+      const ir2 = integrateText(body);
+      if(ir2) return ir2;
       return null;
     }
 
@@ -1802,4 +2661,5 @@ function baintSolve(question){
 }
 
 window.baintSolve = baintSolve;
+window.__baintInternals = {parseAst: parseAst, evalN: evalN, dNode: dNode, pr: pr, astToPoly: astToPoly, realRoots: realRoots};   // used by the automatic tests only
 })();
